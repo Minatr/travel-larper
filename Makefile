@@ -5,39 +5,46 @@ export
 
 COMPOSE := docker compose
 
+# Valeurs par défaut si .env est absent (mêmes que docker-compose.yml).
+POSTGRES_USER ?= travel
+POSTGRES_DB ?= travel
+
 .DEFAULT_GOAL := help
-.PHONY: help dev db-up db-down db-logs db-psql db-reset backend frontend test lint generate migrate
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint generate migrate
 
 help: ## Affiche cette aide
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-dev: db-up ## Lance l'environnement de développement (base seule pour l'instant)
-	@echo "Base prête sur le port $${POSTGRES_PORT:-5432}. Backend et frontend : à venir (tickets 3 et 4)."
+dev: ## Lance base + backend + frontend avec rechargement automatique (Ctrl+C pour arrêter)
+	$(COMPOSE) up --build --watch
 
-db-up: ## Démarre PostgreSQL + PostGIS et attend qu'il soit prêt
+down: ## Arrête tous les services (les données sont conservées)
+	$(COMPOSE) down
+
+db-up: ## Démarre PostgreSQL + PostGIS seul et attend qu'il soit prêt
 	$(COMPOSE) up -d --wait db
 
 db-down: ## Arrête PostgreSQL (les données sont conservées)
-	$(COMPOSE) down
+	$(COMPOSE) stop db
 
 db-logs: ## Affiche les logs de PostgreSQL
 	$(COMPOSE) logs -f db
 
 db-psql: ## Ouvre un terminal SQL dans la base
-	$(COMPOSE) exec db psql -U $${POSTGRES_USER:-travel} -d $${POSTGRES_DB:-travel}
+	$(COMPOSE) exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 db-reset: ## Supprime et recrée la base (perte des données locales)
 	$(COMPOSE) down -v
 	$(COMPOSE) up -d --wait db
 
-backend: ## Lance le backend Go (pas encore configuré)
-	@echo "Pas encore configuré : à venir avec le squelette backend."
+backend: ## Lance la base et le backend Go seuls
+	$(COMPOSE) up --build --watch backend
 
-frontend: ## Lance le frontend Vite (pas encore configuré)
-	@echo "Pas encore configuré : à venir avec le squelette frontend."
+frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
+	$(COMPOSE) up --build --watch frontend
 
-test: ## Lance tous les tests (pas encore configuré)
-	@echo "Pas encore configuré : à venir avec le ticket qualité et pipeline."
+test: ## Lance les tests du backend dans Docker
+	$(COMPOSE) run --rm --build --no-deps backend go test ./...
 
 lint: ## Lance le lint et le formatage (pas encore configuré)
 	@echo "Pas encore configuré : à venir avec le ticket qualité et pipeline."

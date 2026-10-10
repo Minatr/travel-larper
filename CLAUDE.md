@@ -244,7 +244,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 - Avant d'ouvrir une PR : `make generate`, `make lint`, `make test`, `make dev` qui démarre sans étape manuelle (voir `.github/pull_request_template.md`).
 
 ### Commandes
-`make help` liste tout. Aujourd'hui seules les commandes de base fonctionnent : `make dev`, `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `test`, `lint`, `generate`, `migrate`, `backend` et `frontend` affichent « pas encore configuré ».
+`make help` liste tout. Tout tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `lint`, `generate` et `migrate` affichent « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
 
 ---
 

@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  title: Travel Larper API
+  version: 0.1.0
+  description: HTTP contract between the Travel Larper frontend and backend.
+servers:
+  - url: /api
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Report whether the API and its database are reachable.
+      tags: [system]
+      responses:
+        "200":
+          description: The API and the database are up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "503":
+          description: The API is up but the database is unreachable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status, database]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        database:
+          type: string
+          enum: [up, down]
