@@ -1,0 +1,31 @@
+# Environnement
+.env
+.env.*
+!.env.example
+
+# Go
+backend/bin/
+*.exe
+*.test
+*.out
+coverage.*
+
+# Node / frontend
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+npm-debug.log*
+
+# Données téléchargées (make data)
+data/geo/*.geojson
+
+# Éditeurs et système
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Divers
+tmp/
+*.log
