@@ -1,5 +1,7 @@
 # Environnement de développement local.
-# Lancer avec `make db-up` (ou `make dev`).
+# Lancer avec `make dev` (ou `docker compose up --build --watch`).
+# Compose Watch synchronise le code dans les conteneurs : sous Windows, un
+# simple montage de dossier ne transmet pas les changements de fichiers.
 name: travel-larper
 
 services:
@@ -19,6 +21,57 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      # Dans le réseau Docker, la base s'appelle `db` (et non `localhost`).
+      DATABASE_URL: postgres://${POSTGRES_USER:-travel}:${POSTGRES_PASSWORD:-travel}@db:5432/${POSTGRES_DB:-travel}?sslmode=disable
+      API_PORT: "8080"
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend
+          target: /app
+          ignore:
+            - go.mod
+            - go.sum
+        - action: rebuild
+          path: ./backend/go.mod
+        - action: rebuild
+          path: ./backend/go.sum
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      API_PROXY_TARGET: http://backend:8080
+      FRONTEND_PORT: "5173"
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - package.json
+            - package-lock.json
+        - action: rebuild
+          path: ./frontend/package.json
+        - action: rebuild
+          path: ./frontend/package-lock.json
 
 volumes:
   db-data:

@@ -24,9 +24,10 @@ L'inscription est ouverte, mais chaque compte doit être validé par un administ
 
 ### Prérequis
 
-- [Docker](https://docs.docker.com/get-docker/) avec Docker Compose
-- Make
-- Go et Node.js (pour le backend et le frontend, une fois en place)
+- [Docker](https://docs.docker.com/get-docker/) avec Docker Compose (v2.22+ pour Compose Watch)
+- Make (facultatif). Sous Windows : `winget install ezwinports.make`, puis rouvrir le terminal.
+
+Go et Node.js ne sont **pas** nécessaires : backend et frontend tournent dans Docker.
 
 ### Démarrage
 
@@ -34,26 +35,31 @@ L'inscription est ouverte, mais chaque compte doit être validé par un administ
 git clone <adresse-du-depot>
 cd travel-larper
 cp .env.example .env
-make dev
+make dev        # sans make : docker compose up --build --watch
 ```
 
-`make dev` démarre PostgreSQL + PostGIS sur le port indiqué dans `.env` (5432 par défaut). Le backend et le frontend s'y ajouteront au fil des tickets.
+`make dev` démarre la base (PostgreSQL + PostGIS), le backend Go et le frontend Vite, avec rechargement automatique quand le code change. Ouvrir ensuite http://localhost:5173 : la page indique si l'API et la base répondent.
+
+Le détail de l'environnement (rôle de chaque conteneur, variables, passage en production) est dans [docs/environnement.md](docs/environnement.md).
 
 ### Commandes utiles
 
 | Commande | Effet |
 | --- | --- |
-| `make help` | Liste toutes les commandes |
-| `make dev` | Lance l'environnement de développement |
-| `make db-up` / `make db-down` | Démarre ou arrête la base (les données sont conservées) |
+| `make help` | Liste toutes les commandes (sous Windows : depuis Git Bash) |
+| `make dev` | Lance base + backend + frontend (`Ctrl+C` pour arrêter) |
+| `make down` | Arrête tous les conteneurs (les données sont conservées) |
+| `make test` | Lance les tests du backend |
+| `make db-up` / `make db-down` | Démarre ou arrête la base seule (les données sont conservées) |
 | `make db-psql` | Ouvre un terminal SQL dans la base |
 | `make db-logs` | Affiche les logs de la base |
 | `make db-reset` | Supprime et recrée la base (perte des données locales) |
 
 ### En cas de problème
 
-- **Le port 5432 est déjà utilisé** (un PostgreSQL installé sur la machine) : changer `POSTGRES_PORT` et le port de `DATABASE_URL` dans `.env`.
+- **Le port 5432, 8080 ou 5173 est déjà utilisé** : changer `POSTGRES_PORT`, `API_PORT` ou `FRONTEND_PORT` dans `.env` (et le port de `DATABASE_URL` pour 5432).
 - **Docker ne répond pas** : vérifier que Docker Desktop est lancé.
+- **`http proxy error ... ECONNREFUSED` dans les logs du frontend** : le backend est en train de compiler, il répond dès que `server listening` apparaît.
 
 ## Contribuer
 
