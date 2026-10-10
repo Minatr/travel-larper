@@ -233,10 +233,13 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 
 - **Dépôt** : `github.com/Minatr/travel-larper`. Branche `main` protégée par le ruleset `protect-main` : PR obligatoire, 1 approbation, approbations annulées après un nouveau commit, conversations résolues, pas de force-push ni de suppression, aucune exception.
 - **Tickets** : Jira (clé **TL**), relié à GitHub par l'app « GitHub for Jira » (à mettre en place).
-- **Branches** : `feat/…`, `fix/…`, `chore/…` + numéro de ticket, par exemple `feat/TL-12_connexion-utilisateur`.
+- **Ticket `TL-0`** : tant que Jira n'est pas configuré, tout le travail de mise en place de base utilise le numéro `TL-0` (ex. branche et PR `chore/TL-0_github-rules`). Les vrais numéros commencent avec Jira.
+- **Branches et titres de PR : même format** `<type>/TL-<numéro>_<description-courte>`, en minuscules avec des tirets, par exemple `feat/TL-12_connexion-utilisateur`. Types autorisés (les mêmes que pour les commits) : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Le titre de la PR reprend en général le nom de la branche ; le type et le numéro de ticket doivent être identiques.
+- **Vérifications** : le job `check-title` vérifie le titre, le job `check-branch` vérifie la branche et sa cohérence avec le titre. Un nom de branche ne se renomme pas sur une PR ouverte : en cas d'erreur, recréer la branche et ouvrir une nouvelle PR (le titre, lui, se corrige directement sur GitHub).
 - **Commits** : Conventional Commits, en anglais (`feat: add trip invitation`, `fix: …`, `chore: …`, `docs: …`, `test: …`, `refactor: …`, `ci: …`).
-- **Titre des PR** : `TL-<numéro>_<description-courte>`, en minuscules avec des tirets, par exemple `TL-12_connexion-utilisateur`. Une GitHub Action `check-title` le vérifiera.
 - **Fusion** : squash merge uniquement, titre de la PR comme message, branche supprimée automatiquement.
+- **Assignation automatique** : à l'ouverture d'une PR, le job `assign-author` assigne son auteur, et `.github/CODEOWNERS` (`@Minatr`, `@gonpass08`) demande la revue à l'autre développeur (GitHub n'ajoute jamais l'auteur comme reviewer). Le ruleset exige l'approbation d'un code owner.
+- **Workflow** : `.github/workflows/pull-request.yml` regroupe `check-title`, `check-branch` (vérifications obligatoires du ruleset) et `assign-author`.
 - **Une PR = un ticket = une fonctionnalité complète** (backend + frontend). Chaque ticket commence par ajouter ses routes à `api/openapi.yaml`.
 - Avant d'ouvrir une PR : `make generate`, `make lint`, `make test`, `make dev` qui démarre sans étape manuelle (voir `.github/pull_request_template.md`).
 
@@ -245,21 +248,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 
 ---
 
-## 10. Où en est le projet
-
-- **Fait** : squelette (arborescence, `.editorconfig`, `.gitattributes`, `.gitignore`, `.env.example`, `docker-compose.yml`, `Makefile`, `README.md`, modèle de PR). **Aucun code** pour l'instant : pas de `go.mod`, pas de projet Vite. Le lancement réel de la base via Docker n'a pas encore été testé.
-- **Configuration GitHub** : dépôt créé, ruleset `protect-main`. À faire : workflow `.github/workflows/pr-title.yml` (job `check-title`) puis l'ajouter aux vérifications obligatoires.
-- **Prochaines étapes**, dans l'ordre :
-  1. Finir la configuration GitHub, puis Jira.
-  2. `go mod init github.com/Minatr/travel-larper/backend`.
-  3. Ticket contrat d'API : `openapi.yaml` + génération de code (`make generate`).
-  4. Ticket qualité et pipeline : lint, formatage, Lefthook, GitHub Actions.
-  5. Fonctionnalités, une par ticket : comptes et connexion → validation admin → voyages et membres → lieux et carte (avec le prototype du globe MapLibre).
-- Pas de roadmap datée.
-
----
-
-## 11. Comment travailler avec Claude sur ce projet
+## 10. Comment travailler avec Claude sur ce projet
 
 - **Répondre en français**, de façon concise, en **justifiant les choix** et en expliquant les termes techniques (« à quoi ça sert ? »).
 - **Corriger franchement** les idées et proposer des améliorations, puis laisser l'équipe trancher. Ne pas prendre de décision d'architecture à sa place.

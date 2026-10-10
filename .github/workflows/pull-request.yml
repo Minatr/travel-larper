@@ -1,0 +1,67 @@
+# Checks and automations run on every pull request.
+# check-title and check-branch are required status checks in the protect-main ruleset.
+#
+# Branch names and PR titles share one format: <type>/TL-<ticket>_<short-description>,
+# e.g. feat/TL-12_connexion-utilisateur. Allowed types match the Conventional Commits types used in commits.
+name: Pull request
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+# Least privilege by default; jobs that need more ask for it explicitly.
+permissions:
+  contents: read
+
+env:
+  NAME_PATTERN: '^(feat|fix|chore|docs|refactor|test|ci)/TL-([0-9]+)_[a-z0-9]+(-[a-z0-9]+)*$'
+  NAME_EXAMPLE: 'feat/TL-12_connexion-utilisateur (types: feat, fix, chore, docs, refactor, test, ci)'
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title format
+        # Values go through env vars, never straight into the script, to prevent command injection.
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ ! "$TITLE" =~ $NAME_PATTERN ]]; then
+            echo "::error::Invalid PR title: \"$TITLE\". Expected <type>/TL-<ticket>_<short-description>, e.g. $NAME_EXAMPLE"
+            exit 1
+          fi
+          echo "Valid PR title: $TITLE"
+
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name format and consistency with the PR title
+        env:
+          BRANCH: ${{ github.head_ref }}
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ ! "$BRANCH" =~ $NAME_PATTERN ]]; then
+            echo "::error::Invalid branch name: \"$BRANCH\". Expected <type>/TL-<ticket>_<short-description>, e.g. $NAME_EXAMPLE"
+            exit 1
+          fi
+          branch_prefix="${BRANCH%%_*}"
+          # The title format is reported by check-title; here we only compare type and ticket.
+          if [[ "$TITLE" =~ $NAME_PATTERN && "${TITLE%%_*}" != "$branch_prefix" ]]; then
+            echo "::error::Mismatch: branch is $branch_prefix but PR title is ${TITLE%%_*}. Type and ticket must be the same."
+            exit 1
+          fi
+          echo "Valid branch name: $BRANCH"
+
+  assign-author:
+    # Only on creation, so a manual change of assignee is not overwritten later.
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Assign the PR author
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: gh pr edit "$PR_URL" --add-assignee "$AUTHOR"
