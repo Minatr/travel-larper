@@ -12,7 +12,7 @@ Navigateur ──► frontend (Vite, :5173) ──/api──► backend (Go, :80
 
 | Service | Image | Rôle en dev |
 | --- | --- | --- |
-| `db` | `postgis/postgis:17-3.5` | Base de données, données conservées dans le volume `db-data` |
+| `db` | `db/Dockerfile` (`postgres:17` + PostGIS 3) | Base de données, données conservées dans le volume `db-data` |
 | `backend` | `backend/Dockerfile.dev` (Go 1.27) | `go run ./cmd/server`, recompilé à chaque redémarrage |
 | `frontend` | `frontend/Dockerfile.dev` (Node 24) | Serveur Vite avec rechargement à chaud |
 
@@ -50,6 +50,12 @@ curl http://localhost:8080/api/health
 
 `Ctrl+C` arrête la surveillance ; `make down` arrête les conteneurs (les données restent).
 
+### PostGIS
+
+L'image contient PostGIS mais l'extension n'est pas activée d'office : la première migration qui stocke des positions l'active avec `CREATE EXTENSION IF NOT EXISTS postgis`. Ainsi, son activation est versionnée avec le reste du schéma.
+
+Un volume créé par l'ancienne image `postgis/postgis` n'est pas compatible avec la nouvelle (version de PostGIS et de la bibliothèque système différentes) : lancer `make db-reset` une fois après la mise à jour (perte des données locales, qui ne contenaient rien d'utile à ce stade).
+
 ### `make` sous Windows
 
 `make` s'installe avec `winget install ezwinports.make` (rouvrir le terminal ensuite). Les commandes Docker (`make dev`, `make test`, `make db-psql`…) marchent depuis PowerShell. `make help` utilise `grep` et `awk` : le lancer depuis **Git Bash**. Chaque commande `make` correspond à une commande `docker compose` visible dans le `Makefile`, utilisable directement si besoin.
@@ -81,6 +87,6 @@ Le code applicatif n'a rien à changer : il lit sa configuration depuis l'enviro
 ### Hébergement gratuit : points d'attention
 
 - **Une VM (ex. Oracle Cloud « Always Free ») est la cible la plus simple** : on y installe Docker et on lance le même type de Compose, base comprise. Les offres « conteneur » (Fly.io, Render, Cloud Run…) hébergent bien le backend, mais une base PostgreSQL gratuite et durable y est rarement incluse. Les conditions des offres gratuites changent souvent : à revérifier au moment du ticket.
-- **Architecture ARM** : les VM gratuites d'Oracle sont en ARM (`arm64`). Les images `golang`, `node` et `caddy` existent en `arm64`, mais **`postgis/postgis` est publiée uniquement en `amd64`** (vérifié le 10/10/2026). Options à trancher le moment venu : une VM `amd64`, une image PostGIS communautaire multi-architecture, ou une image maison basée sur `postgres:17` avec le paquet PostGIS.
+- **Architecture ARM** : les VM gratuites les plus généreuses d'Oracle (Ampere A1) sont en ARM (`arm64`). L'image `postgis/postgis` n'existant qu'en `amd64` (vérifié le 10/10/2026), la base utilise une image maison (`db/Dockerfile`) : `postgres:17` officielle + paquet PostGIS du dépôt officiel PostgreSQL. Elle a été testée en `amd64` et en `arm64` (émulation). Les autres images (`golang`, `node`, `caddy`) existent aussi en `arm64`.
 - **Mémoire** : prévoir le build des images sur la machine de dev ou en CI (GitHub Actions), puis les pousser sur un registre (ex. GitHub Container Registry). Une petite VM n'a pas à compiler elle-même.
 - **Sauvegardes** : la base vit dans un volume Docker ; les sauvegardes automatiques vers R2 (voir CLAUDE.md, section Sécurité) sont à mettre en place avant d'y stocker de vraies données.
