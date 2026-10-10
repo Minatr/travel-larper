@@ -6,7 +6,9 @@ name: travel-larper
 
 services:
   db:
-    image: postgis/postgis:17-3.5
+    # Image maison (amd64 + arm64) : voir db/Dockerfile.
+    build:
+      context: ./db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-travel}

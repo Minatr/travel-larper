@@ -104,7 +104,7 @@
 | Carte 2D | MapLibre GL + tuiles OpenFreeMap |
 | Globe | MapLibre seul d'abord (globe natif depuis la v5) ; repli : react-globe.gl |
 | Backend | Go, architecture **MVC + couche services** ; chi, sqlc, pgx |
-| Base de données | PostgreSQL + PostGIS (`postgis/postgis:17-3.5` via Docker Compose) |
+| Base de données | PostgreSQL 17 + PostGIS 3 : image maison `db/Dockerfile` (`postgres:17` + paquet PGDG `postgresql-17-postgis-3`), compatible amd64 et arm64. `postgis/postgis` écartée car publiée en amd64 seulement. L'extension est créée par la première migration qui en a besoin. |
 | Contrat d'API | OpenAPI (`api/openapi.yaml`), écrit **avant** le code ; types générés avec oapi-codegen (Go) et openapi-typescript (TS) |
 | Auth | Maison : argon2id + sessions côté serveur |
 | Hébergement (plus tard) | VPS ~5 €/mois (Hetzner), Docker Compose, reverse proxy à choisir (Caddy, Nginx ou Traefik) ; photos et sauvegardes sur R2 |

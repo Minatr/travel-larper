@@ -22,7 +22,7 @@ down: ## Arrête tous les services (les données sont conservées)
 	$(COMPOSE) down
 
 db-up: ## Démarre PostgreSQL + PostGIS seul et attend qu'il soit prêt
-	$(COMPOSE) up -d --wait db
+	$(COMPOSE) up -d --build --wait db
 
 db-down: ## Arrête PostgreSQL (les données sont conservées)
 	$(COMPOSE) stop db
@@ -35,7 +35,7 @@ db-psql: ## Ouvre un terminal SQL dans la base
 
 db-reset: ## Supprime et recrée la base (perte des données locales)
 	$(COMPOSE) down -v
-	$(COMPOSE) up -d --wait db
+	$(COMPOSE) up -d --build --wait db
 
 backend: ## Lance la base et le backend Go seuls
 	$(COMPOSE) up --build --watch backend
