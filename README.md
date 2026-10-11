@@ -66,4 +66,6 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 - Aucun push direct sur `main` : tout passe par une pull request (PR), approuvée par l'autre développeur, avec une pipeline au vert.
 - Nom de branche et titre de PR : `<type>/TL-<numéro du ticket>_<description-courte>`, par exemple `feat/TL-12_connexion-utilisateur`. Types : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. La branche et le titre ont le même type et le même numéro.
 - À l'ouverture d'une PR, son auteur est assigné et la revue est demandée à l'autre développeur automatiquement.
+- La description de la PR suit le modèle proposé par GitHub (ticket, ce que fait la PR, vérifications).
+- Grâce au numéro dans son nom, la branche et la PR apparaissent automatiquement dans le ticket Jira.
 - Avant d'ouvrir une PR : `make lint` et `make test`.
