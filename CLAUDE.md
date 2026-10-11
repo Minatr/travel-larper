@@ -232,8 +232,8 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 ## 9. Organisation et Git
 
 - **Dépôt** : `github.com/Minatr/travel-larper`. Branche `main` protégée par le ruleset `protect-main` : PR obligatoire, 1 approbation, approbations annulées après un nouveau commit, conversations résolues, pas de force-push ni de suppression, aucune exception.
-- **Tickets** : Jira (clé **TL**), relié à GitHub par l'app « GitHub for Jira » (à mettre en place).
-- **Ticket `TL-0`** : tant que Jira n'est pas configuré, tout le travail de mise en place de base utilise le numéro `TL-0` (ex. branche et PR `chore/TL-0_github-rules`). Les vrais numéros commencent avec Jira.
+- **Tickets** : Jira (clé **TL**), relié au dépôt par l'app « GitHub for Atlassian » (ex-« GitHub for Jira ») : la branche, la PR et le commit de squash apparaissent dans le panneau *Développement* du ticket, grâce à la clé `TL-<numéro>` présente dans leur nom. Le numéro `TL-0` a servi à la mise en place de base, avant Jira : on ne l'utilise plus.
+- **Description des tickets** : quand on prend un ticket, on complète sa description Jira avec ce qu'il faut pour le réaliser sans deviner : objectif, étapes, critères d'acceptation, hors périmètre. Court et précis, pas un roman.
 - **Branches et titres de PR : même format** `<type>/TL-<numéro>_<description-courte>`, en minuscules avec des tirets, par exemple `feat/TL-12_connexion-utilisateur`. Types autorisés (les mêmes que pour les commits) : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Le titre de la PR reprend en général le nom de la branche ; le type et le numéro de ticket doivent être identiques.
 - **Vérifications** : le job `check-title` vérifie le titre, le job `check-branch` vérifie la branche et sa cohérence avec le titre. Un nom de branche ne se renomme pas sur une PR ouverte : en cas d'erreur, recréer la branche et ouvrir une nouvelle PR (le titre, lui, se corrige directement sur GitHub).
 - **Commits** : Conventional Commits, en anglais (`feat: add trip invitation`, `fix: …`, `chore: …`, `docs: …`, `test: …`, `refactor: …`, `ci: …`).
@@ -242,6 +242,10 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 - **Workflow** : `.github/workflows/pull-request.yml` regroupe `check-title`, `check-branch` (vérifications obligatoires du ruleset) et `assign-author`.
 - **Une PR = un ticket = une fonctionnalité complète** (backend + frontend). Chaque ticket commence par ajouter ses routes à `api/openapi.yaml`.
 - Avant d'ouvrir une PR : `make generate`, `make lint`, `make test`, `make dev` qui démarre sans étape manuelle (voir `.github/pull_request_template.md`).
+- **Description des PR** : toujours rédigée en suivant `.github/pull_request_template.md`, sans retirer de section :
+  - *Ticket* : numéro et lien.
+  - *Ce que fait cette PR* : une ou deux phrases de résumé, puis si besoin le détail par partie (contrat, backend, frontend, Docker, doc), les nouvelles dépendances avec leur justification, et un « À savoir » qui liste les écarts aux règles et les limites connues.
+  - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
 `make help` liste tout. Tout tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `lint`, `generate` et `migrate` affichent « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
@@ -257,4 +261,5 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 - **Ne jamais modifier la configuration Git globale, les clés SSH ni les comptes** : les développeurs s'en occupent eux-mêmes. Proposer plutôt des réglages au niveau du dépôt.
 - Ne jamais committer de secret ; ne jamais pousser directement sur `main`.
 - Respecter toutes les règles ci-dessus (MVC, centimes entiers, vérification d'appartenance au voyage, i18n, commentaires) et le signaler quand une demande les contredit.
+- Quand on commence un ticket, compléter d'abord sa description Jira (voir section 9) ; quand Claude rédige une PR, la description suit le modèle.
 - Mettre à jour ce fichier quand une décision change.
