@@ -1,0 +1,27 @@
+# golangci-lint v2 configuration: `make lint` locally, the CI on every PR.
+version: "2"
+
+linters:
+  # standard = errcheck, govet, ineffassign, staticcheck, unused.
+  default: standard
+  enable:
+    # Style rules; "exported" enforces a comment starting with the name on
+    # every exported identifier (CLAUDE.md, section Commentaires).
+    - revive
+    # Errors compared with errors.Is / errors.As and wrapped with %w.
+    - errorlint
+    # Common security mistakes (SQL built from strings, missing timeouts…).
+    - gosec
+    - misspell
+  # No exclusion preset: the "comments" preset would silence the missing
+  # comment warnings we rely on.
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      # Our own packages are grouped after the third-party ones.
+      local-prefixes:
+        - github.com/Minatr/travel-larper

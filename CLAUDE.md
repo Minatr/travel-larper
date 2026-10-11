@@ -218,8 +218,11 @@ travel-larper/
 - En Go, tests en tableau (table-driven) quand il y a plusieurs cas.
 - La logique métier (services, planner, calculs Tricount et budget) est testée en priorité.
 
-### Qualité automatisée (à mettre en place dans le ticket « qualité et pipeline »)
-golangci-lint, ESLint, Prettier, eslint-plugin-jsdoc, Lefthook avant chaque commit, et une pipeline GitHub Actions (lint, tests, build, vérification que le code généré est à jour).
+### Qualité automatisée
+- **Backend** : golangci-lint v2 (`backend/.golangci.yml`) avec revive, errorlint, gosec et les formateurs gofmt/goimports.
+- **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`) et Prettier (`frontend/.prettierrc.json`).
+- **Avant chaque commit** : Lefthook (`lefthook.yml`) formate et vérifie les fichiers modifiés. Les outils sont installés sur la machine (voir README), pas dans Docker, pour que le commit reste instantané.
+- **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build). La vérification que le code généré est à jour arrivera avec TL-15.
 
 ---
 
@@ -239,12 +242,12 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 - **Commits** : Conventional Commits, en anglais (`feat: add trip invitation`, `fix: …`, `chore: …`, `docs: …`, `test: …`, `refactor: …`, `ci: …`).
 - **Fusion** : squash merge uniquement, titre de la PR comme message, branche supprimée automatiquement.
 - **Assignation automatique** : à l'ouverture d'une PR, le job `assign-author` assigne son auteur, et `.github/CODEOWNERS` (`@Minatr`, `@gonpass08`) demande la revue à l'autre développeur (GitHub n'ajoute jamais l'auteur comme reviewer). Le ruleset exige l'approbation d'un code owner.
-- **Workflow** : `.github/workflows/pull-request.yml` regroupe `check-title`, `check-branch` (vérifications obligatoires du ruleset) et `assign-author`.
+- **Workflows** : `.github/workflows/pull-request.yml` regroupe `check-title`, `check-branch` et `assign-author` ; `.github/workflows/ci.yml` regroupe `backend` et `frontend`. Vérifications obligatoires du ruleset : `check-title`, `check-branch`, `backend`, `frontend`.
 - **Une PR = un ticket = une fonctionnalité complète** (backend + frontend). Chaque ticket commence par ajouter ses routes à `api/openapi.yaml`.
 - Avant d'ouvrir une PR : `make generate`, `make lint`, `make test`, `make dev` qui démarre sans étape manuelle (voir `.github/pull_request_template.md`).
 
 ### Commandes
-`make help` liste tout. Tout tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `lint`, `generate` et `migrate` affichent « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint` et `make format` utilisent les outils installés sur la machine. `generate` et `migrate` affichent « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
 
 ---
 
