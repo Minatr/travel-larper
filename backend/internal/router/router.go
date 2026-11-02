@@ -7,16 +7,27 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/Minatr/travel-larper/backend/internal/api"
 	"github.com/Minatr/travel-larper/backend/internal/controllers"
 )
 
-// Routes builds the HTTP handler that maps every API route to its
-// controller. All routes live under /api so the reverse proxy (Vite in dev)
-// can forward them with a single rule.
+// basePath prefixes every API route so the reverse proxy (Vite in dev) can
+// forward them with a single rule. It matches `servers` in openapi.yaml.
+const basePath = "/api"
+
+// server bundles the controllers into a single api.ServerInterface. The
+// assertion below turns a contract route without a handler into a compile error.
+type server struct {
+	*controllers.HealthController
+}
+
+var _ api.ServerInterface = server{}
+
+// Routes builds the HTTP handler that maps every route of openapi.yaml to
+// its controller method. The routing itself is generated from the contract.
 func Routes(health *controllers.HealthController) http.Handler {
-	router := chi.NewRouter()
-	router.Route("/api", func(api chi.Router) {
-		api.Get("/health", health.Show)
+	return api.HandlerWithOptions(server{HealthController: health}, api.ChiServerOptions{
+		BaseURL:    basePath,
+		BaseRouter: chi.NewRouter(),
 	})
-	return router
 }

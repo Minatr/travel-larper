@@ -1,22 +1,11 @@
 package views
 
-const (
-	healthStatusOK       = "ok"
-	healthStatusDegraded = "degraded"
-	databaseStateUp      = "up"
-	databaseStateDown    = "down"
-)
+import "github.com/Minatr/travel-larper/backend/internal/api"
 
-// HealthResponse is the body of GET /api/health (schema Health in openapi.yaml).
-type HealthResponse struct {
-	Status   string `json:"status"`
-	Database string `json:"database"`
-}
-
-// NewHealthResponse builds the health body from the database state.
-func NewHealthResponse(databaseUp bool) HealthResponse {
+// NewHealthResponse builds the body of GET /api/health from the database state.
+func NewHealthResponse(databaseUp bool) api.Health {
 	if databaseUp {
-		return HealthResponse{Status: healthStatusOK, Database: databaseStateUp}
+		return api.Health{Status: api.HealthStatusOk, Database: api.HealthDatabaseUp}
 	}
-	return HealthResponse{Status: healthStatusDegraded, Database: databaseStateDown}
+	return api.Health{Status: api.HealthStatusDegraded, Database: api.HealthDatabaseDown}
 }

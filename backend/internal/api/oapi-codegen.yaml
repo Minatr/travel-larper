@@ -1,0 +1,13 @@
+# oapi-codegen configuration, run by `go generate` (see generate.go).
+package: api
+output: openapi.gen.go
+generate:
+  # Structs and enum constants for every schema of the contract.
+  models: true
+  # ServerInterface (one method per operationId) and the chi routing that
+  # calls it. Not the "strict" server: our views keep writing the JSON.
+  chi-server: true
+compatibility:
+  # HealthStatusOk rather than Ok: two schemas will sooner or later share an
+  # enum value (pending, active…) and unprefixed constants would collide.
+  always-prefix-enum-values: true
