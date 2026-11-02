@@ -10,7 +10,7 @@ POSTGRES_USER ?= travel
 POSTGRES_DB ?= travel
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint generate migrate
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format generate migrate
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -46,8 +46,15 @@ frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 test: ## Lance les tests du backend dans Docker
 	$(COMPOSE) run --rm --build --no-deps backend go test ./...
 
-lint: ## Lance le lint et le formatage (pas encore configuré)
-	@echo "Pas encore configuré : à venir avec le ticket qualité et pipeline."
+# lint et format utilisent les outils installés sur la machine (voir README),
+# comme les vérifications Lefthook avant chaque commit.
+lint: ## Vérifie lint et formatage, backend et frontend (outils locaux)
+	cd backend && golangci-lint run ./...
+	cd frontend && npm run lint && npm run format:check
+
+format: ## Formate le code, backend et frontend (outils locaux)
+	cd backend && golangci-lint fmt
+	cd frontend && npm run format
 
 generate: ## Génère le code depuis OpenAPI et sqlc (pas encore configuré)
 	@echo "Pas encore configuré : à venir avec le ticket contrat d'API."

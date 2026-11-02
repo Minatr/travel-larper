@@ -1,0 +1,23 @@
+# Checks run before each commit, on the staged files only so commits stay
+# fast. Activate once per clone with `lefthook install` (tools installed on
+# the machine: see README). The CI runs the full checks on every PR.
+pre-commit:
+  jobs:
+    - name: backend-format
+      root: backend/
+      glob: "*.go"
+      run: golangci-lint fmt {staged_files}
+      stage_fixed: true
+    - name: backend-lint
+      root: backend/
+      glob: "*.go"
+      run: golangci-lint run ./...
+    - name: frontend-format
+      root: frontend/
+      glob: "*.{ts,tsx,js,json,css,html}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
+    - name: frontend-lint
+      root: frontend/
+      glob: "*.{ts,tsx,js}"
+      run: npx eslint {staged_files}

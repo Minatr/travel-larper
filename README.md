@@ -27,7 +27,25 @@ L'inscription est ouverte, mais chaque compte doit être validé par un administ
 - [Docker](https://docs.docker.com/get-docker/) avec Docker Compose (v2.22+ pour Compose Watch)
 - Make (facultatif). Sous Windows : `winget install ezwinports.make`, puis rouvrir le terminal.
 
-Go et Node.js ne sont **pas** nécessaires : backend et frontend tournent dans Docker.
+Pour lancer l'application, Go et Node.js ne sont **pas** nécessaires : backend et frontend tournent dans Docker.
+
+Pour **développer** (lint, formatage, vérifications avant chaque commit), installer aussi :
+
+| Outil | Version | Windows | Mac |
+| --- | --- | --- | --- |
+| Go | 1.27+ | `winget install GoLang.Go` | `brew install go` |
+| Node.js | 24.x | `winget install OpenJS.NodeJS.LTS` | `brew install node@24` |
+| golangci-lint | 2.14+ | `winget install GolangCI.golangci-lint` | `brew install golangci-lint` |
+| Lefthook | 2.x | `npm install -g lefthook` | `brew install lefthook` |
+
+Puis, une fois par clone du dépôt :
+
+```bash
+cd frontend && npm ci && cd ..   # outils du frontend (ESLint, Prettier)
+lefthook install                 # active les vérifications avant chaque commit
+```
+
+Sous Windows, ne pas installer Lefthook avec `go install` : sa compilation échoue avec Go 1.27.
 
 ### Démarrage
 
@@ -50,6 +68,8 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 | `make dev` | Lance base + backend + frontend (`Ctrl+C` pour arrêter) |
 | `make down` | Arrête tous les conteneurs (les données sont conservées) |
 | `make test` | Lance les tests du backend |
+| `make lint` | Vérifie le lint et le formatage (backend + frontend) |
+| `make format` | Formate le code (backend + frontend) |
 | `make db-up` / `make db-down` | Démarre ou arrête la base seule (les données sont conservées) |
 | `make db-psql` | Ouvre un terminal SQL dans la base |
 | `make db-logs` | Affiche les logs de la base |
