@@ -58,6 +58,7 @@ format: ## Formate le code, backend et frontend (outils locaux)
 
 generate: ## Génère le code depuis api/openapi.yaml (outils locaux)
 	cd backend && go generate ./...
+	cd frontend && npm run generate
 
 migrate: ## Applique les migrations (pas encore configuré)
 	@echo "Pas encore configuré : à venir avec le premier ticket qui crée une table."
