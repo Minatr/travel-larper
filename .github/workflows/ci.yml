@@ -55,3 +55,30 @@ jobs:
         run: npm run format:check
       - name: Type check and build
         run: npm run build
+
+  # Fails when api/openapi.yaml changed but `make generate` was not run, so
+  # the committed code always matches the contract.
+  generated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: make generate
+      - name: Check the generated code is committed and up to date
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            git diff
+            echo "::error::Generated code is out of date: run 'make generate' and commit the result."
+            exit 1
+          fi

@@ -88,4 +88,4 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 - À l'ouverture d'une PR, son auteur est assigné et la revue est demandée à l'autre développeur automatiquement.
 - La description de la PR suit le modèle proposé par GitHub (ticket, ce que fait la PR, vérifications).
 - Grâce au numéro dans son nom, la branche et la PR apparaissent automatiquement dans le ticket Jira.
-- Avant d'ouvrir une PR : `make lint` et `make test`.
+- Avant d'ouvrir une PR : `make generate`, `make lint` et `make test`.
