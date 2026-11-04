@@ -1,7 +1,7 @@
 <!--
 Titre de la PR : <type>/TL-<numéro du ticket>_<description-courte> (en général, le nom de la branche)
 Types : feat, fix, chore, docs, refactor, test, ci
-Exemple : feat/TL-12_connexion-utilisateur
+Exemple : feat/TL-12_user-login
 (« TL » pour Travel Larper.)
 -->
 
