@@ -56,8 +56,9 @@ format: ## Formate le code, backend et frontend (outils locaux)
 	cd backend && golangci-lint fmt
 	cd frontend && npm run format
 
-generate: ## Génère le code depuis OpenAPI et sqlc (pas encore configuré)
-	@echo "Pas encore configuré : à venir avec le ticket contrat d'API."
+generate: ## Génère le code depuis api/openapi.yaml (outils locaux)
+	cd backend && go generate ./...
+	cd frontend && npm run generate
 
 migrate: ## Applique les migrations (pas encore configuré)
 	@echo "Pas encore configuré : à venir avec le premier ticket qui crée une table."
