@@ -225,7 +225,8 @@ travel-larper/
 - **Backend** : golangci-lint v2 (`backend/.golangci.yml`) avec revive, errorlint, gosec et les formateurs gofmt/goimports.
 - **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`), Prettier (`frontend/.prettierrc.json`) et tests Vitest + Testing Library (`npm test`, lancés aussi par `make test`).
 - **Avant chaque commit** : Lefthook (`lefthook.yml`) formate et vérifie les fichiers modifiés. Les outils sont installés sur la machine (voir README), pas dans Docker, pour que le commit reste instantané.
-- **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build ; `generated` : vérifie que le code généré est à jour).
+- **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build ; `generated` : vérifie que le code généré est à jour). Les jobs `backend` et `frontend` cherchent aussi les failles connues des dépendances (govulncheck ; `npm audit` sur les dépendances livrées, gravité élevée ou critique).
+- **Dépendances** : Dependabot (`.github/dependabot.yml`) ouvre une PR uniquement quand une dépendance a une faille connue et qu'une version corrigée existe ; pas de mise à jour de version de routine.
 
 ---
 
@@ -240,7 +241,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 - **Dépôt** : `github.com/Minatr/travel-larper`. Branche `main` protégée par le ruleset `protect-main` : PR obligatoire, 1 approbation, approbations annulées après un nouveau commit, conversations résolues, pas de force-push ni de suppression, aucune exception.
 - **Tickets** : Jira (clé **TL**), relié au dépôt par l'app « GitHub for Atlassian » (ex-« GitHub for Jira ») : la branche, la PR et le commit de squash apparaissent dans le panneau *Développement* du ticket, grâce à la clé `TL-<numéro>` présente dans leur nom. Le numéro `TL-0` a servi à la mise en place de base, avant Jira : on ne l'utilise plus.
 - **Description des tickets** : quand on prend un ticket, on complète sa description Jira avec ce qu'il faut pour le réaliser sans deviner : objectif, étapes, critères d'acceptation, hors périmètre. Court et précis, pas un roman.
-- **Branches et titres de PR : même format** `<type>/TL-<numéro>_<description-courte>`, en minuscules avec des tirets, par exemple `feat/TL-12_connexion-utilisateur`. Types autorisés (les mêmes que pour les commits) : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Le titre de la PR reprend en général le nom de la branche ; le type et le numéro de ticket doivent être identiques.
+- **Branches et titres de PR : même format** `<type>/TL-<numéro>_<description-courte>`, **en anglais**, en minuscules avec des tirets, par exemple `feat/TL-12_user-login`. Types autorisés (les mêmes que pour les commits) : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Le titre de la PR reprend en général le nom de la branche ; le type et le numéro de ticket doivent être identiques. Seule exception : les PR de Dependabot, sans ticket, pour lesquelles `check-title` et `check-branch` sont ignorés.
 - **Vérifications** : le job `check-title` vérifie le titre, le job `check-branch` vérifie la branche et sa cohérence avec le titre. Un nom de branche ne se renomme pas sur une PR ouverte : en cas d'erreur, recréer la branche et ouvrir une nouvelle PR (le titre, lui, se corrige directement sur GitHub).
 - **Commits** : Conventional Commits, en anglais (`feat: add trip invitation`, `fix: …`, `chore: …`, `docs: …`, `test: …`, `refactor: …`, `ci: …`).
 - **Fusion** : squash merge uniquement, titre de la PR comme message, branche supprimée automatiquement.
@@ -254,7 +255,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
   - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
-`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format` et `make generate` utilisent les outils installés sur la machine. `migrate` affiche « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine. `migrate` affiche « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
 
 ---
 
