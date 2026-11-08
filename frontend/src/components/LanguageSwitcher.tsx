@@ -11,8 +11,6 @@ import { cn } from '../lib/utils.ts'
  * Lets the visitor switch the interface language. The choice is remembered on
  * this browser; it will move to the user profile once accounts exist.
  *
- * Each button shows the language code (EN, FR) and is announced with the
- * language's own name, so screen readers read "Français", not "F R".
  */
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation()
