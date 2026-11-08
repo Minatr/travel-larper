@@ -32,6 +32,9 @@ services:
       # Dans le réseau Docker, la base s'appelle `db` (et non `localhost`).
       DATABASE_URL: postgres://${POSTGRES_USER:-travel}:${POSTGRES_PASSWORD:-travel}@db:5432/${POSTGRES_DB:-travel}?sslmode=disable
       API_PORT: "8080"
+      APP_ENV: ${APP_ENV:-}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-}
+      MAX_BODY_BYTES: ${MAX_BODY_BYTES:-}
     ports:
       - "${API_PORT:-8080}:8080"
     depends_on:

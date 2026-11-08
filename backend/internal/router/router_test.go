@@ -52,6 +52,12 @@ func TestRoutes(t *testing.T) {
 			if recorder.Code != tt.wantStatus {
 				t.Fatalf("status = %d, want %d", recorder.Code, tt.wantStatus)
 			}
+			if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+				t.Fatal("security headers are missing: middlewares not applied")
+			}
+			if recorder.Header().Get("X-Ratelimit-Limit") == "" {
+				t.Fatal("rate limit headers are missing: middlewares not applied")
+			}
 			if tt.wantErrorCode != "" {
 				assertErrorCode(t, recorder, tt.wantErrorCode)
 			}
