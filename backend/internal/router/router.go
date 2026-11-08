@@ -20,6 +20,8 @@ type server struct {
 	*controllers.HealthController
 }
 
+// Compile-time check: a route of openapi.yaml without a controller method
+// breaks the build instead of failing at runtime.
 var _ api.ServerInterface = server{}
 
 // Routes builds the HTTP handler that maps every route of openapi.yaml to
