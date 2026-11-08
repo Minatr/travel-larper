@@ -61,7 +61,6 @@ jobs:
       - name: Type check and build
         run: npm run build
       # Dependencies shipped to users only, high or critical severity: the dev
-      # tools stay covered by the Dependabot alerts.
       - name: Known vulnerabilities
         run: npm audit --omit=dev --audit-level=high
 
