@@ -1,8 +1,5 @@
 /**
  * Sets up the translations once, before React renders anything: main.tsx
- * imports this file first. Components then call `useTranslation()` and
- * `t('some.key')`, which looks the key up in the JSON of the current
- * language (src/i18n/locales/).
  */
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
