@@ -255,7 +255,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
   - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
-`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine. `migrate` affiche « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go, base comprise), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
 
 ---
 

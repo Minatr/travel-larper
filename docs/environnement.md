@@ -50,6 +50,10 @@ curl http://localhost:8080/api/health
 
 `Ctrl+C` arrête la surveillance ; `make down` arrête les conteneurs (les données restent).
 
+### Migrations
+
+Le schéma évolue par fichiers numérotés dans `backend/migrations/` (format goose), appliqués par le backend à son démarrage ; s'il n'y arrive pas, il s'arrête. `make migrate-new name=…` crée le fichier suivant. Une migration déjà fusionnée ne se modifie plus : on en ajoute une nouvelle. En local, `make db-reset` repart d'une base vide.
+
 ### PostGIS
 
 L'image contient PostGIS mais l'extension n'est pas activée d'office : la première migration qui stocke des positions l'active avec `CREATE EXTENSION IF NOT EXISTS postgis`. Ainsi, son activation est versionnée avec le reste du schéma.
