@@ -1,6 +1,7 @@
 // Command server starts the Travel Larper API.
 //
-// Startup sequence: read the configuration, open the database pool, wire the
+// Startup sequence: read the configuration, open the database pool, apply
+// the pending migrations (the server stops if they fail), wire the
 // layers together (service -> controller -> routes), then serve HTTP until
 // the process receives Ctrl+C or SIGTERM (sent by `docker compose stop`).
 package main
@@ -60,6 +61,10 @@ func run(logger *slog.Logger) error {
 		return err
 	}
 	defer pool.Close()
+
+	if err := db.Migrate(ctx, pool, logger); err != nil {
+		return fmt.Errorf("migrate database: %w", err)
+	}
 
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", cfg.APIPort),

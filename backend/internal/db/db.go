@@ -9,8 +9,8 @@ import (
 )
 
 // Connect creates a connection pool for the given database URL.
-// The pool connects lazily, so the server can start even if the database
-// is not ready yet; the health route reports its state.
+// The pool connects lazily: the first connection is opened by the
+// migrations, run right after at startup.
 func Connect(ctx context.Context, databaseURL string) (*pgxpool.Pool, error) {
 	pool, err := pgxpool.New(ctx, databaseURL)
 	if err != nil {

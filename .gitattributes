@@ -13,3 +13,4 @@
 # Code généré par `make generate` : replié dans le diff des PR sur GitHub.
 *.gen.go linguist-generated=true
 *.gen.ts linguist-generated=true
+backend/internal/models/** linguist-generated=true
