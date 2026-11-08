@@ -2,7 +2,11 @@
 # check-title and check-branch are required status checks in the protect-main ruleset.
 #
 # Branch names and PR titles share one format: <type>/TL-<ticket>_<short-description>,
-# e.g. feat/TL-12_connexion-utilisateur. Allowed types match the Conventional Commits types used in commits.
+# e.g. feat/TL-12_user-login. Allowed types match the Conventional Commits types used in commits.
+#
+# Pull requests opened by Dependabot (security updates) have no ticket and
+# their own naming: the jobs below are skipped for them. A skipped job counts
+# as passed for the ruleset; the CI jobs still run and stay required.
 name: Pull request
 
 on:
@@ -15,10 +19,11 @@ permissions:
 
 env:
   NAME_PATTERN: '^(feat|fix|chore|docs|refactor|test|ci)/TL-([0-9]+)_[a-z0-9]+(-[a-z0-9]+)*$'
-  NAME_EXAMPLE: 'feat/TL-12_connexion-utilisateur (types: feat, fix, chore, docs, refactor, test, ci)'
+  NAME_EXAMPLE: 'feat/TL-12_user-login (types: feat, fix, chore, docs, refactor, test, ci)'
 
 jobs:
   check-title:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check PR title format
@@ -33,6 +38,7 @@ jobs:
           echo "Valid PR title: $TITLE"
 
   check-branch:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name format and consistency with the PR title
@@ -54,7 +60,8 @@ jobs:
 
   assign-author:
     # Only on creation, so a manual change of assignee is not overwritten later.
-    if: github.event.action == 'opened'
+    # Dependabot cannot be assigned, and its runs get a read-only token.
+    if: github.event.action == 'opened' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
