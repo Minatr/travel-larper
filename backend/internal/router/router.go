@@ -15,8 +15,7 @@ import (
 // forward them with a single rule. It matches `servers` in openapi.yaml.
 const basePath = "/api"
 
-// server bundles the controllers into a single api.ServerInterface. The
-// assertion below turns a contract route without a handler into a compile error.
+// server bundles the controllers into a single api.ServerInterface.
 type server struct {
 	*controllers.HealthController
 }
@@ -24,7 +23,7 @@ type server struct {
 var _ api.ServerInterface = server{}
 
 // Routes builds the HTTP handler that maps every route of openapi.yaml to
-// its controller method. The routing itself is generated from the contract.
+// its controller method.
 func Routes(health *controllers.HealthController) http.Handler {
 	return api.HandlerWithOptions(server{HealthController: health}, api.ChiServerOptions{
 		BaseURL:    basePath,
