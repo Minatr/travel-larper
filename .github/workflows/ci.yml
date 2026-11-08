@@ -60,7 +60,7 @@ jobs:
         run: npm run format:check
       - name: Type check and build
         run: npm run build
-      # Dependencies shipped to users only, high or critical severity: the dev
+     
       - name: Known vulnerabilities
         run: npm audit --omit=dev --audit-level=high
 
