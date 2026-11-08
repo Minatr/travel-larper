@@ -34,9 +34,13 @@ window.matchMedia = (query: string) =>
   ({
     matches: false,
     media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
     addEventListener: () => {},
     removeEventListener: () => {},
-  }) as unknown as MediaQueryList
+    dispatchEvent: () => false,
+  }) satisfies MediaQueryList
 
 // The tests check the default language, whatever the machine's settings.
 await i18n.changeLanguage('en')

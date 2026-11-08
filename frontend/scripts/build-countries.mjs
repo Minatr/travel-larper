@@ -122,26 +122,34 @@ function byCode(features, code) {
   return feature
 }
 
+// The border edits below rebuild a country from a single ring: an island or
+// a hole a newer Natural Earth release adds would be silently dropped, so
+// the build stops instead.
+function onlyRing(feature) {
+  const parts = polygons(feature.geometry)
+  if (parts.length !== 1 || parts[0].length !== 1) {
+    throw new Error(`${feature.properties.ADM0_A3} is not a single ring`)
+  }
+  return parts[0][0]
+}
+
 function mergeCountry(features, part, into) {
   const target = byCode(features, into)
-  const [ring] = polygons(target.geometry)[0]
-  const [partRing] = polygons(byCode(features, part).geometry)[0]
-  setPolygons(target, [[mergeRings(ring, partRing)]])
+  const partRing = onlyRing(byCode(features, part))
+  setPolygons(target, [[mergeRings(onlyRing(target), partRing)]])
   return features.filter((item) => item.properties.ADM0_A3 !== part)
 }
 
 function separateWesternSahara(features) {
   const morocco = byCode(features, 'MAR')
   const sahara = byCode(features, 'SAH')
-  const [moroccoRing] = polygons(morocco.geometry)[0]
   const [held, north] = splitRing(
-    moroccoRing,
+    onlyRing(morocco),
     SAHARA_BORDER_EAST,
     SAHARA_BORDER_COAST,
   )
   setPolygons(morocco, [[north]])
-  const [saharaRing] = polygons(sahara.geometry)[0]
-  setPolygons(sahara, [[mergeRings(saharaRing, held)]])
+  setPolygons(sahara, [[mergeRings(onlyRing(sahara), held)]])
 }
 
 function isCrimea([ring]) {
@@ -164,8 +172,8 @@ function moveCrimeaToUkraine(features) {
     russia,
     parts.filter((part) => part !== crimea),
   )
-  const [ukraineRing] = polygons(ukraine.geometry)[0]
-  setPolygons(ukraine, [[mergeRings(ukraineRing, crimea[0])]])
+  if (crimea.length !== 1) throw new Error('Crimea is not a single ring')
+  setPolygons(ukraine, [[mergeRings(onlyRing(ukraine), crimea[0])]])
 }
 
 function round(value) {
