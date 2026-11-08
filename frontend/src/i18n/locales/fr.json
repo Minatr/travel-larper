@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Travel Larper"
+  },
+  "health": {
+    "title": "État du service",
+    "checking": "Vérification…",
+    "unreachable": "L'API est injoignable.",
+    "api": "API",
+    "database": "Base de données",
+    "status": {
+      "ok": "opérationnelle",
+      "degraded": "dégradée"
+    },
+    "databaseState": {
+      "up": "connectée",
+      "down": "injoignable"
+    }
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "message": "Cette page n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  },
+  "language": {
+    "label": "Langue"
+  }
+}

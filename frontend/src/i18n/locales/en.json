@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Travel Larper"
+  },
+  "health": {
+    "title": "Service status",
+    "checking": "Checking…",
+    "unreachable": "The API is unreachable.",
+    "api": "API",
+    "database": "Database",
+    "status": {
+      "ok": "operational",
+      "degraded": "degraded"
+    },
+    "databaseState": {
+      "up": "connected",
+      "down": "unreachable"
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "This page does not exist or has been moved.",
+    "backHome": "Back to home"
+  },
+  "language": {
+    "label": "Language"
+  }
+}

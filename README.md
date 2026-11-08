@@ -67,7 +67,7 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 | `make help` | Liste toutes les commandes (sous Windows : depuis Git Bash) |
 | `make dev` | Lance base + backend + frontend (`Ctrl+C` pour arrêter) |
 | `make down` | Arrête tous les conteneurs (les données sont conservées) |
-| `make test` | Lance les tests du backend |
+| `make test` | Lance les tests du backend et du frontend |
 | `make lint` | Vérifie le lint et le formatage (backend + frontend) |
 | `make format` | Formate le code (backend + frontend) |
 | `make audit` | Cherche les failles connues dans les dépendances (backend + frontend) |

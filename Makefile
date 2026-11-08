@@ -43,8 +43,9 @@ backend: ## Lance la base et le backend Go seuls
 frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 	$(COMPOSE) up --build --watch frontend
 
-test: ## Lance les tests du backend dans Docker
+test: ## Lance les tests du backend (Docker) et du frontend (outils locaux)
 	$(COMPOSE) run --rm --build --no-deps backend go test ./...
+	cd frontend && npm test
 
 # lint et format utilisent les outils installés sur la machine (voir README),
 # comme les vérifications Lefthook avant chaque commit.
