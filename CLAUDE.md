@@ -43,7 +43,7 @@
 - Filtre « voyages solo / partagés ».
 
 ### Globe 3D et cartes
-- Globe 3D : au survol, le pays se soulève et ses bordures passent en blanc ; un clic ouvre le pays. La recherche de pays est une alternative. Version allégée sur téléphone.
+- Globe 3D : au survol, le pays se soulève et prend la couleur d'accent du globe ; un clic ouvre le pays. La recherche de pays est une alternative. Version allégée sur téléphone.
 - Au clic : zoom, puis carte 2D détaillée où vivent les lieux.
 
 ### Fiche pays
@@ -118,7 +118,7 @@ SQLite et MongoDB ont été écartés. Le module Go sera `github.com/Minatr/trav
 | Besoin | Source |
 | --- | --- |
 | Infos pays | REST Countries, Wikivoyage |
-| Frontières (globe) | Natural Earth (GeoJSON) |
+| Frontières (globe) | Natural Earth (GeoJSON) : 1:110m + petits pays du 1:50m, frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés) |
 | Géocodage | Photon ou Nominatim (OpenStreetMap) — Nominatim : 1 requête/s maximum |
 | Horaires | OpenStreetMap ou saisie |
 | Trajets pied/vélo/voiture | OpenRouteService |
@@ -150,7 +150,8 @@ travel-larper/
 │   ├── queries/              # requêtes SQL pour sqlc
 │   └── migrations/           # migrations SQL versionnées
 ├── frontend/
-│   ├── public/
+│   ├── public/geo/           # formes des pays du globe (versionnées), produites par scripts/build-countries.mjs
+│   ├── scripts/              # scripts de préparation des données
 │   └── src/{pages,components,hooks,services,models,i18n}/
 └── data/{geo,reference,seeds}/   # GeoJSON (non versionné), données de référence, jeux de test
 ```
@@ -232,7 +233,32 @@ travel-larper/
 
 ## 8. Direction artistique
 
-Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF Pro / Inter), gris neutres + une seule couleur d'accent, beaucoup d'espace, coins arrondis, ombres légères, panneaux translucides floutés sur la carte, modes clair et sombre automatiques, animations courtes. Composants Radix/shadcn + Tailwind.
+Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF Pro / Inter), palette « Nuit bleue » (voir ci-dessous), beaucoup d'espace, coins arrondis, ombres légères, panneaux translucides floutés (en-tête flottant au-dessus du globe, panneaux sur la carte), **mode sombre uniquement** (le globe, page principale, est sombre comme l'espace ; un cadre clair autour ne collait pas), animations courtes. Composants Radix/shadcn + Tailwind.
+
+### Palette « Nuit bleue »
+
+Surfaces **graphite** (gris neutres très foncés, comme l'espace autour du globe), **globe bleu nuit** (le bleu reste la couleur du globe) et **une seule couleur d'accent : le turquoise**, partagée par l'appli et le globe. Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui) et `frontend/src/lib/globeStyle.ts` (MapLibre demande des couleurs brutes) : on les modifie là, et ce tableau en même temps.
+
+| Rôle | Couleur |
+| --- | --- |
+| Fond (`--background`) | `#0d0f13` |
+| Texte (`--foreground`) | `#e8eaee` |
+| Carte, panneau (`--card`) | `#15181e` |
+| Fond discret (`--muted`) | `#1d2129` |
+| Texte secondaire (`--muted-foreground`) | `#9aa3b2` |
+| Bordure (`--border`) | blanc à 10 % |
+| Accent (`--primary`, `--ring`) | `#2dd4bf` |
+| Texte sur accent (`--primary-foreground`) | `#04201c` |
+| En-tête flottant | verre neutre : noir à 40 % + flou, bordure blanche à 10 % |
+
+Globe :
+
+| Élément | Couleur |
+| --- | --- |
+| Espace autour (`--globe-space`) | dégradé radial graphite, `#1a1d24` → `#040506` (neutre, pour que le globe bleu ressorte) |
+| Océan et frontières | `#0a1a33` |
+| Pays (7 nuances, une par groupe Natural Earth) | `#2b5080` `#2f5788` `#284b78` `#335d8f` `#2d5384` `#264872` `#376396` |
+| Pays soulevé | `#2dd4bf` (l'accent) |
 
 ---
 
