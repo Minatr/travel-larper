@@ -16,6 +16,24 @@ concurrency:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    # Database for the integration tests. Plain postgres is enough until a
+    # migration needs PostGIS.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: travel
+          POSTGRES_PASSWORD: travel
+          POSTGRES_DB: travel_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U travel -d travel_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://travel:travel@localhost:5432/travel_test?sslmode=disable
     defaults:
       run:
         working-directory: backend

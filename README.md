@@ -68,6 +68,7 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 | `make dev` | Lance base + backend + frontend (`Ctrl+C` pour arrêter) |
 | `make down` | Arrête tous les conteneurs (les données sont conservées) |
 | `make test` | Lance les tests du backend et du frontend |
+| `make migrate-new name=…` | Crée une migration de base de données (appliquée au prochain démarrage du backend) |
 | `make lint` | Vérifie le lint et le formatage (backend + frontend) |
 | `make format` | Formate le code (backend + frontend) |
 | `make audit` | Cherche les failles connues dans les dépendances (backend + frontend) |

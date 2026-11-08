@@ -10,7 +10,7 @@ POSTGRES_USER ?= travel
 POSTGRES_DB ?= travel
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format audit generate migrate
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format audit generate migrate-new
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -43,8 +43,10 @@ backend: ## Lance la base et le backend Go seuls
 frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 	$(COMPOSE) up --build --watch frontend
 
-test: ## Lance les tests du backend (Docker) et du frontend (outils locaux)
-	$(COMPOSE) run --rm --build --no-deps backend go test ./...
+# Les tests d'intégration travaillent dans des schémas temporaires de la base
+# de dev : les données locales ne sont pas touchées.
+test: ## Lance les tests du backend (Docker, avec la base) et du frontend (outils locaux)
+	$(COMPOSE) run --rm --build backend sh -c 'TEST_DATABASE_URL="$$DATABASE_URL" go test ./...'
 	cd frontend && npm test
 
 # lint et format utilisent les outils installés sur la machine (voir README),
@@ -61,9 +63,15 @@ audit: ## Cherche les failles connues dans les dépendances (outils locaux)
 	cd backend && go tool govulncheck ./...
 	cd frontend && npm audit --omit=dev --audit-level=high
 
-generate: ## Génère le code depuis api/openapi.yaml (outils locaux)
-	cd backend && go generate ./...
+generate: ## Génère le code depuis api/openapi.yaml et les requêtes SQL (outils locaux)
+	cd backend && go generate ./... && go tool sqlc generate
 	cd frontend && npm run generate
 
-migrate: ## Applique les migrations (pas encore configuré)
-	@echo "Pas encore configuré : à venir avec le premier ticket qui crée une table."
+# Les migrations s'appliquent au démarrage du backend : cette cible crée
+# seulement le fichier, numéroté à la suite du dernier.
+migrate-new: ## Crée une migration vide : make migrate-new name=add_role
+	@echo "$(name)" | grep -qE '^[a-z0-9_]+$$' || { echo "Usage : make migrate-new name=<minuscules_chiffres_underscores>"; exit 1; }
+	@last=$$(ls backend/migrations | grep -E '^[0-9]+_.*\.sql$$' | sort | tail -n 1 | cut -d_ -f1); \
+	file=backend/migrations/$$(printf '%05d' $$(expr $${last:-0} + 1))_$(name).sql; \
+	printf -- '-- +goose Up\n\n-- +goose Down\n' > $$file; \
+	echo "Créé : $$file"

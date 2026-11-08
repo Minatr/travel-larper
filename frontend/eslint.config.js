@@ -24,8 +24,6 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // CLAUDE.md: every exported function, hook, component and type has a
-      // JSDoc comment.
       'jsdoc/require-jsdoc': [
         'error',
         {

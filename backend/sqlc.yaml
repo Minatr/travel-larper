@@ -1,0 +1,17 @@
+# sqlc configuration, run by `make generate`: the schema comes from the
+# migrations, the queries from queries/, the Go code goes to internal/models.
+version: "2"
+sql:
+  - engine: postgresql
+    schema: migrations
+    queries: queries
+    gen:
+      go:
+        package: models
+        out: internal/models
+        sql_package: pgx/v5
+        overrides:
+          - db_type: uuid
+            go_type: github.com/google/uuid.UUID
+          - db_type: timestamptz
+            go_type: time.Time
