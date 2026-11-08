@@ -10,7 +10,7 @@ POSTGRES_USER ?= travel
 POSTGRES_DB ?= travel
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format generate migrate
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format audit generate migrate
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -43,8 +43,9 @@ backend: ## Lance la base et le backend Go seuls
 frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 	$(COMPOSE) up --build --watch frontend
 
-test: ## Lance les tests du backend dans Docker
+test: ## Lance les tests du backend (Docker) et du frontend (outils locaux)
 	$(COMPOSE) run --rm --build --no-deps backend go test ./...
+	cd frontend && npm test
 
 # lint et format utilisent les outils installés sur la machine (voir README),
 # comme les vérifications Lefthook avant chaque commit.
@@ -55,6 +56,10 @@ lint: ## Vérifie lint et formatage, backend et frontend (outils locaux)
 format: ## Formate le code, backend et frontend (outils locaux)
 	cd backend && golangci-lint fmt
 	cd frontend && npm run format
+
+audit: ## Cherche les failles connues dans les dépendances (outils locaux)
+	cd backend && go tool govulncheck ./...
+	cd frontend && npm audit --omit=dev --audit-level=high
 
 generate: ## Génère le code depuis api/openapi.yaml (outils locaux)
 	cd backend && go generate ./...

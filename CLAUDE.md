@@ -90,7 +90,8 @@
 - Stockage sur Cloudflare R2 (10 Go gratuits, sans frais de téléchargement). Les métadonnées GPS sont supprimées.
 
 ### Langue
-- Français par défaut, anglais possible. **Aucun texte affiché en dur** : tout passe par react-i18next.
+- Anglais par défaut, français disponible. **Aucun texte affiché en dur** : tout passe par react-i18next.
+- Les textes sont dans `frontend/src/i18n/locales/en.json` (la référence) et `fr.json`, rangés par écran (`health.title`, `notFound.message`…). Chaque nouveau texte est ajouté **dans les deux langues** : un test vérifie que les deux fichiers ont les mêmes clés, et les clés sont typées (une clé inexistante ne compile pas). Un sélecteur EN | FR dans l'en-tête permet de changer de langue ; le choix est mémorisé dans le navigateur (`localStorage`) et sera synchronisé avec le profil quand les comptes existeront. Sans choix, la langue du navigateur est utilisée, avec repli sur l'anglais.
 
 ---
 
@@ -100,7 +101,8 @@
 | --- | --- |
 | Frontend | React + TypeScript + Vite (SPA, installable en PWA) |
 | Style | Tailwind CSS + shadcn/ui (Radix) ; icônes Lucide ou Phosphor |
-| Traduction | react-i18next |
+| Traduction | react-i18next (anglais par défaut, français) |
+| Navigation | React Router |
 | Carte 2D | MapLibre GL + tuiles OpenFreeMap |
 | Globe | MapLibre seul d'abord (globe natif depuis la v5) ; repli : react-globe.gl |
 | Backend | Go, architecture **MVC + couche services** ; chi, sqlc, pgx |
@@ -186,7 +188,7 @@ travel-larper/
 ## 7. Règles de code
 
 ### Général
-- **Code, noms, commentaires, commits et messages de log en anglais.** Textes affichés à l'utilisateur via i18n (français par défaut). Documentation du projet (README, ce fichier, PR) en français.
+- **Code, noms, commentaires, commits et messages de log en anglais.** Textes affichés à l'utilisateur via i18n (anglais par défaut, français disponible). Documentation du projet (README, ce fichier, PR) en français.
 - Respecter `.editorconfig` : UTF-8, fins de ligne LF, 2 espaces (tabulations pour Go et Makefile), retour à la ligne final.
 - Des noms explicites plutôt que des abréviations ; des fonctions courtes qui font une seule chose.
 - **Pas de code mort ni de code commenté** : Git garde l'historique.
@@ -198,6 +200,7 @@ travel-larper/
 - **Tout ce qui est exporté est commenté** : en Go, le commentaire commence par le nom de l'élément (`// TripService manages…`), comme l'impose la règle `exported` de revive ; en TypeScript, JSDoc sur les fonctions, hooks, composants et types exportés.
 - Un commentaire explique **le pourquoi**, pas le quoi : le code dit déjà ce qu'il fait. Commenter les choix non évidents, les contraintes externes (ex. « Nominatim limite à 1 req/s ») et les compromis.
 - Les algorithmes (planner notamment) ont un commentaire d'en-tête qui décrit l'approche et sa complexité.
+- **Commentaire en tête de fichier** quand son rôle ne se devine pas à son nom ou à son contenu : fichiers de configuration, de types (`.d.ts`), de préparation des tests, mécanismes propres à une bibliothèque. Deux à cinq lignes : à quoi sert le fichier, quand il intervient, comment il s'articule avec le reste. Pas pour un composant ou une fonction dont le JSDoc suffit. En Go, ce rôle est tenu par le commentaire de package.
 
 ### Go
 - Formatage `gofmt`/`goimports`, lint `golangci-lint` (avec revive).
@@ -220,9 +223,10 @@ travel-larper/
 
 ### Qualité automatisée
 - **Backend** : golangci-lint v2 (`backend/.golangci.yml`) avec revive, errorlint, gosec et les formateurs gofmt/goimports.
-- **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`) et Prettier (`frontend/.prettierrc.json`).
+- **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`), Prettier (`frontend/.prettierrc.json`) et tests Vitest + Testing Library (`npm test`, lancés aussi par `make test`).
 - **Avant chaque commit** : Lefthook (`lefthook.yml`) formate et vérifie les fichiers modifiés. Les outils sont installés sur la machine (voir README), pas dans Docker, pour que le commit reste instantané.
-- **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build ; `generated` : vérifie que le code généré est à jour).
+- **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build ; `generated` : vérifie que le code généré est à jour). Les jobs `backend` et `frontend` cherchent aussi les failles connues des dépendances (govulncheck ; `npm audit` sur les dépendances livrées, gravité élevée ou critique).
+- **Dépendances** : Dependabot (`.github/dependabot.yml`) ouvre une PR uniquement quand une dépendance a une faille connue et qu'une version corrigée existe ; pas de mise à jour de version de routine.
 
 ---
 
@@ -237,7 +241,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 - **Dépôt** : `github.com/Minatr/travel-larper`. Branche `main` protégée par le ruleset `protect-main` : PR obligatoire, 1 approbation, approbations annulées après un nouveau commit, conversations résolues, pas de force-push ni de suppression, aucune exception.
 - **Tickets** : Jira (clé **TL**), relié au dépôt par l'app « GitHub for Atlassian » (ex-« GitHub for Jira ») : la branche, la PR et le commit de squash apparaissent dans le panneau *Développement* du ticket, grâce à la clé `TL-<numéro>` présente dans leur nom. Le numéro `TL-0` a servi à la mise en place de base, avant Jira : on ne l'utilise plus.
 - **Description des tickets** : quand on prend un ticket, on complète sa description Jira avec ce qu'il faut pour le réaliser sans deviner : objectif, étapes, critères d'acceptation, hors périmètre. Court et précis, pas un roman.
-- **Branches et titres de PR : même format** `<type>/TL-<numéro>_<description-courte>`, en minuscules avec des tirets, par exemple `feat/TL-12_connexion-utilisateur`. Types autorisés (les mêmes que pour les commits) : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Le titre de la PR reprend en général le nom de la branche ; le type et le numéro de ticket doivent être identiques.
+- **Branches et titres de PR : même format** `<type>/TL-<numéro>_<description-courte>`, **en anglais**, en minuscules avec des tirets, par exemple `feat/TL-12_user-login`. Types autorisés (les mêmes que pour les commits) : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Le titre de la PR reprend en général le nom de la branche ; le type et le numéro de ticket doivent être identiques. Seule exception : les PR de Dependabot, sans ticket, pour lesquelles `check-title` et `check-branch` sont ignorés.
 - **Vérifications** : le job `check-title` vérifie le titre, le job `check-branch` vérifie la branche et sa cohérence avec le titre. Un nom de branche ne se renomme pas sur une PR ouverte : en cas d'erreur, recréer la branche et ouvrir une nouvelle PR (le titre, lui, se corrige directement sur GitHub).
 - **Commits** : Conventional Commits, en anglais (`feat: add trip invitation`, `fix: …`, `chore: …`, `docs: …`, `test: …`, `refactor: …`, `ci: …`).
 - **Fusion** : squash merge uniquement, titre de la PR comme message, branche supprimée automatiquement.
@@ -251,7 +255,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
   - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
-`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format` et `make generate` utilisent les outils installés sur la machine. `migrate` affiche « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine. `migrate` affiche « pas encore configuré ». Détails et passage en production : `docs/environnement.md`.
 
 ---
 
