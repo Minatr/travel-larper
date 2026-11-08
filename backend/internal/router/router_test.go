@@ -21,12 +21,14 @@ func (healthyChecker) Check(context.Context) error {
 	return nil
 }
 
+var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20}
+
 func discardLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }
 
 func TestRoutes(t *testing.T) {
-	handler := Routes(controllers.NewHealthController(healthyChecker{}, discardLogger()), discardLogger())
+	handler := Routes(controllers.NewHealthController(healthyChecker{}, discardLogger()), discardLogger(), testOptions)
 
 	tests := []struct {
 		name          string

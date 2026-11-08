@@ -7,9 +7,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/Minatr/travel-larper/backend/internal/api"
 	"github.com/Minatr/travel-larper/backend/internal/controllers"
+	"github.com/Minatr/travel-larper/backend/internal/middleware"
 	"github.com/Minatr/travel-larper/backend/internal/views"
 )
 
@@ -24,10 +26,28 @@ type server struct {
 
 var _ api.ServerInterface = server{}
 
+// Options holds the settings of the middlewares shared by every route.
+type Options struct {
+	RateLimitPerMinute int
+	MaxBodyBytes       int64
+	HSTS               bool
+}
+
 // Routes builds the HTTP handler that maps every route of openapi.yaml to
 // its controller method.
-func Routes(health *controllers.HealthController, logger *slog.Logger) http.Handler {
+func Routes(health *controllers.HealthController, logger *slog.Logger, options Options) http.Handler {
 	router := chi.NewRouter()
+	router.Use(
+		chimiddleware.RequestID,
+		// TODO(TL-13): behind the production reverse proxy, read the client IP
+		// from the header it sets (chimiddleware.ClientIPFromXFF).
+		chimiddleware.ClientIPFromRemoteAddr,
+		middleware.RequestLogger(logger),
+		middleware.Recoverer(logger),
+		middleware.SecurityHeaders(options.HSTS),
+		middleware.RateLimit(options.RateLimitPerMinute, logger),
+		middleware.MaxBodySize(options.MaxBodyBytes, logger),
+	)
 	router.NotFound(func(w http.ResponseWriter, _ *http.Request) {
 		views.WriteError(w, logger, api.ErrorCodeNotFound)
 	})

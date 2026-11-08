@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -25,14 +24,6 @@ import (
 	"github.com/Minatr/travel-larper/backend/internal/db"
 	"github.com/Minatr/travel-larper/backend/internal/router"
 	"github.com/Minatr/travel-larper/backend/internal/services"
-)
-
-const (
-	// readHeaderTimeout protects against clients that open a connection and
-	// send headers very slowly (Slowloris).
-	readHeaderTimeout = 5 * time.Second
-	// shutdownTimeout lets in-flight requests finish when the server stops.
-	shutdownTimeout = 10 * time.Second
 )
 
 func main() {
@@ -68,8 +59,10 @@ func run(logger *slog.Logger) error {
 
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", cfg.APIPort),
-		Handler:           buildHandler(pool, logger),
-		ReadHeaderTimeout: readHeaderTimeout,
+		Handler:           buildHandler(pool, logger, cfg),
+		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
+		WriteTimeout:      cfg.WriteTimeout,
+		IdleTimeout:       cfg.IdleTimeout,
 	}
 
 	// ListenAndServe blocks, so it runs in its own goroutine while this one
@@ -90,7 +83,7 @@ func run(logger *slog.Logger) error {
 	// Graceful shutdown: stop accepting connections and wait for in-flight
 	// requests. A fresh context is needed because ctx is already cancelled.
 	logger.Info("shutting down")
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 	defer cancel()
 	if err := server.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("shutdown: %w", err)
@@ -102,8 +95,12 @@ func run(logger *slog.Logger) error {
 // its dependencies, each controller its service, and the router the
 // controllers. Go has no dependency-injection container, so this explicit
 // wiring at the entry point (the "composition root") is the usual approach.
-func buildHandler(pool *pgxpool.Pool, logger *slog.Logger) http.Handler {
+func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) http.Handler {
 	healthService := services.NewHealthService(pool)
 	healthController := controllers.NewHealthController(healthService, logger)
-	return router.Routes(healthController, logger)
+	return router.Routes(healthController, logger, router.Options{
+		RateLimitPerMinute: cfg.RateLimitPerMinute,
+		MaxBodyBytes:       cfg.MaxBodyBytes,
+		HSTS:               cfg.Production,
+	})
 }
