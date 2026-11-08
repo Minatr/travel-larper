@@ -105,5 +105,5 @@ func run(logger *slog.Logger) error {
 func buildHandler(pool *pgxpool.Pool, logger *slog.Logger) http.Handler {
 	healthService := services.NewHealthService(pool)
 	healthController := controllers.NewHealthController(healthService, logger)
-	return router.Routes(healthController)
+	return router.Routes(healthController, logger)
 }
