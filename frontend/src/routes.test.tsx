@@ -27,11 +27,23 @@ describe('routes', () => {
     )
   })
 
-  it('shows the health page, translated, on the home page', async () => {
+  it('shows the globe on the home page', () => {
+    // The globe loads the country shapes: no server in the tests.
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
     renderAt('/')
+
+    expect(
+      screen.getByRole('region', { name: 'World globe' }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows the health page, translated, on /status', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    renderAt('/status')
 
     expect(
       screen.getByRole('heading', { name: 'Service status' }),

@@ -7,6 +7,7 @@
 import type { RouteObject } from 'react-router'
 
 import { Layout } from './components/Layout.tsx'
+import { GlobePage } from './pages/GlobePage.tsx'
 import { HealthPage } from './pages/HealthPage.tsx'
 import { NotFoundPage } from './pages/NotFoundPage.tsx'
 
@@ -19,9 +20,9 @@ export const routes: RouteObject[] = [
   {
     Component: Layout,
     children: [
-      // `index`: the URL of the parent itself, here `/`. Temporary home
-      // page, until a real one exists.
-      { index: true, Component: HealthPage },
+      // `index`: the URL of the parent itself, here `/`.
+      { index: true, Component: GlobePage },
+      { path: 'status', Component: HealthPage },
       // `*`: any URL no other route matches.
       { path: '*', Component: NotFoundPage },
     ],

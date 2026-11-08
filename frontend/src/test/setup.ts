@@ -6,9 +6,37 @@
 import '@testing-library/jest-dom/vitest'
 
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, vi } from 'vitest'
 
 import i18n from '../i18n/index.ts'
+
+// jsdom draws nothing and has no WebGL: MapLibre is replaced by a stub that
+// accepts the calls useGlobe makes. The globe rendering is checked by hand.
+vi.mock('maplibre-gl', () => ({
+  setWorkerUrl: () => {},
+  MapLibreMap: class {
+    on() {}
+    once() {}
+    remove() {}
+    setFeatureState() {}
+    getCanvas() {
+      return document.createElement('canvas')
+    }
+    queryRenderedFeatures() {
+      return []
+    }
+  },
+}))
+
+// jsdom has no matchMedia (used by the globe to detect hover support):
+// answer "no" to every media query.
+window.matchMedia = (query: string) =>
+  ({
+    matches: false,
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }) as unknown as MediaQueryList
 
 // The tests check the default language, whatever the machine's settings.
 await i18n.changeLanguage('en')

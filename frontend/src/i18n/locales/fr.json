@@ -24,5 +24,8 @@
   },
   "language": {
     "label": "Langue"
+  },
+  "globe": {
+    "label": "Globe terrestre"
   }
 }
