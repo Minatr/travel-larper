@@ -28,9 +28,28 @@ import {
 // dev and in the production build.
 setWorkerUrl(workerUrl)
 
-/** Initial view: centered on Europe and Africa, the whole globe visible. */
+/** Initial view: centered on Europe and Africa. */
 const INITIAL_CENTER: [number, number] = [10, 25]
-const INITIAL_ZOOM = 0.8
+
+/**
+ * Initial zoom for a 800 px screen side: the globe then fills about 90 % of
+ * it. Measured on the rendered globe; the zoom is scaled from it so that
+ * the globe fills the screen whatever its size (see initialZoom).
+ */
+const REFERENCE_SIDE_PX = 800
+const REFERENCE_ZOOM = 2.4
+
+/**
+ * Zoom at which the globe fills the smaller side of the container: its
+ * height on a computer, its width on a phone. Each zoom level doubles the
+ * size of the map, hence the log2.
+ */
+function initialZoom(container: HTMLElement): number {
+  const side = Math.min(container.clientWidth, container.clientHeight)
+  return side > 0
+    ? REFERENCE_ZOOM + Math.log2(side / REFERENCE_SIDE_PX)
+    : REFERENCE_ZOOM
+}
 
 /**
  * High-density phone screens can be 3x or more: capping the pixel ratio
@@ -87,7 +106,7 @@ export function useGlobe(
       container,
       style: globeStyle(),
       center: INITIAL_CENTER,
-      zoom: INITIAL_ZOOM,
+      zoom: initialZoom(container),
       // No map tiles: Natural Earth is public domain, nothing to credit.
       attributionControl: false,
       pixelRatio: Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO),
