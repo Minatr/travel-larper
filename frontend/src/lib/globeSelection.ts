@@ -31,7 +31,7 @@ export function reduceSelection(
     : { ...state, selected: event.code }
 }
 
-/** Codes of the countries to show raised, with white borders. */
+/** Codes of the countries to show raised. */
 export function raisedCountries(state: GlobeSelection): Set<string> {
   return new Set(
     [state.hovered, state.selected].filter((code) => code !== null),

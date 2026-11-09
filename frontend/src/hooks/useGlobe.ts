@@ -135,13 +135,18 @@ export function useGlobe(
     let frame: number | undefined
 
     // Puts exactly the raised countries in the small 3D source.
-    function showRaised() {
-      window.clearTimeout(liftTimer)
-      shown = raisedCountries(selection)
+    function show(codes: Set<string>) {
+      shown = codes
       const features = [...shown].flatMap((code) => shapes.get(code) ?? [])
       map
         .getSource<GeoJSONSource>(RAISED_SOURCE)
         ?.setData({ type: 'FeatureCollection', features })
+    }
+
+    // Lifts every raised country, the hovered one included.
+    function showRaised() {
+      window.clearTimeout(liftTimer)
+      show(raisedCountries(selection))
     }
 
     // Recolors at once the countries whose state changes. A country going
@@ -168,9 +173,15 @@ export function useGlobe(
         }
       }
 
-      const goesDown = [...shown].some((code) => !after.has(code))
-      if (event.type === 'click' || goesDown) {
+      if (event.type === 'click') {
         showRaised()
+        return
+      }
+      // Lowers at once the countries left behind, but keeps the newly
+      // hovered one flat until the timer: lifting it here too would make
+      // every country crossed jump when sweeping from one to the next.
+      if ([...shown].some((code) => !after.has(code))) {
+        show(new Set([...shown].filter((code) => after.has(code))))
       }
       if ([...after].some((code) => !shown.has(code))) {
         window.clearTimeout(liftTimer)

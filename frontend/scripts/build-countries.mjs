@@ -1,25 +1,16 @@
 /**
- * Builds public/geo/countries.json, the country shapes of the globe, from
- * Natural Earth (public domain), version 5.1:
+ * Builds public/geo/countries.json from Natural Earth (public domain):
  * https://github.com/nvkelso/natural-earth-vector/tree/master/geojson
  *
  * Usage, from frontend/:
- *   node scripts/build-countries.mjs \
- *     path/to/ne_110m_admin_0_countries.geojson \
- *     path/to/ne_50m_admin_0_countries.geojson
+ *   node scripts/build-countries.mjs <ne_110m_admin_0_countries.geojson> \
+ *     <ne_50m_admin_0_countries.geojson>
  *
- * Three steps:
- * 1. The 1:110m countries, light enough for phones, are the base.
- * 2. Natural Earth draws de facto borders (who controls the ground). The
- *    globe shows the borders Google Maps shows, as the app links to it:
- *    Western Sahara whole and apart from Morocco, Crimea in Ukraine,
- *    Somaliland in Somalia, Northern Cyprus in Cyprus.
- * 3. The small countries missing at 1:110m (Singapore, Malta…) come from
- *    the 1:50m countries.
- *
- * Only what the app needs is kept (shape, ISO code, English and French
- * names, color group), and coordinates are rounded to 3 decimals (about
- * 100 m, invisible at globe scale).
+ * Base: the 1:110m countries, light enough for phones. Borders follow
+ * Google Maps, which the app links to, rather than Natural Earth's de facto
+ * ones. The small countries missing at 1:110m come from 1:50m. Only the
+ * shape, ISO code and color group are kept: the browser names a country
+ * from its code (Intl.DisplayNames).
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 
@@ -218,8 +209,6 @@ const countries = {
     type: 'Feature',
     properties: {
       code: countryCode(feature.properties),
-      nameEn: feature.properties.NAME_EN,
-      nameFr: feature.properties.NAME_FR,
       // 1 to 7, chosen by Natural Earth so that neighbours never share a
       // value: the globe gives each value its own color.
       colorGroup: feature.properties.MAPCOLOR7,
