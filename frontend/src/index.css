@@ -1,39 +1,40 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens (CLAUDE.md, Direction artistique): neutral greys, a single
- * accent colour, system font, rounded corners. The variable names follow
- * shadcn/ui so its components pick them up. The dark values apply when the
- * system is in dark mode: there is no manual switch.
+ * Design tokens (CLAUDE.md, Direction artistique): the "Night blue" palette,
+ * neutral graphite surfaces, a blue globe (lib/globeStyle.ts) and a single
+ * turquoise accent. System font, rounded corners. The variable names follow
+ * shadcn/ui so its components pick them up. The app is dark only: the
+ * globe, its main page, is dark like space, and a light frame around it
+ * never matched. The surfaces are graphite, like the space around the
+ * globe, so that the blue stays the globe's own color.
  */
 :root {
-  color-scheme: light dark;
+  /* Dark scrollbars and form controls, whatever the system theme. */
+  color-scheme: dark;
   --radius: 0.75rem;
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.205 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.955 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --border: oklch(0.922 0 0);
-  --primary: oklch(0.62 0.19 255);
-  --primary-foreground: oklch(0.985 0 0);
-  --ring: oklch(0.62 0.19 255);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --border: oklch(1 0 0 / 12%);
-    --primary: oklch(0.7 0.17 255);
-    --primary-foreground: oklch(0.145 0 0);
-    --ring: oklch(0.7 0.17 255);
-  }
+  --background: #0d0f13;
+  --foreground: #e8eaee;
+  --card: #15181e;
+  --card-foreground: #e8eaee;
+  --muted: #1d2129;
+  --muted-foreground: #9aa3b2;
+  --border: rgb(255 255 255 / 10%);
+  --primary: #2dd4bf;
+  --primary-foreground: #04201c;
+  --ring: #2dd4bf;
+  /*
+   * Space around the globe (GlobePage). It is graphite rather than blue: a
+   * blue space would blend with the blue globe, a neutral one lets the
+   * globe stand out.
+   */
+  --globe-space: radial-gradient(
+    circle at center,
+    #1a1d24 0%,
+    #111318 40%,
+    #090a0d 75%,
+    #040506 100%
+  );
 }
 
 @theme inline {
@@ -52,6 +53,12 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+}
+
+@layer components {
+  .globe-space {
+    background: var(--globe-space);
+  }
 }
 
 @layer base {
