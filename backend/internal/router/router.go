@@ -39,7 +39,7 @@ func Routes(health *controllers.HealthController, logger *slog.Logger, options O
 	router := chi.NewRouter()
 	router.Use(
 		chimiddleware.RequestID,
-		// TODO(TL-13): behind the production reverse proxy, read the client IP
+		// TODO(TL-71): behind the production reverse proxy, read the client IP
 		// from the header it sets (chimiddleware.ClientIPFromXFF).
 		chimiddleware.ClientIPFromRemoteAddr,
 		middleware.RequestLogger(logger),
