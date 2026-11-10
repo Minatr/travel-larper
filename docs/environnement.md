@@ -72,6 +72,8 @@ Un volume créé par l'ancienne image `postgis/postgis` n'est pas compatible ave
 | `POSTGRES_PORT`, `API_PORT`, `FRONTEND_PORT` | ports **exposés sur la machine** | à l'intérieur de Docker, les ports restent 5432, 8080 et 5173 |
 | `DATABASE_URL` (`.env`) | outils lancés **sur la machine** (`localhost`) | le conteneur backend reçoit sa propre URL, qui vise l'hôte `db` |
 | `API_PROXY_TARGET` | Vite | fixé par `docker-compose.yml` à `http://backend:8080` |
+| `APP_ENV` | backend | vide ou `production` (active l'en-tête HSTS, HTTPS obligatoire) ; toute autre valeur empêche le démarrage |
+| `RATE_LIMIT_PER_MINUTE`, `MAX_BODY_BYTES` | backend | limite de requêtes par IP (défaut 100/min) et taille max d'un corps (défaut 1 Mo) ; vides = défaut |
 
 ## 4. Vers la production
 

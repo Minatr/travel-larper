@@ -25,6 +25,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Error: {
+            /** @enum {string} */
+            code: "invalid_parameter" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
+            message: string;
+        };
         Health: {
             /** @enum {string} */
             status: "ok" | "degraded";
@@ -32,7 +37,17 @@ export interface components {
             database: "up" | "down";
         };
     };
-    responses: never;
+    responses: {
+        /** @description Any error, in the shared Error format. */
+        Error: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;
@@ -67,6 +82,7 @@ export interface operations {
                     "application/json": components["schemas"]["Health"];
                 };
             };
+            default: components["responses"]["Error"];
         };
     };
 }

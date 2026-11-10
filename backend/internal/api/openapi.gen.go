@@ -10,6 +10,36 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Defines values for ErrorCode.
+const (
+	ErrorCodeInternalError    ErrorCode = "internal_error"
+	ErrorCodeInvalidParameter ErrorCode = "invalid_parameter"
+	ErrorCodeMethodNotAllowed ErrorCode = "method_not_allowed"
+	ErrorCodeNotFound         ErrorCode = "not_found"
+	ErrorCodeRateLimited      ErrorCode = "rate_limited"
+	ErrorCodeRequestTooLarge  ErrorCode = "request_too_large"
+)
+
+// Valid indicates whether the value is a known member of the ErrorCode enum.
+func (e ErrorCode) Valid() bool {
+	switch e {
+	case ErrorCodeInternalError:
+		return true
+	case ErrorCodeInvalidParameter:
+		return true
+	case ErrorCodeMethodNotAllowed:
+		return true
+	case ErrorCodeNotFound:
+		return true
+	case ErrorCodeRateLimited:
+		return true
+	case ErrorCodeRequestTooLarge:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for HealthDatabase.
 const (
 	HealthDatabaseDown HealthDatabase = "down"
@@ -45,6 +75,15 @@ func (e HealthStatus) Valid() bool {
 		return false
 	}
 }
+
+// Error defines model for Error.
+type Error struct {
+	Code    ErrorCode `json:"code"`
+	Message string    `json:"message"`
+}
+
+// ErrorCode defines model for Error.Code.
+type ErrorCode string
 
 // Health defines model for Health.
 type Health struct {

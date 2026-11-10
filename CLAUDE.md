@@ -195,6 +195,7 @@ travel-larper/
 - **Pas de code mort ni de code commenté** : Git garde l'historique.
 - **Pas de `TODO` orphelin** : toujours lié à un ticket, par exemple `// TODO(TL-12): handle expired invitations`.
 - Pas de nombre ou de chaîne « magique » : les extraire en constantes nommées.
+- **Valeurs de réglage regroupées** (délais, limites, tailles) : côté backend, elles vivent dans `internal/config` (valeur par défaut en constante, surchargeable par variable d'environnement si utile), pas dans le code qui les utilise. Quand un fichier de constantes grossit, le découper par thème (ex. `config/server.go`, `config/limits.go`).
 - Ne pas ajouter de dépendance sans raison : la justifier dans la PR.
 
 ### Commentaires
