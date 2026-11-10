@@ -35,6 +35,7 @@ func TestLoad(t *testing.T) {
 		},
 		{name: "invalid rate limit", env: map[string]string{"DATABASE_URL": "postgres://db", "RATE_LIMIT_PER_MINUTE": "many"}, wantErr: true},
 		{name: "zero body size", env: map[string]string{"DATABASE_URL": "postgres://db", "MAX_BODY_BYTES": "0"}, wantErr: true},
+		{name: "unknown environment", env: map[string]string{"DATABASE_URL": "postgres://db", "APP_ENV": "prod"}, wantErr: true},
 	}
 
 	for _, tt := range tests {

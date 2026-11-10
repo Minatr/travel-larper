@@ -57,11 +57,15 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	production, err := isProduction()
+	if err != nil {
+		return Config{}, err
+	}
 
 	return Config{
 		DatabaseURL:        databaseURL,
 		APIPort:            apiPort,
-		Production:         os.Getenv("APP_ENV") == productionEnvironment,
+		Production:         production,
 		RateLimitPerMinute: rateLimit,
 		MaxBodyBytes:       int64(maxBodyBytes),
 		ReadHeaderTimeout:  readHeaderTimeout,
@@ -81,4 +85,15 @@ func positiveInt(name string, defaultValue int) (int, error) {
 		return 0, fmt.Errorf("%s must be a positive integer, got %q", name, raw)
 	}
 	return value, nil
+}
+
+func isProduction() (bool, error) {
+	switch value := os.Getenv("APP_ENV"); value {
+	case "":
+		return false, nil
+	case productionEnvironment:
+		return true, nil
+	default:
+		return false, fmt.Errorf("APP_ENV must be empty or %q, got %q", productionEnvironment, value)
+	}
 }
