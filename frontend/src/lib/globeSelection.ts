@@ -3,6 +3,7 @@
  * pointer does. Kept apart from the map code so it can be tested without
  * WebGL; useGlobe applies the result to the map.
  */
+import { hasMap } from './countryCode.ts'
 
 /** Country under the mouse and country picked with a click or a tap. */
 export type GlobeSelection = {
@@ -36,4 +37,25 @@ export function raisedCountries(state: GlobeSelection): Set<string> {
   return new Set(
     [state.hovered, state.selected].filter((code) => code !== null),
   )
+}
+
+/**
+ * What a click or tap on `code` (null: the ocean) does: a country to open,
+ * and the country picked for the touch panel.
+ */
+export type ClickOutcome = { open: string | null; picked: string | null }
+
+/**
+ * With a mouse (`canHover`), a click opens the country at once. On a touch
+ * screen, a tap only picks it: the panel's button opens it, so a stray
+ * double tap opens nothing.
+ */
+export function clickOutcome(
+  code: string | null,
+  canHover: boolean,
+): ClickOutcome {
+  if (canHover) {
+    return { open: code !== null && hasMap(code) ? code : null, picked: null }
+  }
+  return { open: null, picked: code }
 }
