@@ -27,5 +27,10 @@
   },
   "globe": {
     "label": "Globe terrestre"
+  },
+  "country": {
+    "mapLabel": "Carte : {{name}}",
+    "backToGlobe": "← Globe",
+    "unavailable": "Impossible de charger la carte."
   }
 }

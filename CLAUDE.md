@@ -118,12 +118,13 @@ SQLite et MongoDB ont été écartés. Le module Go sera `github.com/Minatr/trav
 | Besoin | Source |
 | --- | --- |
 | Infos pays | REST Countries, Wikivoyage |
-| Frontières (globe) | Natural Earth (GeoJSON) : 1:110m + petits pays du 1:50m, frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés) |
+| Frontières (globe et cartes) | Natural Earth (GeoJSON) : 1:110m + petits pays du 1:50m pour le globe, 1:10m pays par pays pour la carte d'un pays ; frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés) |
 | Géocodage | Photon ou Nominatim (OpenStreetMap) — Nominatim : 1 requête/s maximum |
 | Horaires | OpenStreetMap ou saisie |
 | Trajets pied/vélo/voiture | OpenRouteService |
 | Transports en commun | Transitous (couverture variable selon les pays) |
 | Taux de change | Frankfurter (BCE) |
+| Carte d'un pays | Tuiles vectorielles OpenFreeMap (style sombre recoloré), sans clé |
 | Explorer autour | Liens Google Maps (sans API) |
 | Photos | Cloudflare R2 |
 
@@ -150,7 +151,7 @@ travel-larper/
 │   ├── queries/              # requêtes SQL pour sqlc
 │   └── migrations/           # migrations SQL versionnées
 ├── frontend/
-│   ├── public/geo/           # formes des pays du globe (versionnées), produites par scripts/build-countries.mjs
+│   ├── public/geo/           # formes des pays (versionnées) : countries.json pour le globe, countries/<CODE>.json détaillées pour la carte d'un pays (scripts/build-countries.mjs et build-country-shapes.mjs)
 │   ├── scripts/              # scripts de préparation des données
 │   └── src/{pages,components,hooks,services,models,i18n}/
 └── data/{geo,reference,seeds}/   # GeoJSON (non versionné), données de référence, jeux de test
@@ -238,7 +239,7 @@ Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF P
 
 ### Palette « Nuit bleue »
 
-Surfaces **graphite** (gris neutres très foncés, comme l'espace autour du globe), **globe bleu nuit** (le bleu reste la couleur du globe) et **une seule couleur d'accent : le turquoise**, partagée par l'appli et le globe. Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui) et `frontend/src/lib/globeStyle.ts` (MapLibre demande des couleurs brutes) : on les modifie là, et ce tableau en même temps.
+Surfaces **graphite** (gris neutres très foncés, comme l'espace autour du globe), **bleu nuit pour les cartes** (le globe, et la mer et les terres de la carte d'un pays, pour que le passage de l'un à l'autre ne se voie pas) et **une seule couleur d'accent : le turquoise**, partagée par l'appli et le globe. Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui), `frontend/src/lib/globeStyle.ts` et `frontend/src/lib/countryMapTheme.ts` (MapLibre demande des couleurs brutes) : on les modifie là, et ces tableaux en même temps.
 
 | Rôle | Couleur |
 | --- | --- |
@@ -260,6 +261,18 @@ Globe :
 | Océan et frontières | `#0a1a33` |
 | Pays (7 nuances, une par groupe Natural Earth) | `#2b5080` `#2f5788` `#284b78` `#335d8f` `#2d5384` `#264872` `#376396` |
 | Pays soulevé | `#2dd4bf` (l'accent) |
+| Pays sans carte survolé (Antarctique) | `#1a3354` assombri, curseur « interdit » |
+
+Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche dans `countryMapTheme.ts`) :
+
+| Élément | Couleur |
+| --- | --- |
+| Mer, rivières | `#0a1a33` (l'océan du globe) |
+| Terre du pays | `#26354f` (plus claire que les terres autour, pour que le pays ressorte) |
+| Terre des autres pays (masque) | `#111823`, sans noms ni routes |
+| Routes | `#32425e` (petites) → `#465c80` (autoroutes) |
+| Frontières de pays | `#5a6b85` (terrestres seulement, sans les eaux territoriales) |
+| Noms | `#9aa3b2`, grandes villes `#c3cad6` |
 
 ---
 
@@ -282,7 +295,7 @@ Globe :
   - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
-`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go, base comprise), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go, base comprise), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine ; `make check` enchaîne toutes les vérifications de la CI (lint, tests, failles, types et build du frontend). `make geo` régénère les formes des pays (globe et cartes) depuis Natural Earth. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
 
 ---
 
@@ -295,5 +308,5 @@ Globe :
 - **Ne jamais modifier la configuration Git globale, les clés SSH ni les comptes** : les développeurs s'en occupent eux-mêmes. Proposer plutôt des réglages au niveau du dépôt.
 - Ne jamais committer de secret ; ne jamais pousser directement sur `main`.
 - Respecter toutes les règles ci-dessus (MVC, centimes entiers, vérification d'appartenance au voyage, i18n, commentaires) et le signaler quand une demande les contredit.
-- Quand on commence un ticket, compléter d'abord sa description Jira (voir section 9) ; quand Claude rédige une PR, la description suit le modèle.
+- Quand on commence un ticket, compléter d'abord sa description Jira (voir section 9), puis le passer en **To Do** s'il est prêt, ou directement en **In Progress** si on le commence tout de suite ; quand Claude rédige une PR, la description suit le modèle.
 - Mettre à jour ce fichier quand une décision change.

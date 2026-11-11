@@ -9,13 +9,15 @@
  * 3D layer over all countries rebuilt it each time (laggy hover), and
  * extruding all countries at height 0 caused shading artifacts.
  */
-import type { MapOptions } from 'maplibre-gl'
+import type {
+  ExpressionSpecification,
+  MapOptions,
+  SkySpecification,
+} from 'maplibre-gl'
 
-// MapLibre's style types, reached through MapOptions: maplibre-gl does not
-// export them under their own names.
+// MapLibre's style type, reached through MapOptions: maplibre-gl does not
+// export it under its own name.
 type GlobeStyle = Exclude<MapOptions['style'], string | undefined>
-type Layer = GlobeStyle['layers'][number]
-type FillPaint = NonNullable<Extract<Layer, { type: 'fill' }>['paint']>
 
 /** Id of the source of all countries, filled by useGlobe. */
 export const COUNTRIES_SOURCE = 'countries'
@@ -23,21 +25,44 @@ export const COUNTRIES_SOURCE = 'countries'
 export const RAISED_SOURCE = 'raised-countries'
 /** Id of the flat countries layer, the one queried under the pointer. */
 export const COUNTRIES_LAYER = 'countries-fill'
-const RAISED_LAYER = 'countries-raised'
+/** Countries in the country map's colors, shown during flights only. */
+export const MAP_COLORS_LAYER = 'countries-map-colors'
+/** Id of the 3D layer of the raised countries. */
+export const RAISED_LAYER = 'countries-raised'
 const BORDERS_LAYER = 'countries-borders'
 const BACKGROUND_LAYER = 'background'
-
-/** Prepared by scripts/build-countries.mjs, served from public/. */
-export const COUNTRIES_URL = '/geo/countries.json'
 
 /**
  * Height of a raised country, in meters. It has to be huge to be seen from
  * globe distance: 120 km lifts it visibly without hiding its neighbours.
  */
-const RAISED_HEIGHT_METERS = 120_000
+export const RAISED_HEIGHT_METERS = 120_000
 
 /** Glow of the atmosphere around the globe, from 0 (none) to 1. */
-const ATMOSPHERE_BLEND = 0.8
+export const ATMOSPHERE_BLEND = 0.8
+
+/**
+ * The glow fades out from this many zoom levels past the globe overflowing
+ * the screen, over as many again: that close, MapLibre draws it off the edge.
+ */
+const ATMOSPHERE_FADE_START_LEVELS = 0.4
+const ATMOSPHERE_FADE_LEVELS = 0.6
+
+/** Glow of a globe that overflows the screen from zoom `overflowZoom`. */
+export function globeSky(overflowZoom: number): SkySpecification {
+  const fadeStart = overflowZoom + ATMOSPHERE_FADE_START_LEVELS
+  return {
+    'atmosphere-blend': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      fadeStart,
+      ATMOSPHERE_BLEND,
+      fadeStart + ATMOSPHERE_FADE_LEVELS,
+      0,
+    ],
+  }
+}
 
 const BORDER_WIDTH = 0.6
 
@@ -53,7 +78,13 @@ type Tones = [string, string, string, string, string, string, string]
  * the globe is graphite (--globe-space in index.css): no blue there, so
  * the ocean does not blend into it.
  */
-const COLORS: { ocean: string; land: Tones; border: string; raised: string } = {
+const COLORS: {
+  ocean: string
+  land: Tones
+  border: string
+  raised: string
+  dimmed: string
+} = {
   ocean: '#0a1a33',
   land: [
     '#2b5080',
@@ -66,18 +97,22 @@ const COLORS: { ocean: string; land: Tones; border: string; raised: string } = {
   ],
   border: '#0a1a33',
   raised: '#2dd4bf',
+  dimmed: '#1a3354',
 }
 
-// Raised country in the accent color, the others in the tone of their color
-// group (1 to 7).
+// Raised country in the accent color, a hovered country that cannot open
+// dimmed, the others in the tone of their color group (1 to 7).
 function countryColor(
   raised: string,
+  dimmed: string,
   [one, two, three, four, five, six, seven]: Tones,
-): FillPaint['fill-color'] {
+): ExpressionSpecification {
   return [
     'case',
     ['boolean', ['feature-state', 'raised'], false],
     raised,
+    ['boolean', ['feature-state', 'dimmed'], false],
+    dimmed,
     [
       'match',
       ['get', 'colorGroup'],
@@ -100,12 +135,12 @@ function countryColor(
   ]
 }
 
-/** Full style of the globe. */
-export function globeStyle(): GlobeStyle {
+/** Style of the globe, which overflows the screen from zoom `overflowZoom`. */
+export function globeStyle(overflowZoom: number): GlobeStyle {
   return {
     version: 8,
     projection: { type: 'globe' },
-    sky: { 'atmosphere-blend': ATMOSPHERE_BLEND },
+    sky: globeSky(overflowZoom),
     sources: {
       [COUNTRIES_SOURCE]: {
         type: 'geojson',
@@ -129,7 +164,16 @@ export function globeStyle(): GlobeStyle {
         id: COUNTRIES_LAYER,
         type: 'fill',
         source: COUNTRIES_SOURCE,
-        paint: { 'fill-color': countryColor(COLORS.raised, COLORS.land) },
+        paint: {
+          'fill-color': countryColor(COLORS.raised, COLORS.dimmed, COLORS.land),
+        },
+      },
+      {
+        id: MAP_COLORS_LAYER,
+        type: 'fill',
+        source: COUNTRIES_SOURCE,
+        layout: { visibility: 'none' },
+        paint: { 'fill-opacity': 0 },
       },
       {
         id: BORDERS_LAYER,
