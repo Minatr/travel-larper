@@ -288,7 +288,7 @@ Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche
 - **Assignation automatique** : à l'ouverture d'une PR, le job `assign-author` assigne son auteur, et `.github/CODEOWNERS` (`@Minatr`, `@gonpass08`) demande la revue à l'autre développeur (GitHub n'ajoute jamais l'auteur comme reviewer). Le ruleset exige l'approbation d'un code owner.
 - **Workflows** : `.github/workflows/pull-request.yml` regroupe `check-title`, `check-branch` et `assign-author` ; `.github/workflows/ci.yml` regroupe `backend`, `frontend` et `generated`. Vérifications obligatoires du ruleset : `check-title`, `check-branch`, `backend`, `frontend`, `generated`.
 - **Une PR = un ticket = une fonctionnalité complète** (backend + frontend). Chaque ticket commence par ajouter ses routes à `api/openapi.yaml`.
-- Avant d'ouvrir une PR : `make generate`, `make lint`, `make test`, `make dev` qui démarre sans étape manuelle (voir `.github/pull_request_template.md`).
+- Avant d'ouvrir une PR : `make generate`, `make check` (lint, tests, failles, types et build), `make dev` qui démarre sans étape manuelle (voir `.github/pull_request_template.md`).
 - **Description des PR** : toujours rédigée en suivant `.github/pull_request_template.md`, sans retirer de section :
   - *Ticket* : numéro et lien.
   - *Ce que fait cette PR* : une ou deux phrases de résumé, puis si besoin le détail par partie (contrat, backend, frontend, Docker, doc), les nouvelles dépendances avec leur justification, et un « À savoir » qui liste les écarts aux règles et les limites connues.
