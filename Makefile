@@ -10,7 +10,7 @@ POSTGRES_USER ?= travel
 POSTGRES_DB ?= travel
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format audit generate migrate-new
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format audit check generate geo migrate-new
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -63,9 +63,22 @@ audit: ## Cherche les failles connues dans les dépendances (outils locaux)
 	cd backend && go tool govulncheck ./...
 	cd frontend && npm audit --omit=dev --audit-level=high
 
+# Les mêmes vérifications que la CI, à lancer avant d'ouvrir une PR. Le build
+# du frontend est le seul à vérifier les types TypeScript.
+check: lint test audit ## Lance toutes les vérifications de la CI : lint, tests, failles, types et build
+	cd frontend && npm run build
+
 generate: ## Génère le code depuis api/openapi.yaml et les requêtes SQL (outils locaux)
 	cd backend && go generate ./... && go tool sqlc generate
 	cd frontend && npm run generate
+
+# Les sources Natural Earth (environ 30 Mo) sont téléchargées une seule fois
+# dans data/geo/ (non versionné), à la version qui a produit les fichiers
+# versionnés de frontend/public/geo/ : la commande redonne exactement les mêmes.
+geo: ## Régénère les formes des pays du globe et des cartes (télécharge ~30 Mo la première fois)
+	cd frontend && node scripts/download-natural-earth.mjs
+	cd frontend && node scripts/build-countries.mjs ../data/geo/ne_110m_admin_0_countries.geojson ../data/geo/ne_50m_admin_0_countries.geojson
+	cd frontend && node scripts/build-country-shapes.mjs ../data/geo/ne_10m_admin_0_countries.geojson ../data/geo/ne_10m_admin_0_countries_gbr.geojson
 
 # Les migrations s'appliquent au démarrage du backend : cette cible crée
 # seulement le fichier, numéroté à la suite du dernier.
