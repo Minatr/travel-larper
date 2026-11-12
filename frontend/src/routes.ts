@@ -10,6 +10,7 @@ import { Layout } from './components/Layout.tsx'
 import { GlobePage } from './pages/GlobePage.tsx'
 import { HealthPage } from './pages/HealthPage.tsx'
 import { NotFoundPage } from './pages/NotFoundPage.tsx'
+import { RegisterPage } from './pages/RegisterPage.tsx'
 
 /**
  * Kept apart from main.tsx so the tests mount the very same routes in a
@@ -23,6 +24,7 @@ export const routes: RouteObject[] = [
       // `index`: the URL of the parent itself, here `/`.
       { index: true, Component: GlobePage },
       { path: 'status', Component: HealthPage },
+      { path: 'register', Component: RegisterPage },
       // `*`: any URL no other route matches.
       { path: '*', Component: NotFoundPage },
     ],

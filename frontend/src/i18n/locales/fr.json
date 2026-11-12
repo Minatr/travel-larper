@@ -27,5 +27,31 @@
   },
   "globe": {
     "label": "Globe terrestre"
+  },
+  "nav": {
+    "register": "S'inscrire"
+  },
+  "register": {
+    "title": "Créer un compte",
+    "intro": "Vous pourrez utiliser l'appli dès qu'un admin aura validé votre compte.",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "passwordHint": "Au moins {{min}} caractères.",
+    "submit": "S'inscrire",
+    "submitting": "Création du compte…",
+    "success": {
+      "title": "Compte créé",
+      "message": "Votre compte attend la validation d'un admin. Vous pourrez utiliser l'appli dès qu'il sera validé.",
+      "backHome": "Retour à l'accueil"
+    },
+    "errors": {
+      "invalidEmail": "Cette adresse e-mail n'est pas valide.",
+      "passwordTooShort": "Le mot de passe doit contenir au moins {{min}} caractères.",
+      "passwordTooLong": "Le mot de passe doit contenir au plus {{max}} caractères.",
+      "emailTaken": "Un compte existe déjà avec cette adresse e-mail.",
+      "rateLimited": "Trop de tentatives. Réessayez plus tard.",
+      "unreachable": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
   }
 }

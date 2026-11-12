@@ -17,18 +17,24 @@ import (
 
 type healthyChecker struct{}
 
+type acceptingRegistrar struct{}
+
+func (acceptingRegistrar) Register(context.Context, string, string) error {
+	return nil
+}
+
 func (healthyChecker) Check(context.Context) error {
 	return nil
 }
 
-var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20}
+var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20, RegisterRateLimitPerHour: 1000}
 
 func discardLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }
 
 func TestRoutes(t *testing.T) {
-	handler := Routes(controllers.NewHealthController(healthyChecker{}, discardLogger()), discardLogger(), testOptions)
+	handler := Routes(Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())}, discardLogger(), testOptions)
 
 	tests := []struct {
 		name          string
@@ -62,6 +68,38 @@ func TestRoutes(t *testing.T) {
 				assertErrorCode(t, recorder, tt.wantErrorCode)
 			}
 		})
+	}
+}
+
+func TestRoutesLimitRegistrationOnly(t *testing.T) {
+	options := testOptions
+	options.RegisterRateLimitPerHour = 2
+	handler := Routes(Controllers{
+		HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger()),
+		AuthController:   controllers.NewAuthController(acceptingRegistrar{}, discardLogger()),
+	}, discardLogger(), options)
+	send := func(method, path, body string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(method, path, strings.NewReader(body)))
+		return recorder
+	}
+	register := func() *httptest.ResponseRecorder {
+		return send(http.MethodPost, "/api/auth/register", `{"email":"bob@example.com","password":"12345678"}`)
+	}
+
+	for i := range options.RegisterRateLimitPerHour {
+		if recorder := register(); recorder.Code != http.StatusCreated {
+			t.Fatalf("registration %d: status = %d, want %d", i+1, recorder.Code, http.StatusCreated)
+		}
+	}
+	recorder := register()
+	if recorder.Code != http.StatusTooManyRequests {
+		t.Fatalf("registration over the limit: status = %d, want %d", recorder.Code, http.StatusTooManyRequests)
+	}
+	assertErrorCode(t, recorder, api.ErrorCodeRateLimited)
+
+	if recorder := send(http.MethodGet, "/api/health", ""); recorder.Code != http.StatusOK {
+		t.Fatalf("health after the registration limit: status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 }
 

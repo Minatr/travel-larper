@@ -8,14 +8,11 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/Minatr/travel-larper/backend/internal/db"
 	"github.com/Minatr/travel-larper/backend/internal/dbtest"
 	"github.com/Minatr/travel-larper/backend/internal/models"
 )
-
-const uniqueViolation = "23505"
 
 func newQueries(t *testing.T) *models.Queries {
 	t.Helper()
@@ -41,18 +38,18 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func TestCreateUserRejectsDuplicateEmail(t *testing.T) {
+func TestInsertUserReportsTakenEmail(t *testing.T) {
 	queries := newQueries(t)
 	ctx := context.Background()
-	if _, err := queries.CreateUser(ctx, models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash"}); err != nil {
-		t.Fatalf("create first user: %v", err)
+	created, err := queries.InsertUser(ctx, "bob@example.com", "hash")
+	if err != nil || !created {
+		t.Fatalf("first insert = %v, %v, want true, nil", created, err)
 	}
 
-	_, err := queries.CreateUser(ctx, models.CreateUserParams{Email: "Bob@Example.com", PasswordHash: "hash"})
+	created, err = queries.InsertUser(ctx, "Bob@Example.com", "hash")
 
-	var pgErr *pgconn.PgError
-	if !errors.As(err, &pgErr) || pgErr.Code != uniqueViolation {
-		t.Fatalf("error = %v, want a unique violation", err)
+	if err != nil || created {
+		t.Fatalf("second insert = %v, %v, want false, nil", created, err)
 	}
 }
 

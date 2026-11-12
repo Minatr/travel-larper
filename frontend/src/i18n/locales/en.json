@@ -27,5 +27,31 @@
   },
   "globe": {
     "label": "World globe"
+  },
+  "nav": {
+    "register": "Sign up"
+  },
+  "register": {
+    "title": "Create an account",
+    "intro": "You can use the app once an admin has approved your account.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least {{min}} characters.",
+    "submit": "Sign up",
+    "submitting": "Creating your account…",
+    "success": {
+      "title": "Account created",
+      "message": "Your account is waiting for an admin's approval. You can use the app as soon as it is approved.",
+      "backHome": "Back to home"
+    },
+    "errors": {
+      "invalidEmail": "This email address is invalid.",
+      "passwordTooShort": "The password must be at least {{min}} characters long.",
+      "passwordTooLong": "The password must be at most {{max}} characters long.",
+      "emailTaken": "An account already exists with this email address.",
+      "rateLimited": "Too many attempts. Please try again later.",
+      "unreachable": "The server cannot be reached. Check your connection and try again.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }
