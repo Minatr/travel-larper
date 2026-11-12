@@ -20,7 +20,15 @@ export function Layout() {
           <Link to="/" className="text-lg font-semibold">
             {t('app.name')}
           </Link>
-          <LanguageSwitcher />
+          <nav className="flex items-center gap-2">
+            <Link
+              to="/register"
+              className="flex min-h-11 items-center rounded-md px-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              {t('nav.register')}
+            </Link>
+            <LanguageSwitcher />
+          </nav>
         </div>
       </header>
       <main className="flex flex-1 flex-col">
