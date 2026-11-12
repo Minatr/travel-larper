@@ -17,6 +17,6 @@ TL-<numéro> : <!-- lien vers le ticket -->
 
 - [ ] Le titre respecte le format `<type>/TL-<numéro>_<description-courte>`
 - [ ] `make generate` : le contrat `api/openapi.yaml` est à jour et le code est régénéré
-- [ ] `make lint` passe, avec les commentaires sur tout ce qui est exporté
-- [ ] `make test` passe, et les tests couvrent le cas nominal et les accès refusés
+- [ ] `make check` passe (lint, tests, failles, types et build), avec les commentaires sur tout ce qui est exporté
+- [ ] Les tests couvrent le cas nominal et les accès refusés
 - [ ] `make dev` démarre tout, sans étape manuelle

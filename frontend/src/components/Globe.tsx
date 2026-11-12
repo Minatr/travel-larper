@@ -1,5 +1,3 @@
-import 'maplibre-gl/dist/maplibre-gl.css'
-
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,14 +6,25 @@ import { useGlobe } from '../hooks/useGlobe.ts'
 /** Props of {@link Globe}. */
 type GlobeProps = {
   /** Called with the ISO code of the country clicked or tapped. */
-  onSelectCountry: (code: string) => void
+  onOpenCountry: (code: string) => void
+  /** Called when a flight of the globe ends. */
+  onLanded: () => void
+  /** Whether a country page is open above the globe. */
+  countryOpen: boolean
+  /** Whether that page is visible, covering the globe. */
+  countryShown: boolean
 }
 
 /** Interactive globe filling its parent: hover or tap a country to raise it. */
-export function Globe({ onSelectCountry }: GlobeProps) {
+export function Globe({
+  onOpenCountry,
+  onLanded,
+  countryOpen,
+  countryShown,
+}: GlobeProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
-  useGlobe(containerRef, onSelectCountry)
+  useGlobe(containerRef, onOpenCountry, onLanded, countryOpen, countryShown)
 
   return (
     <section aria-label={t('globe.label')} className="absolute inset-0">

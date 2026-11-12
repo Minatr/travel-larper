@@ -27,5 +27,11 @@
   },
   "globe": {
     "label": "World globe"
+  },
+  "country": {
+    "mapLabel": "Map of {{name}}",
+    "backToGlobe": "← Globe",
+    "unavailable": "The map could not be loaded.",
+    "loading": "Loading the map…"
   }
 }
