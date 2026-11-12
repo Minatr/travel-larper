@@ -10,7 +10,7 @@ POSTGRES_USER ?= travel
 POSTGRES_DB ?= travel
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset backend frontend test lint format audit generate migrate-new
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset db-seed backend frontend test lint format audit generate migrate-new
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -36,6 +36,10 @@ db-psql: ## Ouvre un terminal SQL dans la base
 db-reset: ## Supprime et recrée la base (perte des données locales)
 	$(COMPOSE) down -v
 	$(COMPOSE) up -d --build --wait db
+
+# Les tables viennent des migrations, appliquées au démarrage du backend.
+db-seed: ## Ajoute le compte de dev (dev@gmail.com / 12345678) ; lancer après make dev
+	$(COMPOSE) exec -T db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) -v ON_ERROR_STOP=1 < data/seeds/dev_user.sql
 
 backend: ## Lance la base et le backend Go seuls
 	$(COMPOSE) up --build --watch backend

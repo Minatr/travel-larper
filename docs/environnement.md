@@ -52,7 +52,7 @@ curl http://localhost:8080/api/health
 
 ### Migrations
 
-Le schéma évolue par fichiers numérotés dans `backend/migrations/` (format goose), appliqués par le backend à son démarrage ; s'il n'y arrive pas, il s'arrête. `make migrate-new name=…` crée le fichier suivant. Une migration déjà fusionnée ne se modifie plus : on en ajoute une nouvelle. En local, `make db-reset` repart d'une base vide.
+Le schéma évolue par fichiers numérotés dans `backend/migrations/` (format goose), appliqués par le backend à son démarrage ; s'il n'y arrive pas, il s'arrête. `make migrate-new name=…` crée le fichier suivant. Une migration déjà fusionnée ne se modifie plus : on en ajoute une nouvelle. En local, `make db-reset` repart d'une base vide, et `make db-seed` (backend démarré) ajoute le compte de dev `dev@gmail.com` / `12345678`, déjà actif. Ce compte n'existe jamais en production : il ne passe pas par les migrations.
 
 ### PostGIS
 
@@ -74,6 +74,7 @@ Un volume créé par l'ancienne image `postgis/postgis` n'est pas compatible ave
 | `API_PROXY_TARGET` | Vite | fixé par `docker-compose.yml` à `http://backend:8080` |
 | `APP_ENV` | backend | vide ou `production` (active l'en-tête HSTS, HTTPS obligatoire) ; toute autre valeur empêche le démarrage |
 | `RATE_LIMIT_PER_MINUTE`, `MAX_BODY_BYTES` | backend | limite de requêtes par IP (défaut 100/min) et taille max d'un corps (défaut 1 Mo) ; vides = défaut |
+| `REGISTER_RATE_LIMIT_PER_HOUR` | backend | limite d'inscriptions par IP, plus stricte car chaque inscription calcule un hash argon2id coûteux (défaut 10/h) ; vide = défaut |
 
 ## 4. Vers la production
 

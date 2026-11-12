@@ -28,7 +28,7 @@ func discardLogger() *slog.Logger {
 }
 
 func TestRoutes(t *testing.T) {
-	handler := Routes(controllers.NewHealthController(healthyChecker{}, discardLogger()), discardLogger(), testOptions)
+	handler := Routes(Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())}, discardLogger(), testOptions)
 
 	tests := []struct {
 		name          string

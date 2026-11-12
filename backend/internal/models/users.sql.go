@@ -12,6 +12,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (email, password_hash)
 VALUES ($1, $2)
+ON CONFLICT ((lower(email))) DO NOTHING
 RETURNING id, email, password_hash, status, created_at, updated_at
 `
 

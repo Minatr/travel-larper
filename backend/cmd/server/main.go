@@ -22,6 +22,7 @@ import (
 	"github.com/Minatr/travel-larper/backend/internal/config"
 	"github.com/Minatr/travel-larper/backend/internal/controllers"
 	"github.com/Minatr/travel-larper/backend/internal/db"
+	"github.com/Minatr/travel-larper/backend/internal/models"
 	"github.com/Minatr/travel-larper/backend/internal/router"
 	"github.com/Minatr/travel-larper/backend/internal/services"
 )
@@ -93,14 +94,20 @@ func run(logger *slog.Logger) error {
 
 // buildHandler wires the application layers together: each service receives
 // its dependencies, each controller its service, and the router the
-// controllers. Go has no dependency-injection container, so this explicit
-// wiring at the entry point (the "composition root") is the usual approach.
+// controllers. Go has no dependency-injection container
 func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) http.Handler {
 	healthService := services.NewHealthService(pool)
 	healthController := controllers.NewHealthController(healthService, logger)
-	return router.Routes(healthController, logger, router.Options{
-		RateLimitPerMinute: cfg.RateLimitPerMinute,
-		MaxBodyBytes:       cfg.MaxBodyBytes,
-		HSTS:               cfg.Production,
+
+	queries := models.New(pool)
+	passwordHasher := services.NewPasswordHasher(cfg.Argon2)
+	registrationService := services.NewRegistrationService(queries, passwordHasher)
+	authController := controllers.NewAuthController(registrationService, logger)
+
+	return router.Routes(router.Controllers{HealthController: healthController, AuthController: authController}, logger, router.Options{
+		RateLimitPerMinute:       cfg.RateLimitPerMinute,
+		MaxBodyBytes:             cfg.MaxBodyBytes,
+		HSTS:                     cfg.Production,
+		RegisterRateLimitPerHour: cfg.RegisterRateLimitPerHour,
 	})
 }
