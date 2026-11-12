@@ -19,7 +19,11 @@ export function useCountry(code: string): CountryState {
   useEffect(() => {
     const controller = new AbortController()
     loadCountry(code.toUpperCase(), controller.signal)
-      .then(setState)
+      .then((state) => {
+        if (!controller.signal.aborted) {
+          setState(state)
+        }
+      })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           console.error('country failed to load', error)
@@ -45,7 +49,7 @@ async function loadCountry(
     (shape) => ({ shape }),
     (error: unknown) => ({ error }),
   )
-  const countries: Countries = await fetchCountries(signal)
+  const countries: Countries = await fetchCountries()
   const country = countries.features.find(
     (feature) => feature.properties.code === code,
   )

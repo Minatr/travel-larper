@@ -4,15 +4,13 @@
  * which differ for countries over many latitudes (China): with this one, the
  * flight ends on the very picture the map opens on.
  */
-import type { Bounds } from './countryBounds.ts'
+import { type Bounds, FULL_TURN_DEGREES, HALF_TURN_DEGREES } from './geo.ts'
 
 /** Center and zoom of a map. */
 export type Camera = { center: [number, number]; zoom: number }
 
 /** Width of the world at zoom 0, in pixels. */
 const WORLD_SIZE_PX = 512
-const FULL_TURN_DEGREES = 360
-const HALF_TURN_DEGREES = 180
 
 /**
  * Same as MapLibre's fitBounds on a flat map: center and zoom fitting
@@ -39,6 +37,28 @@ export function mercatorCamera(
     ],
     zoom: Math.log2(scale),
   }
+}
+
+/**
+ * The area a `width` × `height` view shows with `camera`, the reverse of
+ * mercatorCamera (without padding). Latitudes stop at the map's edges.
+ */
+export function mercatorView(
+  { center: [longitude, latitude], zoom }: Camera,
+  width: number,
+  height: number,
+): Bounds {
+  const worldPx = WORLD_SIZE_PX * 2 ** zoom
+  const x = mercatorX(longitude)
+  const y = mercatorY(latitude)
+  const halfWidth = width / 2 / worldPx
+  const halfHeight = height / 2 / worldPx
+  return [
+    longitudeOf(x - halfWidth),
+    latitudeOf(Math.min(1, y + halfHeight)),
+    longitudeOf(x + halfWidth),
+    latitudeOf(Math.max(0, y - halfHeight)),
+  ]
 }
 
 // Position across the world: 0 at 180° W, 1 at 180° E (more past it).

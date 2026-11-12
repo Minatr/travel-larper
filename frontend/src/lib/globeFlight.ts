@@ -2,12 +2,11 @@
  * Flights of the globe to a country's map and back. On the way in, the globe
  * zooms onto the country, flattens and takes the map's colors, ending on the
  * map's own camera (mercatorCamera.ts): the map then takes over unseen.
- * Each effect is a zoom-based expression, set once per flight: no code runs
- * on each frame.
+ * Each effect is a zoom-based expression, set once per flight (twice for
+ * an arc): no code runs on each frame.
  */
 import type {
   ExpressionSpecification,
-  LngLatLike,
   Map as MapLibreMap,
   ProjectionSpecification,
   SkySpecification,
@@ -21,18 +20,24 @@ import {
   RAISED_HEIGHT_METERS,
   RAISED_LAYER,
 } from './globeStyle.ts'
-
-/** Where a flight ends. */
-export type Camera = { center: LngLatLike; zoom: number }
+import type { Camera } from './mercatorCamera.ts'
 
 /** Share of the zoom range the globe stays round, before flattening. */
 const ROUND_SHARE = 0.4
 
-/** Shortest zoom range a flattening reads well over, once zoomed in. */
+/**
+ * Shortest zoom range a flattening reads well over. A flight that changes
+ * the zoom less (a large country, opened from about its own zoom) goes
+ * through an arc instead: see ARC_DEPTH_LEVELS.
+ */
 const MIN_FLATTEN_ZOOM_LEVELS = 0.4
 
-/** Below this zoom change, the globe only flies: no blend to set. */
-const MIN_ZOOM_CHANGE = 0.02
+/**
+ * How far an arc flight zooms out before coming back in. The globe stays
+ * round on the way out and flattens on the way in: the blend is set once,
+ * at the arc's lowest zoom, where it still reads as the plain globe.
+ */
+const ARC_DEPTH_LEVELS = 0.5
 
 /**
  * Plain globe, as MapLibre's `'globe'` stands for. The short name cannot
@@ -90,26 +95,33 @@ export function flyIn(
 ) {
   const from = map.getZoom()
   const to = camera.zoom
-  if (Math.abs(to - from) < MIN_ZOOM_CHANGE) {
-    // Clears a blend a flight cut short may have left.
-    map.setProjection(GLOBE)
-    map.setSky(globeSky(overflowZoom))
-    setGlobeColors(map)
-    resetRaised(map)
-  } else {
-    const round = Math.max(from + (to - from) * ROUND_SHARE, overflowZoom)
-    const roundUntil = to - round >= MIN_FLATTEN_ZOOM_LEVELS ? round : from
-    map.setProjection(flattening(roundUntil, to))
-    map.setSky(fadingSky(...glowFade(from, roundUntil, to)))
-    setFadingColors(map, code, roundUntil, to)
-    lowerRaised(map, from, from + (to - from) * LOWER_SHARE)
+  const round = Math.max(from + (to - from) * ROUND_SHARE, overflowZoom)
+  const roundUntil = to - round >= MIN_FLATTEN_ZOOM_LEVELS ? round : from
+  if (Math.abs(to - roundUntil) >= MIN_FLATTEN_ZOOM_LEVELS) {
+    flatten(map, code, from, roundUntil, to)
+    fly(map, camera, durationMs, done)
+    return
   }
-  fly(map, camera, durationMs, done)
+
+  // Too little zoom change to flatten along: an arc, round on the way out.
+  const lowest = Math.min(from, to) - ARC_DEPTH_LEVELS
+  setGlobe(map, overflowZoom)
+  lowerRaised(map, from, lowest)
+  fly(map, camera, durationMs, done, {
+    lowestZoom: lowest,
+    atLowest: (zoom) => {
+      flatten(map, code, zoom, zoom, to)
+      // Already down at the lowest zoom: kept out of sight on the way in.
+      map.setLayoutProperty(RAISED_LAYER, 'visibility', 'none')
+    },
+  })
 }
 
 /**
  * Flies back to `camera`: flyIn's blends, still set, run backwards. Then
- * puts the globe's own projection, glow and colors back.
+ * puts the globe's own projection, glow and colors back. After an arc, the
+ * way back is an arc too: the globe rounds out on the way out, and gets its
+ * own look back at the lowest zoom, before coming back in.
  */
 export function flyBack(
   map: MapLibreMap,
@@ -118,13 +130,42 @@ export function flyBack(
   durationMs: number,
   done: () => void,
 ) {
-  fly(map, camera, durationMs, () => {
-    map.setProjection(GLOBE)
-    map.setSky(globeSky(overflowZoom))
-    setGlobeColors(map)
-    resetRaised(map)
+  const from = map.getZoom()
+  const ending = () => {
+    setGlobe(map, overflowZoom)
     done()
+  }
+  if (Math.abs(camera.zoom - from) >= MIN_FLATTEN_ZOOM_LEVELS) {
+    fly(map, camera, durationMs, ending)
+    return
+  }
+  fly(map, camera, durationMs, ending, {
+    lowestZoom: Math.min(from, camera.zoom) - ARC_DEPTH_LEVELS,
+    atLowest: () => setGlobe(map, overflowZoom),
   })
+}
+
+// Blends the globe into the flat map, from round at zoom `roundUntil` to
+// flat at zoom `to`, on a flight starting at zoom `from`.
+function flatten(
+  map: MapLibreMap,
+  code: string,
+  from: number,
+  roundUntil: number,
+  to: number,
+) {
+  map.setProjection(flattening(roundUntil, to))
+  map.setSky(fadingSky(...glowFade(from, roundUntil, to)))
+  setFadingColors(map, code, roundUntil, to)
+  lowerRaised(map, from, from + (to - from) * LOWER_SHARE)
+}
+
+// The globe's own projection, glow, colors and raised country.
+function setGlobe(map: MapLibreMap, overflowZoom: number) {
+  map.setProjection(GLOBE)
+  map.setSky(globeSky(overflowZoom))
+  setGlobeColors(map)
+  resetRaised(map)
 }
 
 /**
@@ -171,6 +212,7 @@ function lowerRaised(map: MapLibreMap, from: number, flat: number) {
 }
 
 function resetRaised(map: MapLibreMap) {
+  map.setLayoutProperty(RAISED_LAYER, 'visibility', 'visible')
   map.setPaintProperty(
     RAISED_LAYER,
     'fill-extrusion-height',
@@ -191,18 +233,51 @@ function byZoom(
     : ['interpolate', ['linear'], ['zoom'], zoomB, atB, zoomA, atA]
 }
 
+/**
+ * An arc flight: out to `lowestZoom` and back in, `atLowest` called once
+ * with the zoom where it turns back.
+ */
+type Arc = { lowestZoom: number; atLowest: (zoom: number) => void }
+
 function fly(
   map: MapLibreMap,
   camera: Camera,
   durationMs: number,
   done: () => void,
+  arc?: Arc,
 ) {
+  // Ends a flight still on (back during the way in) first: stopping it fires
+  // its "moveend", which this flight would otherwise take for its own end.
+  map.stop()
   setInteractive(map, false)
+  const stopWatching = arc === undefined ? () => {} : watchLowest(map, arc)
   map.once('moveend', () => {
+    stopWatching()
     setInteractive(map, true)
     done()
   })
-  map.easeTo({ ...camera, duration: durationMs })
+  if (arc === undefined) {
+    map.easeTo({ ...camera, duration: durationMs })
+  } else {
+    map.flyTo({ ...camera, duration: durationMs, minZoom: arc.lowestZoom })
+  }
+}
+
+// Calls `arc.atLowest` once the zoom starts rising again. Returns the way
+// to stop watching, for a flight that ends first (cut short).
+function watchLowest(map: MapLibreMap, { atLowest }: Arc): () => void {
+  let previous = map.getZoom()
+  function onZoom() {
+    const zoom = map.getZoom()
+    if (zoom > previous) {
+      map.off('zoom', onZoom)
+      atLowest(zoom)
+    } else {
+      previous = zoom
+    }
+  }
+  map.on('zoom', onZoom)
+  return () => map.off('zoom', onZoom)
 }
 
 /** Globe at zoom `round`, flat at zoom `flat`, stops in increasing order. */

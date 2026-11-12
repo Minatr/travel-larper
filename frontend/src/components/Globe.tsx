@@ -7,6 +7,8 @@ import { useGlobe } from '../hooks/useGlobe.ts'
 type GlobeProps = {
   /** Called with the ISO code of the country clicked or tapped. */
   onOpenCountry: (code: string) => void
+  /** Called when a flight of the globe ends. */
+  onLanded: () => void
   /** Whether a country page is open above the globe. */
   countryOpen: boolean
   /** Whether that page is visible, covering the globe. */
@@ -16,12 +18,13 @@ type GlobeProps = {
 /** Interactive globe filling its parent: hover or tap a country to raise it. */
 export function Globe({
   onOpenCountry,
+  onLanded,
   countryOpen,
   countryShown,
 }: GlobeProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
-  useGlobe(containerRef, onOpenCountry, countryOpen, countryShown)
+  useGlobe(containerRef, onOpenCountry, onLanded, countryOpen, countryShown)
 
   return (
     <section aria-label={t('globe.label')} className="absolute inset-0">

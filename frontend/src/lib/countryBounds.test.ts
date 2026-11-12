@@ -1,7 +1,8 @@
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 import { describe, expect, it } from 'vitest'
 
-import { type Bounds, countryBounds } from './countryBounds.ts'
+import { countryBounds } from './countryBounds.ts'
+import type { Bounds } from './geo.ts'
 
 // Closed rectangular ring from west, south, east, north.
 function box([west, south, east, north]: Bounds): Position[] {

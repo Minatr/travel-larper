@@ -8,8 +8,8 @@ import {
   GLOBE_RETURN_MS,
   GLOBE_TRANSITION_MS,
 } from '../lib/countryTransition.ts'
-import { type Camera, flyBack, flyIn } from '../lib/globeFlight.ts'
-import { mercatorCamera } from '../lib/mercatorCamera.ts'
+import { flyBack, flyIn } from '../lib/globeFlight.ts'
+import { type Camera, mercatorCamera } from '../lib/mercatorCamera.ts'
 import {
   EMPTY_SELECTION,
   type GlobeEvent,
@@ -88,7 +88,8 @@ function cursorFor(code: string | null): string {
 
 /**
  * Mounts the interactive globe in `containerRef`: hovering raises a country,
- * a click calls `onOpenCountry` and flies to it while its page loads on top.
+ * a click calls `onOpenCountry` and flies to it while its page loads on top,
+ * then calls `onLanded`.
  * Once that page covers the globe (`countryShown`), the country is lowered;
  * when `countryOpen` turns false, the globe flies back to where it was.
  *
@@ -98,13 +99,16 @@ function cursorFor(code: string | null): string {
 export function useGlobe(
   containerRef: RefObject<HTMLElement | null>,
   onOpenCountry: (code: string) => void,
+  onLanded: () => void,
   countryOpen: boolean,
   countryShown: boolean,
 ): void {
   // Latest callback without re-creating the map when it changes.
   const onOpenRef = useRef(onOpenCountry)
+  const onLandedRef = useRef(onLanded)
   useEffect(() => {
     onOpenRef.current = onOpenCountry
+    onLandedRef.current = onLanded
   })
   // Set once the map exists.
   const lowerRef = useRef<() => void>(() => {})
@@ -140,15 +144,13 @@ export function useGlobe(
 
     // Loaded once here rather than by MapLibre, to keep each country's shape
     // at hand for the raised layer.
-    const download = new AbortController()
-    const countriesLoaded: Promise<Countries | null> = fetchCountries(
-      download.signal,
-    ).catch((error: unknown) => {
-      if (!download.signal.aborted) {
+    let disposed = false
+    const countriesLoaded: Promise<Countries | null> = fetchCountries().catch(
+      (error: unknown) => {
         console.error('countries failed to load', error)
-      }
-      return null
-    })
+        return null
+      },
+    )
     const shapes = new Map<string, Country>()
 
     let selection = EMPTY_SELECTION
@@ -248,7 +250,10 @@ export function useGlobe(
         return
       }
       onOpenRef.current(code)
-      viewBeforeOpening = { center: map.getCenter(), zoom: map.getZoom() }
+      viewBeforeOpening = {
+        center: map.getCenter().toArray(),
+        zoom: map.getZoom(),
+      }
       // The map's own camera, so it takes over exactly where the globe stops.
       const { clientWidth, clientHeight } = map.getContainer()
       const camera = mercatorCamera(
@@ -270,6 +275,7 @@ export function useGlobe(
 
     function landed() {
       flying = false
+      onLandedRef.current()
     }
 
     // Lowered while hidden under the country page, so it does not flash raised
@@ -277,6 +283,8 @@ export function useGlobe(
     lowerRef.current = () => apply({ type: 'click', code: null })
 
     zoomOutRef.current = () => {
+      // Back before the country page showed, the country is still raised.
+      lowerRef.current()
       flying = true
       flyBack(
         map,
@@ -308,7 +316,7 @@ export function useGlobe(
     // handlers are added then.
     map.once('load', () => {
       void countriesLoaded.then((countries) => {
-        if (countries === null) {
+        if (countries === null || disposed) {
           return
         }
         for (const feature of countries.features) {
@@ -343,7 +351,7 @@ export function useGlobe(
     })
 
     return () => {
-      download.abort()
+      disposed = true
       window.clearTimeout(liftTimer)
       if (frame !== undefined) {
         window.cancelAnimationFrame(frame)

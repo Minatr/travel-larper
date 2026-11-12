@@ -6,11 +6,13 @@
  */
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
-/**
- * West, south, east and north edges, in degrees. East goes past 180 for a
- * country across the antimeridian (Russia: 27 to 190).
- */
-export type Bounds = [number, number, number, number]
+import {
+  type Bounds,
+  boxOf,
+  FULL_TURN_DEGREES,
+  HALF_TURN_DEGREES,
+  polygonsOf,
+} from './geo.ts'
 
 /**
  * Gap under which two parts belong together: Borneo (600 km) stays with
@@ -23,17 +25,13 @@ const KM_PER_DEGREE = 111.32
  * shown in its surroundings, not at a street's zoom.
  */
 const MIN_FRAME_DEGREES = 0.2
-const FULL_TURN_DEGREES = 360
-const HALF_TURN_DEGREES = 180
 
 type Part = { bounds: Bounds; area: number }
 
 /** Bounds to frame for a country shape. */
 export function countryBounds(geometry: Polygon | MultiPolygon): Bounds {
-  const polygons =
-    geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates
   // Holes never widen bounds: only outer rings count.
-  const parts = polygons.map(([outerRing]) => describe(outerRing))
+  const parts = polygonsOf(geometry).map(([outerRing]) => describe(outerRing))
   const main = largestGroup(parts)
   const reference = center(main[0].bounds)
   const bounds = main
@@ -49,15 +47,7 @@ function atLeastMinFrame([west, south, east, north]: Bounds): Bounds {
 }
 
 function describe(ring: Position[]): Part {
-  const longitudes = ring.map(([longitude]) => longitude)
-  const latitudes = ring.map(([, latitude]) => latitude)
-  const bounds: Bounds = [
-    Math.min(...longitudes),
-    Math.min(...latitudes),
-    Math.max(...longitudes),
-    Math.max(...latitudes),
-  ]
-  return { bounds, area: ringArea(ring) }
+  return { bounds: boxOf(ring), area: ringArea(ring) }
 }
 
 // Shoelace formula, longitudes scaled by the latitude's cosine: only used

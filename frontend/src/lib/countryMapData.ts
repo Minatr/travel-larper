@@ -1,6 +1,7 @@
 import type { MultiPolygon, Polygon } from 'geojson'
 
-import { type Bounds, countryBounds } from './countryBounds.ts'
+import { countryBounds } from './countryBounds.ts'
+import type { Bounds } from './geo.ts'
 import { partsWithin, simplifyToBudget } from './countryShape.ts'
 
 /** What the map of a country needs. */

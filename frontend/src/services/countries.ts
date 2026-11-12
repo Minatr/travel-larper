@@ -5,12 +5,24 @@ import type { Countries } from '../models/country.ts'
 /** Served from public/, prepared by scripts/build-countries.mjs. */
 const COUNTRIES_URL = '/geo/countries.json'
 
+// One download for the whole app: the globe and the country page both ask
+// for it, at the same time when a country's URL is opened directly.
+let countriesRequest: Promise<Countries> | undefined
+
 /**
- * Downloads the countries of the globe. The globe and the country page
- * both call it: the browser cache serves the second call.
+ * The countries of the globe, downloaded once. Not cancellable, as another
+ * caller may be waiting for it; a failed download is tried again next call.
  */
-export async function fetchCountries(signal?: AbortSignal): Promise<Countries> {
-  const response = await fetch(COUNTRIES_URL, { signal })
+export function fetchCountries(): Promise<Countries> {
+  countriesRequest ??= downloadCountries().catch((error: unknown) => {
+    countriesRequest = undefined
+    throw error
+  })
+  return countriesRequest
+}
+
+async function downloadCountries(): Promise<Countries> {
+  const response = await fetch(COUNTRIES_URL)
   if (!response.ok) {
     throw new Error(`countries failed to load (HTTP ${response.status})`)
   }

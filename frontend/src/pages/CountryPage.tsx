@@ -1,17 +1,13 @@
 import { type ReactNode, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation, useOutletContext, useParams } from 'react-router'
+import { Link, useOutletContext, useParams } from 'react-router'
 
 import { CountryMap } from '../components/CountryMap.tsx'
 import { PageContainer } from '../components/PageContainer.tsx'
 import { useCountry } from '../hooks/useCountry.ts'
 import { useReveal } from '../hooks/useReveal.ts'
 import { countryName } from '../lib/countryName.ts'
-import {
-  cameFromGlobe,
-  type CountryOutletContext,
-  FADE_MS,
-} from '../lib/countryTransition.ts'
+import { type CountryOutletContext, FADE_MS } from '../lib/countryTransition.ts'
 import { NotFoundPage } from './NotFoundPage.tsx'
 
 /**
@@ -21,10 +17,10 @@ import { NotFoundPage } from './NotFoundPage.tsx'
 export function CountryPage() {
   const { t, i18n } = useTranslation()
   const { code = '' } = useParams()
-  const location = useLocation()
   const country = useCountry(code)
-  const { visible, onMapReady } = useReveal(cameFromGlobe(location.state))
-  const { onCountryShown } = useOutletContext<CountryOutletContext>()
+  const { flying, onCountryShown } = useOutletContext<CountryOutletContext>()
+  const { visible, loading, failed, onMapReady, onMapFailed } =
+    useReveal(flying)
   useEffect(() => {
     if (visible) {
       onCountryShown()
@@ -38,9 +34,9 @@ export function CountryPage() {
       </Overlay>
     )
   }
-  if (country.kind === 'unavailable') {
+  if (country.kind === 'unavailable' || failed) {
     return (
-      <Overlay visible>
+      <Overlay visible={!flying}>
         <PageContainer>
           <p>{t('country.unavailable')}</p>
         </PageContainer>
@@ -53,7 +49,20 @@ export function CountryPage() {
   return (
     <Overlay visible={visible}>
       {country.kind === 'found' && (
-        <CountryMap name={name} data={country.map} onReady={onMapReady} />
+        <CountryMap
+          name={name}
+          data={country.map}
+          onReady={onMapReady}
+          onFailed={onMapFailed}
+        />
+      )}
+      {loading && (
+        <p
+          role="status"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-sm backdrop-blur-md"
+        >
+          {t('country.loading')}
+        </p>
       )}
       <div className="absolute top-16 right-4 left-4 flex items-center gap-3">
         <Link
@@ -75,7 +84,8 @@ export function CountryPage() {
 }
 
 // Covers the globe. Even invisible, it catches clicks: no second country
-// opens during the transition.
+// opens during the transition. Its content is inert meanwhile: no click,
+// no focus with Tab, nothing read by screen readers.
 function Overlay({
   visible,
   children,
@@ -91,7 +101,9 @@ function Overlay({
         transition: `opacity ${FADE_MS}ms ease-out`,
       }}
     >
-      {children}
+      <div inert={!visible} className="absolute inset-0">
+        {children}
+      </div>
     </div>
   )
 }

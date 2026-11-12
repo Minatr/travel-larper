@@ -5,9 +5,7 @@
  */
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
-import type { Bounds } from './countryBounds.ts'
-
-const FULL_TURN_DEGREES = 360
+import { type Bounds, boxOf, FULL_TURN_DEGREES, polygonsOf } from './geo.ts'
 
 /** Parts of `shape` whose box meets `area`, or null if none. */
 export function partsWithin(
@@ -67,21 +65,6 @@ function pointsOf(shape: MultiPolygon): number {
       sum + polygon.reduce((ringSum, ring) => ringSum + ring.length, 0),
     0,
   )
-}
-
-function polygonsOf(shape: Polygon | MultiPolygon): Position[][][] {
-  return shape.type === 'Polygon' ? [shape.coordinates] : shape.coordinates
-}
-
-function boxOf(ring: Position[]): Bounds {
-  const longitudes = ring.map(([longitude]) => longitude)
-  const latitudes = ring.map(([, latitude]) => latitude)
-  return [
-    Math.min(...longitudes),
-    Math.min(...latitudes),
-    Math.max(...longitudes),
-    Math.max(...latitudes),
-  ]
 }
 
 // Also tried a turn east, for an area past 180° (Russia).

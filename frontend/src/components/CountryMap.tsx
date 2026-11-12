@@ -12,13 +12,15 @@ type CountryMapProps = {
   data: CountryMapData
   /** Called once the map is fully drawn. */
   onReady: () => void
+  /** Called when the map cannot load. */
+  onFailed: () => void
 }
 
 /** Detailed map of a country, filling its parent. */
-export function CountryMap({ name, data, onReady }: CountryMapProps) {
+export function CountryMap({ name, data, onReady, onFailed }: CountryMapProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
-  useCountryMap(containerRef, data, onReady)
+  useCountryMap(containerRef, data, onReady, onFailed)
 
   return (
     <section
