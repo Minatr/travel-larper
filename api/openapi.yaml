@@ -26,6 +26,22 @@ paths:
                 $ref: "#/components/schemas/Health"
         default:
           $ref: "#/components/responses/Error"
+  /auth/register:
+    post:
+      operationId: register
+      summary: Create a user account, pending until an admin approves it.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: The account is created and pending approval.
+        default:
+          $ref: "#/components/responses/Error"
 components:
   responses:
     Error:
@@ -43,6 +59,11 @@ components:
           type: string
           enum:
             - invalid_parameter
+            - invalid_body
+            - invalid_email
+            - password_too_short
+            - password_too_long
+            - email_taken
             - not_found
             - method_not_allowed
             - request_too_large
@@ -60,3 +81,13 @@ components:
         database:
           type: string
           enum: [up, down]
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
