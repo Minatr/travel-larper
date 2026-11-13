@@ -27,7 +27,9 @@
   },
   "globe": {
     "label": "World globe",
-    "openMap": "Open the map →",
+    "destination": "Destination",
+    "openMap": "Open the map",
+    "clickToOpen": "Click to open the map",
     "noMap": "No map for this country"
   },
   "country": {

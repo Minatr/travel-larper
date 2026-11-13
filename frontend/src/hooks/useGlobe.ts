@@ -1,8 +1,10 @@
 import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
+import { countryAnchor, facesViewer } from '../lib/countryAnchor.ts'
 import { countryBounds } from '../lib/countryBounds.ts'
 import { hasMap } from '../lib/countryCode.ts'
+import { type CountryHint, tagLayout } from '../lib/countryTag.ts'
 import {
   FRAME_PADDING_PX,
   GLOBE_RETURN_MS,
@@ -70,9 +72,6 @@ function initialZoom(container: HTMLElement): number {
  */
 const LIFT_DELAY_MS = 80
 
-/** Gap between the mouse and the name bubble, down and right of it. */
-const BUBBLE_OFFSET_PX = 16
-
 // Touch screens have no hover: without this check, a tap would leave the
 // country "hovered" forever, as no mouseleave ever comes.
 const HOVER_QUERY = '(hover: hover)'
@@ -107,12 +106,10 @@ function cursorFor(code: string | null): string {
 
 /** What the globe shows over the map, for the Globe component to draw. */
 export type GlobePointer = {
-  /** Country under the mouse, once it rose: its name bubble shows. */
-  hovered: string | null
+  /** Country under the mouse, once it rose, and where its tag hangs. */
+  hint: CountryHint | null
   /** Country tapped on a touch screen: its panel shows. */
   picked: string | null
-  /** Name bubble element, moved along with the mouse by the hook. */
-  bubbleRef: RefObject<HTMLDivElement | null>
   /** Opens the picked country, from the panel's button. */
   openPicked: () => void
 }
@@ -127,7 +124,7 @@ export type GlobePointer = {
  * to where it was.
  *
  * The selection lives in plain variables, not React state: it changes on
- * every mouse move, and only the map needs to know. Only the name shown
+ * every mouse move, and only the map needs to know. Only the tag shown
  * changes state, once per country.
  */
 export function useGlobe(
@@ -137,9 +134,8 @@ export function useGlobe(
   countryOpen: boolean,
   countryShown: boolean,
 ): GlobePointer {
-  const [hovered, setHovered] = useState<string | null>(null)
+  const [hint, setHint] = useState<CountryHint | null>(null)
   const [picked, setPicked] = useState<string | null>(null)
-  const bubbleRef = useRef<HTMLDivElement>(null)
   const openPickedRef = useRef<() => void>(() => {})
   const openPicked = useCallback(() => openPickedRef.current(), [])
 
@@ -203,8 +199,8 @@ export function useGlobe(
     let liftTimer: number | undefined
     let pendingPoint: Point | null = null
     let frame: number | undefined
-    // Country whose name bubble shows (or is about to), and the timer that
-    // shows it with the lift.
+    // Country whose tag shows (or is about to), and the timer that shows it
+    // with the lift.
     let hint: string | null = null
     let hintTimer: number | undefined
     // Country tapped on a touch screen, shown in the panel.
@@ -235,23 +231,45 @@ export function useGlobe(
       dimmed = code
     }
 
-    // Shows the name of `code` after the lift delay, or hides it at once.
+    // Shows the tag of `code` after the lift delay, or hides it at once.
     function showHint(code: string | null) {
       if (code === hint) {
         return
       }
       hint = code
       window.clearTimeout(hintTimer)
-      setHovered(null)
+      setHint(null)
       if (code !== null) {
-        hintTimer = window.setTimeout(() => setHovered(code), LIFT_DELAY_MS)
+        hintTimer = window.setTimeout(
+          () => setHint(hintFor(code)),
+          LIFT_DELAY_MS,
+        )
       }
     }
 
-    function moveBubble({ x, y }: Point) {
-      const bubble = bubbleRef.current
-      if (bubble !== null) {
-        bubble.style.transform = `translate(${x + BUBBLE_OFFSET_PX}px, ${y + BUBBLE_OFFSET_PX}px)`
+    // Tag hanging from the country's centroid, or from the mouse when the
+    // centroid is behind the horizon (Russia seen from the side).
+    function hintFor(code: string): CountryHint | null {
+      if (pendingPoint === null) {
+        return null
+      }
+      const center = map.getCenter()
+      const shape = shapes.get(code)
+      const centroid =
+        shape === undefined ? null : countryAnchor(shape.geometry)
+      const anchor =
+        centroid !== null && facesViewer(center.toArray(), centroid)
+          ? map.project(centroid)
+          : pendingPoint
+      const { clientWidth, clientHeight } = map.getContainer()
+      return {
+        code,
+        layout: tagLayout(
+          anchor,
+          map.project(center),
+          clientWidth,
+          clientHeight,
+        ),
       }
     }
 
@@ -390,7 +408,6 @@ export function useGlobe(
         return
       }
       const code = countryCodeAt(map, pendingPoint)
-      moveBubble(pendingPoint)
       showHint(code)
       map.getCanvas().style.cursor = cursorFor(code)
       const opens = code !== null && hasMap(code)
@@ -420,9 +437,9 @@ export function useGlobe(
           pendingPoint = event.point
           frame ??= window.requestAnimationFrame(onHoverFrame)
         })
-        // While the globe turns or zooms, the country under the mouse changes
-        // without any mouse move: the bubble hides until the mouse moves again.
+        // The tag would drift off its country: hidden until the next move.
         map.on('movestart', () => showHint(null))
+        map.on('resize', () => showHint(null))
         map.on('mouseout', () => {
           pendingPoint = null
           showHint(null)
@@ -458,5 +475,5 @@ export function useGlobe(
     }
   }, [containerRef])
 
-  return { hovered, picked, bubbleRef, openPicked }
+  return { hint, picked, openPicked }
 }

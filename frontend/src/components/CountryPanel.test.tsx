@@ -15,7 +15,7 @@ describe('CountryPanel', () => {
     render(<CountryPanel code="FR" onOpen={onOpen} />)
 
     expect(screen.getByRole('heading', { name: 'France' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Open the map →' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open the map' }))
     expect(onOpen).toHaveBeenCalledOnce()
   })
 

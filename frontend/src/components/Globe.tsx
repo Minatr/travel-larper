@@ -18,7 +18,7 @@ type GlobeProps = {
 }
 
 /**
- * Interactive globe filling its parent: hover a country for its name, click
+ * Interactive globe filling its parent: hover a country for its tag, click
  * it to open its map; on a touch screen, tap it, then open it from the panel.
  */
 export function Globe({
@@ -29,7 +29,7 @@ export function Globe({
 }: GlobeProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
-  const { hovered, picked, bubbleRef, openPicked } = useGlobe(
+  const { hint, picked, openPicked } = useGlobe(
     containerRef,
     onOpenCountry,
     onLanded,
@@ -48,7 +48,7 @@ export function Globe({
         wins over Tailwind's layers) and would collapse the globe to 0 px.
       */}
       <div ref={containerRef} className="h-full w-full" />
-      <CountryBubble code={hovered} ref={bubbleRef} />
+      <CountryBubble hint={hint} />
       <CountryPanel code={picked} onOpen={openPicked} />
     </section>
   )

@@ -27,7 +27,9 @@
   },
   "globe": {
     "label": "Globe terrestre",
-    "openMap": "Ouvrir la carte →",
+    "destination": "Destination",
+    "openMap": "Ouvrir la carte",
+    "clickToOpen": "Cliquer pour ouvrir la carte",
     "noMap": "Pas de carte pour ce pays"
   },
   "country": {

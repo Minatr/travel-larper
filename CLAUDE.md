@@ -43,7 +43,7 @@
 - Filtre « voyages solo / partagés ».
 
 ### Globe 3D et cartes
-- Globe 3D : au survol, le pays se soulève et prend la couleur d'accent du globe ; un clic ouvre le pays. La recherche de pays est une alternative. Version allégée sur téléphone.
+- Globe 3D : au survol, le pays se soulève en turquoise (couleur de sélection) ; un clic ouvre le pays (sur écran tactile, un panneau de confirmation d'abord). La recherche de pays est une alternative. Version allégée sur téléphone.
 - Au clic : zoom, puis carte 2D détaillée où vivent les lieux.
 
 ### Fiche pays
@@ -202,6 +202,7 @@ travel-larper/
 ### Commentaires
 - **Tout ce qui est exporté est commenté** : en Go, le commentaire commence par le nom de l'élément (`// TripService manages…`), comme l'impose la règle `exported` de revive ; en TypeScript, JSDoc sur les fonctions, hooks, composants et types exportés.
 - Un commentaire explique **le pourquoi**, pas le quoi : le code dit déjà ce qu'il fait. Commenter les choix non évidents, les contraintes externes (ex. « Nominatim limite à 1 req/s ») et les compromis.
+- **Court et seulement si nécessaire** : on ne commente que ce qui aide à comprendre, en une ou deux lignes. Un mini-exemple seulement si ce n'est vraiment pas clair. Pas de paragraphe qui raconte tout le raisonnement : le détail va dans la PR ou le ticket.
 - Les algorithmes (planner notamment) ont un commentaire d'en-tête qui décrit l'approche et sa complexité.
 - **Commentaire en tête de fichier** quand son rôle ne se devine pas à son nom ou à son contenu : fichiers de configuration, de types (`.d.ts`), de préparation des tests, mécanismes propres à une bibliothèque. Deux à cinq lignes : à quoi sert le fichier, quand il intervient, comment il s'articule avec le reste. Pas pour un composant ou une fonction dont le JSDoc suffit. En Go, ce rôle est tenu par le commentaire de package.
 
@@ -235,23 +236,52 @@ travel-larper/
 
 ## 8. Direction artistique
 
-Simple et minimaliste, inspirée de l'écosystème Apple : police système (SF Pro / Inter), palette « Nuit bleue » (voir ci-dessous), beaucoup d'espace, coins arrondis, ombres légères, panneaux translucides floutés (en-tête flottant au-dessus du globe, panneaux sur la carte), **mode sombre uniquement** (le globe, page principale, est sombre comme l'espace ; un cadre clair autour ne collait pas), animations courtes. Composants Radix/shadcn + Tailwind.
+**Des objets de voyage en papier posés sur l'espace sombre.** Le globe et les cartes restent sombres comme l'espace (**mode sombre uniquement** : un cadre clair autour du globe ne collait pas) ; par-dessus, les panneaux sont des **étiquettes de bagage** couleur crème : forme découpée, œillet, liseré et détails imprimés à l'encre. Beaucoup d'espace, typographie forte, animations courtes. Composants Radix/shadcn + Tailwind. Maquettes de référence : canevas « Travel Larper – pistes d'interface » (rangées « Option 3 » et « Sur ordinateur »).
 
-### Palette « Nuit bleue »
+### Rôles des couleurs
 
-Surfaces **graphite** (gris neutres très foncés, comme l'espace autour du globe), **bleu nuit pour les cartes** (le globe, et la mer et les terres de la carte d'un pays, pour que le passage de l'un à l'autre ne se voie pas) et **une seule couleur d'accent : le turquoise**, partagée par l'appli et le globe. Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui), `frontend/src/lib/globeStyle.ts` et `frontend/src/lib/countryMapTheme.ts` (MapLibre demande des couleurs brutes) : on les modifie là, et ces tableaux en même temps.
+| Rôle | Où | Couleur |
+| --- | --- | --- |
+| **Fond** | espace, globe, cartes, pages | graphite et bleu nuit (tableaux ci-dessous) |
+| **Papier** | étiquettes, panneaux, en-tête (logo, langue, recherche), formulaires | crème `#efe9dc`, texte `#17191e`, texte secondaire `#6a6252` |
+| **Encre** | détails imprimés **décoratifs** : petites étiquettes en capitales, étoile de priorité, œillet, liseré, code-barres | orange `#e8641b` (provisoire, jugé un peu vif) |
+| **Action** | boutons | noir `#0d0f13`, texte crème ; la flèche éventuelle prend l'encre |
+| **Sélection** | pays soulevé, contour de focus clavier, élément actif sur une carte | turquoise `#2dd4bf` |
+
+Règles :
+- L'encre ne sert **jamais** à un élément cliquable : ce qui est cliquable est noir (action) ; ce qui est choisi est turquoise (sélection).
+- Les couleurs des catégories de lieux, choisies dans leur ticket, n'utilisent ni la teinte de l'encre ni le turquoise.
+- Pas de panneau en verre flouté : un panneau est un objet papier.
+
+### Typographie
+
+Polices hébergées avec l'appli (paquets `@fontsource`), jamais chargées depuis Google Fonts (CSP, et l'IP des utilisateurs n'est pas envoyée à Google) :
+- **Archivo** condensé (largeur 75 %, graisse 800) : logo, titres, noms de pays, en capitales ;
+- **Inter** : tout le reste du texte ;
+- **Libre Barcode 39 Text** : code-barres décoratif des étiquettes, uniquement (le navigateur ne la télécharge que si elle est affichée).
+
+### Globe : ordinateur et téléphone
+
+- **Ordinateur** : au survol, l'étiquette du pays apparaît, reliée au pays par une ficelle ; **un clic ouvre directement la carte**.
+- **Toucher** : un appui affiche le panneau de confirmation (étiquette en bas de l'écran) avec le bouton « Ouvrir la carte ».
+- Les noms longs (« Royaume-Uni ») doivent tenir : taille réduite ou retour à la ligne.
+
+### Valeurs
+
+Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui), `frontend/src/lib/globeStyle.ts` et `frontend/src/lib/countryMapTheme.ts` (MapLibre demande des couleurs brutes) : on les modifie là, et ces tableaux en même temps. Changer l'encre ne touche qu'une variable.
 
 | Rôle | Couleur |
 | --- | --- |
 | Fond (`--background`) | `#0d0f13` |
-| Texte (`--foreground`) | `#e8eaee` |
-| Carte, panneau (`--card`) | `#15181e` |
-| Fond discret (`--muted`) | `#1d2129` |
-| Texte secondaire (`--muted-foreground`) | `#9aa3b2` |
-| Bordure (`--border`) | blanc à 10 % |
-| Accent (`--primary`, `--ring`) | `#2dd4bf` |
-| Texte sur accent (`--primary-foreground`) | `#04201c` |
-| En-tête flottant | verre neutre : noir à 40 % + flou, bordure blanche à 10 % |
+| Texte sur fond (`--foreground`) | `#e8eaee` |
+| Texte secondaire sur fond (`--muted-foreground`) | `#9aa3b2` |
+| Bordure sur fond (`--border`) | blanc à 10 % |
+| Papier (`--card`) | `#efe9dc` |
+| Texte sur papier (`--card-foreground`) | `#17191e` |
+| Texte secondaire sur papier (`--card-muted-foreground`) | `#6a6252` |
+| Encre (`--ink`) | `#e8641b` |
+| Action (`--primary`) | `#0d0f13`, texte `#efe9dc` (`--primary-foreground`) |
+| Sélection (`--ring`, `--selection`) | `#2dd4bf`, texte `#04201c` |
 
 Globe :
 
@@ -260,7 +290,7 @@ Globe :
 | Espace autour (`--globe-space`) | dégradé radial graphite, `#1a1d24` → `#040506` (neutre, pour que le globe bleu ressorte) |
 | Océan et frontières | `#0a1a33` |
 | Pays (7 nuances, une par groupe Natural Earth) | `#2b5080` `#2f5788` `#284b78` `#335d8f` `#2d5384` `#264872` `#376396` |
-| Pays soulevé | `#2dd4bf` (l'accent) |
+| Pays soulevé | `#2dd4bf` (sélection) |
 | Pays sans carte survolé (Antarctique) | `#1a3354` assombri, curseur « interdit » |
 
 Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche dans `countryMapTheme.ts`) :
