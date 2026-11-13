@@ -26,7 +26,11 @@
     "label": "Langue"
   },
   "globe": {
-    "label": "Globe terrestre"
+    "label": "Globe terrestre",
+    "destination": "Destination",
+    "openMap": "Ouvrir la carte",
+    "clickToOpen": "Cliquer pour ouvrir la carte",
+    "noMap": "Pas de carte pour ce pays"
   },
   "country": {
     "mapLabel": "Carte : {{name}}",

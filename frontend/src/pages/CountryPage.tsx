@@ -59,25 +59,27 @@ export function CountryPage() {
       {loading && (
         <p
           role="status"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-sm backdrop-blur-md"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md bg-card px-4 py-2 text-sm text-card-foreground shadow-lg"
         >
           {t('country.loading')}
         </p>
       )}
-      <div className="absolute top-16 right-4 left-4 flex items-center gap-3">
+      {/*
+        On the header's row: its logo flies away on this page (Layout). The
+        right margin keeps clear of the language switch.
+      */}
+      <div className="absolute top-3 right-28 left-4 flex items-center gap-3">
         <Link
           to="/"
-          className="shrink-0 rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-sm backdrop-blur-md hover:bg-black/60"
+          className="flex min-h-11 shrink-0 items-center rounded-md bg-card px-3 text-sm font-medium text-card-foreground shadow-lg"
         >
           {t('country.backToGlobe')}
         </Link>
         {/*
-          A title, not a control: plain text, no glass, so it does not look
+          A title, not a control: plain text, not paper, so it does not look
           clickable.
         */}
-        <h1 className="truncate text-lg font-semibold drop-shadow-md">
-          {name}
-        </h1>
+        <h1 className="tag-title truncate text-2xl drop-shadow-md">{name}</h1>
       </div>
     </Overlay>
   )

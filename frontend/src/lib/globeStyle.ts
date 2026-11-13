@@ -74,7 +74,7 @@ type Tones = [string, string, string, string, string, string, string]
  * shades of blue, one per Natural Earth color group (neighbours always
  * differ): the land reads as one surface, with just enough variation to
  * tell countries apart. The raised country glows in the app's turquoise
- * accent (index.css), which stands out from all the blues. Space behind
+ * selection color (index.css), which stands out from all the blues. Space behind
  * the globe is graphite (--globe-space in index.css): no blue there, so
  * the ocean does not blend into it.
  */
@@ -100,7 +100,7 @@ const COLORS: {
   dimmed: '#1a3354',
 }
 
-// Raised country in the accent color, a hovered country that cannot open
+// Raised country in the selection color, a hovered country that cannot open
 // dimmed, the others in the tone of their color group (1 to 7).
 function countryColor(
   raised: string,

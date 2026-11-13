@@ -26,7 +26,11 @@
     "label": "Language"
   },
   "globe": {
-    "label": "World globe"
+    "label": "World globe",
+    "destination": "Destination",
+    "openMap": "Open the map",
+    "clickToOpen": "Click to open the map",
+    "noMap": "No map for this country"
   },
   "country": {
     "mapLabel": "Map of {{name}}",

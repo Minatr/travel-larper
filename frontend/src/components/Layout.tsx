@@ -1,25 +1,47 @@
 import { useTranslation } from 'react-i18next'
-import { Link, Outlet } from 'react-router'
+import { Link, Outlet, useMatch } from 'react-router'
 
+import { cn } from '../lib/utils.ts'
 import { LanguageSwitcher } from './LanguageSwitcher.tsx'
 
 /**
- * Frame shared by every page: a translucent, blurred header floating over
- * the page (CLAUDE.md, Direction artistique), so the globe runs under it
- * up to the top of the screen. Its glass is neutral, not blue, to match
- * the graphite space around the globe. Text pages leave room for it with
- * PageContainer.
+ * Frame shared by every page: a header floating over the page, so the globe
+ * runs under it up to the top of the screen. It is no bar, just two paper
+ * labels (CLAUDE.md, Direction artistique): the logo, a small luggage tag,
+ * and the language switch. Text pages leave room for it with PageContainer.
+ * On a country page the logo flies away: it would only take room there,
+ * and the page has its own way back to the globe.
  */
 export function Layout() {
   const { t } = useTranslation()
+  const countryOpen = useMatch('/countries/:code') !== null
 
   return (
     <div className="relative flex min-h-dvh flex-col">
-      <header className="absolute inset-x-0 top-0 z-10 border-b border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2">
-          <Link to="/" className="text-lg font-semibold">
+      {/* Clicks between the labels reach the globe below. */}
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
+        {/*
+          Drooping to the right, like a tag hanging from its eyelet; smaller on
+          a phone, where it would hide the globe (its padding keeps a 44 px
+          touch target around the smaller label). Out of reach once gone.
+        */}
+        <Link
+          to="/"
+          inert={countryOpen}
+          className={cn(
+            'pointer-events-auto origin-left rotate-2 py-1.5 drop-shadow-lg sm:py-0 transition duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring motion-reduce:transition-none',
+            countryOpen && '-translate-y-20 -rotate-6 opacity-0',
+          )}
+        >
+          <span className="tag-label-left tag-title flex min-h-8 items-center gap-2 bg-card pr-3 pl-3.5 text-sm tracking-wide text-card-foreground sm:min-h-11 sm:gap-2.5 sm:pr-3.5 sm:pl-4 sm:text-lg">
+            <span
+              aria-hidden
+              className="size-2 rounded-full bg-background ring-2 ring-ink"
+            />
             {t('app.name')}
-          </Link>
+          </span>
+        </Link>
+        <div className="pointer-events-auto">
           <LanguageSwitcher />
         </div>
       </header>
