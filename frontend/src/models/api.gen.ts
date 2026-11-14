@@ -21,13 +21,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a user account, pending until an admin approves it. */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         Error: {
             /** @enum {string} */
-            code: "invalid_parameter" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
+            code: "invalid_parameter" | "invalid_body" | "invalid_email" | "password_too_short" | "password_too_long" | "email_taken" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
             message: string;
         };
         Health: {
@@ -35,6 +52,10 @@ export interface components {
             status: "ok" | "degraded";
             /** @enum {string} */
             database: "up" | "down";
+        };
+        RegisterRequest: {
+            email: string;
+            password: string;
         };
     };
     responses: {
@@ -81,6 +102,29 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Health"];
                 };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description The account is created and pending approval. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             default: components["responses"]["Error"];
         };

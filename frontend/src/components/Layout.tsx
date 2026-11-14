@@ -41,9 +41,15 @@ export function Layout() {
             {t('app.name')}
           </span>
         </Link>
-        <div className="pointer-events-auto">
+        <nav className="pointer-events-auto flex items-center gap-2">
+          <Link
+            to="/register"
+            className="tag-title flex min-h-11 items-center rounded-md bg-card px-3 text-base text-card-muted-foreground shadow-lg hover:text-card-foreground"
+          >
+            {t('nav.register')}
+          </Link>
           <LanguageSwitcher />
-        </div>
+        </nav>
       </header>
       <main className="flex flex-1 flex-col">
         {/* React Router renders here the page that matches the URL. */}

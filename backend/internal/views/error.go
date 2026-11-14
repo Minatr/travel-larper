@@ -18,6 +18,16 @@ func describeError(code api.ErrorCode) (int, string) {
 	switch code {
 	case api.ErrorCodeInvalidParameter:
 		return http.StatusBadRequest, "A request parameter is invalid."
+	case api.ErrorCodeInvalidBody:
+		return http.StatusBadRequest, "The request body is not valid JSON for this route."
+	case api.ErrorCodeInvalidEmail:
+		return http.StatusBadRequest, "The email address is invalid."
+	case api.ErrorCodePasswordTooShort:
+		return http.StatusBadRequest, "The password is too short."
+	case api.ErrorCodePasswordTooLong:
+		return http.StatusBadRequest, "The password is too long."
+	case api.ErrorCodeEmailTaken:
+		return http.StatusConflict, "This email address is already used by another account."
 	case api.ErrorCodeNotFound:
 		return http.StatusNotFound, "Resource not found."
 	case api.ErrorCodeMethodNotAllowed:

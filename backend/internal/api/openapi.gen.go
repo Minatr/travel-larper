@@ -12,10 +12,15 @@ import (
 
 // Defines values for ErrorCode.
 const (
+	ErrorCodeEmailTaken       ErrorCode = "email_taken"
 	ErrorCodeInternalError    ErrorCode = "internal_error"
+	ErrorCodeInvalidBody      ErrorCode = "invalid_body"
+	ErrorCodeInvalidEmail     ErrorCode = "invalid_email"
 	ErrorCodeInvalidParameter ErrorCode = "invalid_parameter"
 	ErrorCodeMethodNotAllowed ErrorCode = "method_not_allowed"
 	ErrorCodeNotFound         ErrorCode = "not_found"
+	ErrorCodePasswordTooLong  ErrorCode = "password_too_long"
+	ErrorCodePasswordTooShort ErrorCode = "password_too_short"
 	ErrorCodeRateLimited      ErrorCode = "rate_limited"
 	ErrorCodeRequestTooLarge  ErrorCode = "request_too_large"
 )
@@ -23,13 +28,23 @@ const (
 // Valid indicates whether the value is a known member of the ErrorCode enum.
 func (e ErrorCode) Valid() bool {
 	switch e {
+	case ErrorCodeEmailTaken:
+		return true
 	case ErrorCodeInternalError:
+		return true
+	case ErrorCodeInvalidBody:
+		return true
+	case ErrorCodeInvalidEmail:
 		return true
 	case ErrorCodeInvalidParameter:
 		return true
 	case ErrorCodeMethodNotAllowed:
 		return true
 	case ErrorCodeNotFound:
+		return true
+	case ErrorCodePasswordTooLong:
+		return true
+	case ErrorCodePasswordTooShort:
 		return true
 	case ErrorCodeRateLimited:
 		return true
@@ -97,8 +112,20 @@ type HealthDatabase string
 // HealthStatus defines model for Health.Status.
 type HealthStatus string
 
+// RegisterRequest defines model for RegisterRequest.
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// RegisterJSONRequestBody defines body for Register for application/json ContentType.
+type RegisterJSONRequestBody = RegisterRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Register Create a user account, pending until an admin approves it.
+	// (POST /auth/register)
+	Register(w http.ResponseWriter, r *http.Request)
 	// GetHealth Report whether the API and its database are reachable.
 	// (GET /health)
 	GetHealth(w http.ResponseWriter, r *http.Request)
@@ -107,6 +134,12 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// Register Create a user account, pending until an admin approves it.
+// (POST /auth/register)
+func (_ Unimplemented) Register(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // GetHealth Report whether the API and its database are reachable.
 // (GET /health)
@@ -122,6 +155,20 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// Register operation middleware
+func (siw *ServerInterfaceWrapper) Register(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Register(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // GetHealth operation middleware
 func (siw *ServerInterfaceWrapper) GetHealth(w http.ResponseWriter, r *http.Request) {
@@ -252,6 +299,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/health", wrapper.GetHealth)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/register", wrapper.Register)
 	})
 
 	return r

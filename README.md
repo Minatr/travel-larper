@@ -76,6 +76,7 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 | `make db-psql` | Ouvre un terminal SQL dans la base |
 | `make db-logs` | Affiche les logs de la base |
 | `make db-reset` | Supprime et recrée la base (perte des données locales) |
+| `make db-seed` | Ajoute le compte de dev `dev@gmail.com` / `12345678` (backend démarré) |
 
 ### En cas de problème
 
