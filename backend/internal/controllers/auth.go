@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/Minatr/travel-larper/backend/internal/services"
 	"github.com/Minatr/travel-larper/backend/internal/views"
 )
+
+var errTrailingData = errors.New("data after the JSON body")
 
 // Registrar creates user accounts.
 type Registrar interface {
@@ -66,6 +69,9 @@ func decodeJSONBody(r *http.Request, target any) (api.ErrorCode, bool) {
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(target)
 	if err == nil {
+		err = rejectTrailingData(decoder)
+	}
+	if err == nil {
 		return "", true
 	}
 	// Set by the MaxBodySize middleware when the body has no Content-Length.
@@ -74,4 +80,18 @@ func decodeJSONBody(r *http.Request, target any) (api.ErrorCode, bool) {
 		return api.ErrorCodeRequestTooLarge, false
 	}
 	return api.ErrorCodeInvalidBody, false
+}
+
+// rejectTrailingData fails when the body holds more than one JSON value:
+// Decode stops after the first one and would silently ignore the rest.
+func rejectTrailingData(decoder *json.Decoder) error {
+	err := decoder.Decode(&struct{}{})
+	switch {
+	case errors.Is(err, io.EOF):
+		return nil
+	case err != nil:
+		return err
+	default:
+		return errTrailingData
+	}
 }

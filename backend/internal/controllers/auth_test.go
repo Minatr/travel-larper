@@ -39,7 +39,10 @@ func TestAuthControllerRegister(t *testing.T) {
 		wantCalled  bool
 	}{
 		{name: "created", body: validBody, wantStatus: http.StatusCreated, wantCalled: true},
+		{name: "trailing whitespace", body: validBody + "\n ", wantStatus: http.StatusCreated, wantCalled: true},
 		{name: "malformed JSON", body: `{"email":`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
+		{name: "data after the JSON", body: `{"email":"bob@example.com","password":"12345678"} trailing`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
+		{name: "two JSON objects", body: `{"email":"bob@example.com","password":"12345678"}{}`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
 		{name: "unknown field", body: `{"email":"bob@example.com","password":"12345678","role":"admin"}`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
 		{name: "invalid email", body: validBody, registerErr: services.ErrInvalidEmail, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidEmail, wantCalled: true},
 		{name: "password too short", body: validBody, registerErr: services.ErrPasswordTooShort, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodePasswordTooShort, wantCalled: true},
