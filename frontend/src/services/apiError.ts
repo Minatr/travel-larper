@@ -8,6 +8,8 @@ const API_ERROR_CODES: Record<ApiErrorCode, true> = {
   password_too_short: true,
   password_too_long: true,
   email_taken: true,
+  invalid_credentials: true,
+  unauthorized: true,
   not_found: true,
   method_not_allowed: true,
   request_too_large: true,

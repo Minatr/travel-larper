@@ -42,7 +42,69 @@ paths:
           description: The account is created and pending approval.
         default:
           $ref: "#/components/responses/Error"
+  /auth/login:
+    post:
+      operationId: login
+      summary: Open a session; whatever its status, the account can log in.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in; the session cookie is set.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SessionCookie"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        default:
+          $ref: "#/components/responses/Error"
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: Close the current session, if any, and clear its cookie.
+      tags: [auth]
+      responses:
+        "204":
+          description: Logged out, even when there was no valid session.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SessionCookie"
+        default:
+          $ref: "#/components/responses/Error"
+  /auth/me:
+    get:
+      operationId: getMe
+      summary: Return the logged-in user.
+      tags: [auth]
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: The user of the session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        default:
+          $ref: "#/components/responses/Error"
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+  headers:
+    SessionCookie:
+      description: The session cookie (HttpOnly, SameSite=Lax, Secure in production).
+      schema:
+        type: string
   responses:
     Error:
       description: Any error, in the shared Error format.
@@ -64,6 +126,8 @@ components:
             - password_too_short
             - password_too_long
             - email_taken
+            - invalid_credentials
+            - unauthorized
             - not_found
             - method_not_allowed
             - request_too_large
@@ -91,3 +155,27 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    CurrentUser:
+      type: object
+      required: [id, email, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+          # Same Go type as the sqlc models (oapi-codegen only).
+          x-go-type: uuid.UUID
+          x-go-type-import:
+            path: github.com/google/uuid
+        email:
+          type: string
+        status:
+          type: string
+          enum: [pending, active, refused, suspended]
