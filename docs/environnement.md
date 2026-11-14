@@ -72,9 +72,11 @@ Un volume créé par l'ancienne image `postgis/postgis` n'est pas compatible ave
 | `POSTGRES_PORT`, `API_PORT`, `FRONTEND_PORT` | ports **exposés sur la machine** | à l'intérieur de Docker, les ports restent 5432, 8080 et 5173 |
 | `DATABASE_URL` (`.env`) | outils lancés **sur la machine** (`localhost`) | le conteneur backend reçoit sa propre URL, qui vise l'hôte `db` |
 | `API_PROXY_TARGET` | Vite | fixé par `docker-compose.yml` à `http://backend:8080` |
-| `APP_ENV` | backend | vide ou `production` (active l'en-tête HSTS, HTTPS obligatoire) ; toute autre valeur empêche le démarrage |
+| `APP_ENV` | backend | vide ou `production` (active l'en-tête HSTS et les cookies `Secure`, HTTPS obligatoire) ; toute autre valeur empêche le démarrage |
 | `RATE_LIMIT_PER_MINUTE`, `MAX_BODY_BYTES` | backend | limite de requêtes par IP (défaut 100/min) et taille max d'un corps (défaut 1 Mo) ; vides = défaut |
 | `REGISTER_RATE_LIMIT_PER_HOUR` | backend | limite d'inscriptions par IP, plus stricte car chaque inscription calcule un hash argon2id coûteux (défaut 10/h) ; vide = défaut |
+| `LOGIN_RATE_LIMIT_PER_MINUTE` | backend | limite de tentatives de connexion par IP, contre les essais de mots de passe en série (défaut 5/min) ; vide = défaut |
+| `SESSION_IDLE_TIMEOUT_HOURS` | backend | une session expire après cette durée sans activité ; elle est prolongée à chaque utilisation (défaut 336 h, soit 14 jours) ; vide = défaut |
 
 ## 4. Vers la production
 

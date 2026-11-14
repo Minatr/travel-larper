@@ -28,6 +28,10 @@ func describeError(code api.ErrorCode) (int, string) {
 		return http.StatusBadRequest, "The password is too long."
 	case api.ErrorCodeEmailTaken:
 		return http.StatusConflict, "This email address is already used by another account."
+	case api.ErrorCodeInvalidCredentials:
+		return http.StatusUnauthorized, "The email or the password is incorrect."
+	case api.ErrorCodeUnauthorized:
+		return http.StatusUnauthorized, "You must be logged in."
 	case api.ErrorCodeNotFound:
 		return http.StatusNotFound, "Resource not found."
 	case api.ErrorCodeMethodNotAllowed:

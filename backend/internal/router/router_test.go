@@ -13,9 +13,16 @@ import (
 
 	"github.com/Minatr/travel-larper/backend/internal/api"
 	"github.com/Minatr/travel-larper/backend/internal/controllers"
+	"github.com/Minatr/travel-larper/backend/internal/services"
 )
 
 type healthyChecker struct{}
+
+type rejectingAuthenticator struct{}
+
+func (rejectingAuthenticator) Authenticate(context.Context, string) (services.Session, error) {
+	return services.Session{}, services.ErrInvalidSession
+}
 
 type acceptingRegistrar struct{}
 
@@ -27,14 +34,14 @@ func (healthyChecker) Check(context.Context) error {
 	return nil
 }
 
-var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20, RegisterRateLimitPerHour: 1000}
+var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20, RegisterRateLimitPerHour: 1000, LoginRateLimitPerMinute: 1000}
 
 func discardLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }
 
 func TestRoutes(t *testing.T) {
-	handler := Routes(Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())}, discardLogger(), testOptions)
+	handler := Routes(Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())}, rejectingAuthenticator{}, discardLogger(), testOptions)
 
 	tests := []struct {
 		name          string
@@ -75,9 +82,9 @@ func TestRoutesLimitRegistrationOnly(t *testing.T) {
 	options := testOptions
 	options.RegisterRateLimitPerHour = 2
 	handler := Routes(Controllers{
-		HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger()),
-		AuthController:   controllers.NewAuthController(acceptingRegistrar{}, discardLogger()),
-	}, discardLogger(), options)
+		HealthController:       controllers.NewHealthController(healthyChecker{}, discardLogger()),
+		RegistrationController: controllers.NewRegistrationController(acceptingRegistrar{}, discardLogger()),
+	}, rejectingAuthenticator{}, discardLogger(), options)
 	send := func(method, path, body string) *httptest.ResponseRecorder {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(method, path, strings.NewReader(body)))

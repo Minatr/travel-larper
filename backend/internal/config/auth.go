@@ -2,6 +2,9 @@ package config
 
 const (
 	defaultRegisterRateLimitPerHour = 10
+	defaultLoginRateLimitPerMinute  = 5
+	// 2 weeks
+	defaultSessionIdleTimeoutHours = 14 * 24
 	// About 76 MiB of argon2id memory at most with the parameters below.
 	maxConcurrentPasswordHashes = 4
 

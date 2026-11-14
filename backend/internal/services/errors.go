@@ -15,3 +15,10 @@ var (
 	ErrPasswordTooLong  = errors.New("password too long")
 	ErrEmailTaken       = errors.New("email already taken")
 )
+
+// ErrInvalidCredentials is returned for an unknown email or a wrong
+// password alike, so the response does not reveal which accounts exist.
+var ErrInvalidCredentials = errors.New("invalid credentials")
+
+// ErrInvalidSession is returned for a missing, unknown or expired session.
+var ErrInvalidSession = errors.New("invalid session")
