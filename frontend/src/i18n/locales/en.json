@@ -39,7 +39,8 @@
     "loading": "Loading the map…"
   },
   "nav": {
-    "register": "Sign up"
+    "login": "Log in",
+    "logout": "Log out"
   },
   "register": {
     "title": "Create an account",
@@ -52,7 +53,7 @@
     "success": {
       "title": "Account created",
       "message": "Your account is waiting for an admin's approval. You can use the app as soon as it is approved.",
-      "backHome": "Back to home"
+      "login": "Log in"
     },
     "errors": {
       "invalidEmail": "This email address is invalid.",
@@ -60,6 +61,21 @@
       "passwordTooLong": "The password must be at most {{max}} characters long.",
       "emailTaken": "An account already exists with this email address.",
       "rateLimited": "Too many attempts. Please try again later.",
+      "unreachable": "The server cannot be reached. Check your connection and try again.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "login": {
+    "title": "Log in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in…",
+    "noAccount": "No account yet?",
+    "registerLink": "Sign up",
+    "errors": {
+      "invalidCredentials": "The email or the password is incorrect.",
+      "rateLimited": "Too many attempts. Please try again in a minute.",
       "unreachable": "The server cannot be reached. Check your connection and try again.",
       "generic": "Something went wrong. Please try again."
     }

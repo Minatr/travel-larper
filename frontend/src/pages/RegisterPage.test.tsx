@@ -3,10 +3,17 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { routes } from '../routes.ts'
+import { stubFetch } from '../test/fetch.ts'
+
+const REGISTER_URL = '/api/auth/register'
+
+function renderAt(path: string) {
+  const router = createMemoryRouter(routes, { initialEntries: [path] })
+  render(<RouterProvider router={router} />)
+}
 
 function renderRegisterPage() {
-  const router = createMemoryRouter(routes, { initialEntries: ['/register'] })
-  render(<RouterProvider router={router} />)
+  renderAt('/register')
 }
 
 function fillAndSubmit(email: string, password: string) {
@@ -19,25 +26,19 @@ function fillAndSubmit(email: string, password: string) {
   fireEvent.click(screen.getByRole('button', { name: 'Sign up' }))
 }
 
-function stubFetch(response: Response) {
-  const fetchMock = vi.fn().mockResolvedValue(response)
-  vi.stubGlobal('fetch', fetchMock)
-  return fetchMock
-}
-
 describe('RegisterPage', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
   })
 
-  it('is linked from the header', () => {
-    renderRegisterPage()
+  it('is linked from the login page', async () => {
+    stubFetch(new Response(null, { status: 204 }))
+    renderAt('/login')
 
-    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute(
-      'href',
-      '/register',
-    )
+    expect(
+      await screen.findByRole('link', { name: 'Sign up' }),
+    ).toHaveAttribute('href', '/register')
   })
 
   it('creates the account and shows the confirmation', async () => {
@@ -50,7 +51,7 @@ describe('RegisterPage', () => {
       await screen.findByRole('heading', { name: 'Account created' }),
     ).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith(
-      '/api/auth/register',
+      REGISTER_URL,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
@@ -70,7 +71,7 @@ describe('RegisterPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The password must be at least 8 characters long.',
     )
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalledWith(REGISTER_URL, expect.anything())
   })
 
   it.each([
@@ -88,7 +89,7 @@ describe('RegisterPage', () => {
   })
 
   it('tells the user when the server cannot be reached', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    stubFetch(new Error('offline'))
     vi.spyOn(console, 'error').mockImplementation(() => {})
     renderRegisterPage()
 
