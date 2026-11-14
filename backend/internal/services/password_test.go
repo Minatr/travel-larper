@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -11,9 +12,11 @@ import (
 // Far below the production cost so the tests stay fast.
 var testArgon2Params = config.Argon2Params{MemoryKiB: 64, Iterations: 1, Parallelism: 1, SaltLength: 16, KeyLength: 32}
 
+const testMaxConcurrentHashes = 1
+
 func TestPasswordHasherVerify(t *testing.T) {
-	hasher := NewPasswordHasher(testArgon2Params)
-	encoded, err := hasher.Hash("correct horse")
+	hasher := NewPasswordHasher(testArgon2Params, testMaxConcurrentHashes)
+	encoded, err := hasher.Hash(context.Background(), "correct horse")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
@@ -29,7 +32,7 @@ func TestPasswordHasherVerify(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := hasher.Verify(tt.password, encoded)
+			got, err := hasher.Verify(context.Background(), tt.password, encoded)
 
 			if err != nil || got != tt.want {
 				t.Fatalf("Verify() = %v, %v, want %v, nil", got, err, tt.want)
@@ -39,13 +42,13 @@ func TestPasswordHasherVerify(t *testing.T) {
 }
 
 func TestPasswordHasherHashFormat(t *testing.T) {
-	hasher := NewPasswordHasher(testArgon2Params)
+	hasher := NewPasswordHasher(testArgon2Params, testMaxConcurrentHashes)
 
-	first, err := hasher.Hash("password")
+	first, err := hasher.Hash(context.Background(), "password")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
-	second, err := hasher.Hash("password")
+	second, err := hasher.Hash(context.Background(), "password")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
@@ -59,14 +62,14 @@ func TestPasswordHasherHashFormat(t *testing.T) {
 }
 
 func TestPasswordHasherVerifyKeepsOldParameters(t *testing.T) {
-	encoded, err := NewPasswordHasher(testArgon2Params).Hash("password")
+	encoded, err := NewPasswordHasher(testArgon2Params, testMaxConcurrentHashes).Hash(context.Background(), "password")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
 	stronger := testArgon2Params
 	stronger.Iterations = 3
 
-	got, err := NewPasswordHasher(stronger).Verify("password", encoded)
+	got, err := NewPasswordHasher(stronger, testMaxConcurrentHashes).Verify(context.Background(), "password", encoded)
 
 	if err != nil || !got {
 		t.Fatalf("Verify() = %v, %v, want true, nil", got, err)
@@ -74,7 +77,7 @@ func TestPasswordHasherVerifyKeepsOldParameters(t *testing.T) {
 }
 
 func TestPasswordHasherVerifyRejectsMalformedHash(t *testing.T) {
-	hasher := NewPasswordHasher(testArgon2Params)
+	hasher := NewPasswordHasher(testArgon2Params, testMaxConcurrentHashes)
 	tests := []struct {
 		name    string
 		encoded string
@@ -83,6 +86,8 @@ func TestPasswordHasherVerifyRejectsMalformedHash(t *testing.T) {
 		{name: "other algorithm", encoded: "$argon2i$v=19$m=64,t=1,p=1$c2FsdHNhbHQ$a2V5a2V5"},
 		{name: "other version", encoded: "$argon2id$v=16$m=64,t=1,p=1$c2FsdHNhbHQ$a2V5a2V5"},
 		{name: "missing parameters", encoded: "$argon2id$v=19$m=64$c2FsdHNhbHQ$a2V5a2V5"},
+		{name: "zero iterations", encoded: "$argon2id$v=19$m=64,t=0,p=1$c2FsdHNhbHQ$a2V5a2V5"},
+		{name: "zero parallelism", encoded: "$argon2id$v=19$m=64,t=1,p=0$c2FsdHNhbHQ$a2V5a2V5"},
 		{name: "invalid salt", encoded: "$argon2id$v=19$m=64,t=1,p=1$***$a2V5a2V5"},
 		{name: "empty key", encoded: "$argon2id$v=19$m=64,t=1,p=1$c2FsdHNhbHQ$"},
 		{name: "too many parts", encoded: "$argon2id$v=19$m=64,t=1,p=1$c2FsdHNhbHQ$a2V5a2V5$extra"},
@@ -90,11 +95,30 @@ func TestPasswordHasherVerifyRejectsMalformedHash(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := hasher.Verify("password", tt.encoded)
+			got, err := hasher.Verify(context.Background(), "password", tt.encoded)
 
 			if got || !errors.Is(err, ErrMalformedPasswordHash) {
 				t.Fatalf("Verify() = %v, %v, want false, %v", got, err, ErrMalformedPasswordHash)
 			}
 		})
+	}
+}
+
+func TestPasswordHasherStopsWaitingWhenContextEnds(t *testing.T) {
+	hasher := NewPasswordHasher(testArgon2Params, testMaxConcurrentHashes)
+	encoded, err := hasher.Hash(context.Background(), "password")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+	// Take the only slot, as a hash in progress would.
+	hasher.slots <- struct{}{}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if _, err := hasher.Hash(ctx, "password"); !errors.Is(err, context.Canceled) {
+		t.Fatalf("Hash() error = %v, want %v", err, context.Canceled)
+	}
+	if _, err := hasher.Verify(ctx, "password", encoded); !errors.Is(err, context.Canceled) {
+		t.Fatalf("Verify() error = %v, want %v", err, context.Canceled)
 	}
 }

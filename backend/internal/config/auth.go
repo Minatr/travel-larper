@@ -2,6 +2,8 @@ package config
 
 const (
 	defaultRegisterRateLimitPerHour = 10
+	// About 76 MiB of argon2id memory at most with the parameters below.
+	maxConcurrentPasswordHashes = 4
 
 	// OWASP minimum recommendation for argon2id.
 	argon2MemoryKiB   = 19 * 1024

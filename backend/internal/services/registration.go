@@ -24,7 +24,7 @@ type UserInserter interface {
 
 // Hasher turns a password into a hash safe to store.
 type Hasher interface {
-	Hash(password string) (string, error)
+	Hash(ctx context.Context, password string) (string, error)
 }
 
 // RegistrationService creates user accounts, pending until an admin
@@ -49,7 +49,7 @@ func (s *RegistrationService) Register(ctx context.Context, email, password stri
 		return err
 	}
 
-	hash, err := s.hasher.Hash(password)
+	hash, err := s.hasher.Hash(ctx, password)
 	if err != nil {
 		return fmt.Errorf("register: %w", err)
 	}

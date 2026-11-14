@@ -100,7 +100,7 @@ func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) ht
 	healthController := controllers.NewHealthController(healthService, logger)
 
 	queries := models.New(pool)
-	passwordHasher := services.NewPasswordHasher(cfg.Argon2)
+	passwordHasher := services.NewPasswordHasher(cfg.Argon2, cfg.MaxConcurrentPasswordHashes)
 	registrationService := services.NewRegistrationService(queries, passwordHasher)
 	authController := controllers.NewAuthController(registrationService, logger)
 

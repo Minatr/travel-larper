@@ -23,7 +23,7 @@ type fakeHasher struct {
 	err error
 }
 
-func (h fakeHasher) Hash(password string) (string, error) {
+func (h fakeHasher) Hash(_ context.Context, password string) (string, error) {
 	return "hashed:" + password, h.err
 }
 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
@@ -18,16 +19,25 @@ const argon2Algorithm = "argon2id"
 // PasswordHasher hashes and verifies passwords with argon2id.
 type PasswordHasher struct {
 	params config.Argon2Params
+	// Each hash holds params.MemoryKiB while it runs: capping concurrent
+	// hashes server-wide bounds memory whatever the number of client IPs.
+	slots chan struct{}
 }
 
-// NewPasswordHasher creates a PasswordHasher.
-func NewPasswordHasher(params config.Argon2Params) *PasswordHasher {
-	return &PasswordHasher{params: params}
+// NewPasswordHasher creates a PasswordHasher running at most maxConcurrent
+// hashes at a time.
+func NewPasswordHasher(params config.Argon2Params, maxConcurrent int) *PasswordHasher {
+	return &PasswordHasher{params: params, slots: make(chan struct{}, maxConcurrent)}
 }
 
 // Hash returns the password hashed with a random salt, in the PHC string
 // format: $argon2id$v=19$m=…,t=…,p=…$salt$key.
-func (h *PasswordHasher) Hash(password string) (string, error) {
+func (h *PasswordHasher) Hash(ctx context.Context, password string) (string, error) {
+	if err := h.acquireSlot(ctx); err != nil {
+		return "", err
+	}
+	defer h.releaseSlot()
+
 	salt := make([]byte, h.params.SaltLength)
 	if _, err := rand.Read(salt); err != nil {
 		return "", fmt.Errorf("generate salt: %w", err)
@@ -43,14 +53,32 @@ func (h *PasswordHasher) Hash(password string) (string, error) {
 
 // Verify reports whether password matches encoded, using the parameters
 // stored in encoded rather than the current ones.
-func (h *PasswordHasher) Verify(password, encoded string) (bool, error) {
+func (h *PasswordHasher) Verify(ctx context.Context, password, encoded string) (bool, error) {
 	params, salt, key, err := decodePasswordHash(encoded)
 	if err != nil {
 		return false, err
 	}
+	if err := h.acquireSlot(ctx); err != nil {
+		return false, err
+	}
+	defer h.releaseSlot()
+
 	candidate := argon2.IDKey([]byte(password), salt, params.Iterations, params.MemoryKiB, params.Parallelism, params.KeyLength)
 	// Constant time, so the response time reveals nothing about the hash.
 	return subtle.ConstantTimeCompare(candidate, key) == 1, nil
+}
+
+func (h *PasswordHasher) acquireSlot(ctx context.Context) error {
+	select {
+	case h.slots <- struct{}{}:
+		return nil
+	case <-ctx.Done():
+		return fmt.Errorf("wait for a hashing slot: %w", ctx.Err())
+	}
+}
+
+func (h *PasswordHasher) releaseSlot() {
+	<-h.slots
 }
 
 func decodePasswordHash(encoded string) (config.Argon2Params, []byte, []byte, error) {
@@ -65,6 +93,10 @@ func decodePasswordHash(encoded string) (config.Argon2Params, []byte, []byte, er
 		return params, nil, nil, ErrMalformedPasswordHash
 	}
 	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &params.MemoryKiB, &params.Iterations, &params.Parallelism); err != nil {
+		return params, nil, nil, ErrMalformedPasswordHash
+	}
+	// argon2.IDKey panics on these values instead of returning an error.
+	if params.Iterations < 1 || params.Parallelism < 1 {
 		return params, nil, nil, ErrMalformedPasswordHash
 	}
 

@@ -7,6 +7,7 @@ import (
 
 func withFixedSettings(config Config) Config {
 	config.Argon2 = defaultArgon2Params()
+	config.MaxConcurrentPasswordHashes = maxConcurrentPasswordHashes
 	config.ReadHeaderTimeout = readHeaderTimeout
 	config.WriteTimeout = writeTimeout
 	config.IdleTimeout = idleTimeout
