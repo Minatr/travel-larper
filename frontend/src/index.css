@@ -1,6 +1,12 @@
 @import 'tailwindcss';
 
 /*
+ * Short screens (small phones, e.g. iPhone SE): `short:` styles keep the
+ * panels compact there. Keep in step with SHORT_SCREEN_QUERY (lib/screen.ts).
+ */
+@custom-variant short (@media (max-height: 700px));
+
+/*
  * Design tokens (CLAUDE.md, Direction artistique): paper travel objects
  * (luggage tags) over a dark, space-like background. Five color roles:
  * background (graphite, blue for the maps in lib/globeStyle.ts), paper
@@ -110,15 +116,9 @@
     );
   }
 
-  /* A tag showing up: a short fade, none for those who reduce motion. */
+  /* A tag showing up: a short fade. */
   .tag-appear {
     animation: tag-appear 150ms ease-out;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .tag-appear {
-      animation: none;
-    }
   }
 
   /* Small label tag: a point on the left, where the string goes. */
@@ -140,5 +140,19 @@
 
   body {
     @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  /*
+   * MapLibre makes the map focusable for its arrow keys: after a drag, any
+   * key drew the browser's focus frame around the whole screen.
+   */
+  .maplibregl-canvas:focus-visible {
+    outline: none;
+  }
+
+  /* Tailwind 4 leaves buttons with the arrow cursor: a hand shows they click. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 }

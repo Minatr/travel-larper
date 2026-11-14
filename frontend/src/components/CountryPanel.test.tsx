@@ -19,6 +19,22 @@ describe('CountryPanel', () => {
     expect(onOpen).toHaveBeenCalledOnce()
   })
 
+  it('closes from its close button, when it has one', () => {
+    const onClose = vi.fn()
+    render(<CountryPanel code="FR" onOpen={vi.fn()} onClose={onClose} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it('has no close button by default', () => {
+    render(<CountryPanel code="FR" onOpen={vi.fn()} />)
+
+    expect(
+      screen.queryByRole('button', { name: 'Close' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('has no button for a country without a map', () => {
     render(<CountryPanel code="AQ" onOpen={vi.fn()} />)
 

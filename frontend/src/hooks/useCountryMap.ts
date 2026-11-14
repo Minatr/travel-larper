@@ -14,7 +14,12 @@ import {
   FRAME_PADDING_PX,
   MAP_STYLE_TIMEOUT_MS,
 } from '../lib/countryTransition.ts'
-import { MapLibreMap, mapPixelRatio } from '../lib/maplibre.ts'
+import {
+  lockRotation,
+  MapLibreMap,
+  mapPixelRatio,
+  UPRIGHT_OPTIONS,
+} from '../lib/maplibre.ts'
 import type { CountryMapData } from '../lib/countryMapData.ts'
 import { type Bounds, FULL_TURN_DEGREES } from '../lib/geo.ts'
 import { mercatorCamera, mercatorView } from '../lib/mercatorCamera.ts'
@@ -72,10 +77,13 @@ export function useCountryMap(
       // OpenStreetMap's licence requires the credit, behind an "i" button.
       attributionControl: { compact: true },
       pixelRatio: mapPixelRatio(),
+      // Only moved and zoomed: turning it is of no use.
+      ...UPRIGHT_OPTIONS,
       // Resized by the observer below, which first lifts the limits: with
       // them, a phone turned sideways would be zoomed in by force.
       trackResize: false,
     })
+    lockRotation(map)
 
     // A failure before the style loads leaves the map blank: the style
     // itself failed. Later ones are single tiles, retried by MapLibre.
