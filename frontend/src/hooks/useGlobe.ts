@@ -1,14 +1,19 @@
-import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson'
-import {
-  type GeoJSONSource,
-  MapLibreMap,
-  type PointLike,
-  setWorkerUrl,
-} from 'maplibre-gl'
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
-import { type RefObject, useEffect, useRef } from 'react'
+import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
+import { countryAnchor, facesViewer } from '../lib/countryAnchor.ts'
+import { countryBounds } from '../lib/countryBounds.ts'
+import { hasMap } from '../lib/countryCode.ts'
+import { type CountryHint, tagLayout } from '../lib/countryTag.ts'
 import {
+  FRAME_PADDING_PX,
+  GLOBE_RETURN_MS,
+  GLOBE_TRANSITION_MS,
+} from '../lib/countryTransition.ts'
+import { flyBack, flyIn } from '../lib/globeFlight.ts'
+import { type Camera, mercatorCamera } from '../lib/mercatorCamera.ts'
+import {
+  clickOutcome,
   EMPTY_SELECTION,
   type GlobeEvent,
   raisedCountries,
@@ -17,16 +22,15 @@ import {
 import {
   COUNTRIES_LAYER,
   COUNTRIES_SOURCE,
-  COUNTRIES_URL,
   globeStyle,
   RAISED_SOURCE,
 } from '../lib/globeStyle.ts'
+import { MapLibreMap, mapPixelRatio } from '../lib/maplibre.ts'
+import type { Countries, Country } from '../models/country.ts'
+import { fetchCountries } from '../services/countries.ts'
 
-// MapLibre finds its worker (the background thread that parses the country
-// shapes) next to its own file. Vite moves that file while bundling, so the
-// worker is not found: we give MapLibre its URL, which Vite resolves both in
-// dev and in the production build.
-setWorkerUrl(workerUrl)
+/** A position on the map's canvas, in pixels, as MapLibre gives it. */
+type Point = MapMouseEvent['point']
 
 /** Initial view: centered on Europe and Africa. */
 const INITIAL_CENTER: [number, number] = [10, 25]
@@ -38,6 +42,16 @@ const INITIAL_CENTER: [number, number] = [10, 25]
  */
 const REFERENCE_SIDE_PX = 800
 const REFERENCE_ZOOM = 2.4
+
+/**
+ * Zoom levels past filling the screen at which the globe's edges are off
+ * screen: it may flatten from there.
+ */
+const GLOBE_OVERFLOW_ZOOM_LEVELS = 0.4
+
+function overflowZoom(container: HTMLElement): number {
+  return initialZoom(container) + GLOBE_OVERFLOW_ZOOM_LEVELS
+}
 
 /**
  * Zoom at which the globe fills the smaller side of the container: its
@@ -52,12 +66,6 @@ function initialZoom(container: HTMLElement): number {
 }
 
 /**
- * High-density phone screens can be 3x or more: capping the pixel ratio
- * keeps the globe smooth for a difference hard to see.
- */
-const MAX_PIXEL_RATIO = 2
-
-/**
  * How long the pointer must rest on a country before it rises, so that
  * sweeping across the globe recolors countries without making each of them
  * jump. Going back down is immediate.
@@ -68,33 +76,91 @@ const LIFT_DELAY_MS = 80
 // country "hovered" forever, as no mouseleave ever comes.
 const HOVER_QUERY = '(hover: hover)'
 
-/** Countries file (public/geo/countries.json), features keyed by ISO code. */
-type Countries = FeatureCollection<Polygon | MultiPolygon, { code: string }>
+/**
+ * Gap, in pixels, past which a point does not come back where it was once
+ * turned into a place and back: it lies off the globe, in space.
+ */
+const OFF_GLOBE_PX = 2
 
-function countryCodeAt(map: MapLibreMap, point: PointLike): string | null {
+// Country under `point`, null over the ocean or in space. MapLibre maps a
+// point in space to the globe's edge, which picked the country there.
+function countryCodeAt(map: MapLibreMap, point: Point): string | null {
+  const back = map.project(map.unproject(point))
+  if (Math.hypot(back.x - point.x, back.y - point.y) > OFF_GLOBE_PX) {
+    return null
+  }
   const [feature] = map.queryRenderedFeatures(point, {
     layers: [COUNTRIES_LAYER],
   })
   return typeof feature?.id === 'string' ? feature.id : null
 }
 
+// Pointer over a country: a hand where it opens, a "no" sign where it does
+// not (Antarctica).
+function cursorFor(code: string | null): string {
+  if (code === null) {
+    return ''
+  }
+  return hasMap(code) ? 'pointer' : 'not-allowed'
+}
+
+/** What the globe shows over the map, for the Globe component to draw. */
+export type GlobePointer = {
+  /** Country under the mouse, once it rose, and where its tag hangs. */
+  hint: CountryHint | null
+  /** Country tapped on a touch screen: its panel shows. */
+  picked: string | null
+  /** Opens the picked country, from the panel's button. */
+  openPicked: () => void
+}
+
 /**
- * Mounts the interactive globe in `containerRef` and keeps it in sync with
- * the pointer (raised countries). Calls `onSelectCountry` when a country is
- * clicked or tapped.
+ * Mounts the interactive globe in `containerRef`. With a mouse, hovering
+ * raises a country and shows its name, a click flies to it; on a touch
+ * screen, a tap picks it and the panel's button flies to it. The country
+ * page then loads on top (`onOpenCountry`), and `onLanded` is called when
+ * the flight ends. Once the page covers the globe (`countryShown`), the
+ * country is lowered; when `countryOpen` turns false, the globe flies back
+ * to where it was.
  *
- * The selection lives in plain variables, not in React state: hovering
- * changes it on every mouse move, and only the map needs to know.
+ * The selection lives in plain variables, not React state: it changes on
+ * every mouse move, and only the map needs to know. Only the tag shown
+ * changes state, once per country.
  */
 export function useGlobe(
   containerRef: RefObject<HTMLElement | null>,
-  onSelectCountry: (code: string) => void,
-): void {
+  onOpenCountry: (code: string) => void,
+  onLanded: () => void,
+  countryOpen: boolean,
+  countryShown: boolean,
+): GlobePointer {
+  const [hint, setHint] = useState<CountryHint | null>(null)
+  const [picked, setPicked] = useState<string | null>(null)
+  const openPickedRef = useRef<() => void>(() => {})
+  const openPicked = useCallback(() => openPickedRef.current(), [])
+
   // Latest callback without re-creating the map when it changes.
-  const onSelectRef = useRef(onSelectCountry)
+  const onOpenRef = useRef(onOpenCountry)
+  const onLandedRef = useRef(onLanded)
   useEffect(() => {
-    onSelectRef.current = onSelectCountry
+    onOpenRef.current = onOpenCountry
+    onLandedRef.current = onLanded
   })
+  // Set once the map exists.
+  const lowerRef = useRef<() => void>(() => {})
+  const zoomOutRef = useRef<() => void>(() => {})
+  useEffect(() => {
+    if (countryShown) {
+      lowerRef.current()
+    }
+  }, [countryShown])
+  const wasOpenRef = useRef(countryOpen)
+  useEffect(() => {
+    if (wasOpenRef.current && !countryOpen) {
+      zoomOutRef.current()
+    }
+    wasOpenRef.current = countryOpen
+  }, [countryOpen])
 
   useEffect(() => {
     const container = containerRef.current
@@ -104,35 +170,118 @@ export function useGlobe(
 
     const map = new MapLibreMap({
       container,
-      style: globeStyle(),
+      style: globeStyle(overflowZoom(container)),
       center: INITIAL_CENTER,
       zoom: initialZoom(container),
       // No map tiles: Natural Earth is public domain, nothing to credit.
       attributionControl: false,
-      pixelRatio: Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO),
+      pixelRatio: mapPixelRatio(),
     })
 
     // Loaded once here rather than by MapLibre, to keep each country's shape
     // at hand for the raised layer.
-    const download = new AbortController()
-    const countriesLoaded = fetch(COUNTRIES_URL, { signal: download.signal })
-      .then((response) => response.json() as Promise<Countries>)
-      .catch((error: unknown) => {
-        if (!download.signal.aborted) {
-          console.error('countries failed to load', error)
-        }
+    let disposed = false
+    const countriesLoaded: Promise<Countries | null> = fetchCountries().catch(
+      (error: unknown) => {
+        console.error('countries failed to load', error)
         return null
-      })
-    const shapes = new Map<
-      string,
-      Feature<Polygon | MultiPolygon, { code: string }>
-    >()
+      },
+    )
+    const shapes = new Map<string, Country>()
 
     let selection = EMPTY_SELECTION
+    // Where the globe was when a country opened, to fly back to.
+    let viewBeforeOpening: Camera = {
+      center: INITIAL_CENTER,
+      zoom: initialZoom(container),
+    }
     let shown = new Set<string>()
     let liftTimer: number | undefined
-    let pendingPoint: PointLike | null = null
+    let pendingPoint: Point | null = null
     let frame: number | undefined
+    // Country whose tag shows (or is about to), and the timer that shows it
+    // with the lift.
+    let hint: string | null = null
+    let hintTimer: number | undefined
+    // Country tapped on a touch screen, shown in the panel.
+    let pickedCode: string | null = null
+    // Mouse or touch screen, known once the map loads.
+    let canHover = false
+    // While the globe flies, the pointer neither raises nor opens countries.
+    let flying = false
+    // Hovered country that cannot open, dimmed so the hover visibly lands.
+    let dimmed: string | null = null
+
+    function dim(code: string | null) {
+      if (code === dimmed) {
+        return
+      }
+      if (dimmed !== null) {
+        map.setFeatureState(
+          { source: COUNTRIES_SOURCE, id: dimmed },
+          { dimmed: false },
+        )
+      }
+      if (code !== null) {
+        map.setFeatureState(
+          { source: COUNTRIES_SOURCE, id: code },
+          { dimmed: true },
+        )
+      }
+      dimmed = code
+    }
+
+    // Shows the tag of `code` after the lift delay, or hides it at once.
+    function showHint(code: string | null) {
+      if (code === hint) {
+        return
+      }
+      hint = code
+      window.clearTimeout(hintTimer)
+      setHint(null)
+      if (code !== null) {
+        hintTimer = window.setTimeout(
+          () => setHint(hintFor(code)),
+          LIFT_DELAY_MS,
+        )
+      }
+    }
+
+    // Tag hanging from the country's centroid, or from the mouse when the
+    // centroid is behind the horizon (Russia seen from the side).
+    function hintFor(code: string): CountryHint | null {
+      if (pendingPoint === null) {
+        return null
+      }
+      const center = map.getCenter()
+      const shape = shapes.get(code)
+      const centroid =
+        shape === undefined ? null : countryAnchor(shape.geometry)
+      const anchor =
+        centroid !== null && facesViewer(center.toArray(), centroid)
+          ? map.project(centroid)
+          : pendingPoint
+      const { clientWidth, clientHeight } = map.getContainer()
+      return {
+        code,
+        layout: tagLayout(
+          anchor,
+          map.project(center),
+          clientWidth,
+          clientHeight,
+        ),
+      }
+    }
+
+    // Touch screens: raises the tapped country (dims one without a map) and
+    // shows it in the panel.
+    function pick(code: string | null) {
+      const opens = code !== null && hasMap(code)
+      apply({ type: 'click', code: opens ? code : null })
+      dim(opens ? null : code)
+      pickedCode = code
+      setPicked(code)
+    }
 
     // Puts exactly the raised countries in the small 3D source.
     function show(codes: Set<string>) {
@@ -189,17 +338,83 @@ export function useGlobe(
       }
     }
 
+    // Opens the country page at once, so its map loads during the flight: the
+    // page stays invisible until both are done.
+    function open(code: string) {
+      const shape = shapes.get(code)
+      if (shape === undefined) {
+        return
+      }
+      onOpenRef.current(code)
+      showHint(null)
+      pickedCode = null
+      setPicked(null)
+      viewBeforeOpening = {
+        center: map.getCenter().toArray(),
+        zoom: map.getZoom(),
+      }
+      // The map's own camera, so it takes over exactly where the globe stops.
+      const { clientWidth, clientHeight } = map.getContainer()
+      const camera = mercatorCamera(
+        countryBounds(shape.geometry),
+        clientWidth,
+        clientHeight,
+        FRAME_PADDING_PX,
+      )
+      flying = true
+      flyIn(
+        map,
+        camera,
+        code,
+        overflowZoom(map.getContainer()),
+        GLOBE_TRANSITION_MS,
+        landed,
+      )
+    }
+
+    function landed() {
+      flying = false
+      onLandedRef.current()
+    }
+
+    // Lowered while hidden under the country page, so it does not flash raised
+    // on the way back.
+    lowerRef.current = () => apply({ type: 'click', code: null })
+
+    openPickedRef.current = () => {
+      if (!flying && pickedCode !== null && hasMap(pickedCode)) {
+        open(pickedCode)
+      }
+    }
+
+    zoomOutRef.current = () => {
+      // Back before the country page showed, the country is still raised.
+      lowerRef.current()
+      flying = true
+      flyBack(
+        map,
+        viewBeforeOpening,
+        overflowZoom(map.getContainer()),
+        GLOBE_RETURN_MS,
+        landed,
+      )
+    }
+
     // Mouse moves come faster than the screen refreshes: only the last one
     // of each frame is looked up.
     function onHoverFrame() {
       frame = undefined
-      if (pendingPoint === null) {
+      if (pendingPoint === null || flying) {
         return
       }
       const code = countryCodeAt(map, pendingPoint)
-      map.getCanvas().style.cursor = code === null ? '' : 'pointer'
-      if (code !== selection.hovered) {
-        apply({ type: 'hover', code })
+      showHint(code)
+      map.getCanvas().style.cursor = cursorFor(code)
+      const opens = code !== null && hasMap(code)
+      dim(opens ? null : code)
+      const hovered = opens ? code : null
+      if (hovered !== selection.hovered) {
+        apply({ type: 'hover', code: hovered })
       }
     }
 
@@ -207,7 +422,7 @@ export function useGlobe(
     // handlers are added then.
     map.once('load', () => {
       void countriesLoaded.then((countries) => {
-        if (countries === null) {
+        if (countries === null || disposed) {
           return
         }
         for (const feature of countries.features) {
@@ -216,33 +431,49 @@ export function useGlobe(
         map.getSource<GeoJSONSource>(COUNTRIES_SOURCE)?.setData(countries)
       })
 
-      if (window.matchMedia(HOVER_QUERY).matches) {
+      canHover = window.matchMedia(HOVER_QUERY).matches
+      if (canHover) {
         map.on('mousemove', (event) => {
           pendingPoint = event.point
           frame ??= window.requestAnimationFrame(onHoverFrame)
         })
+        // The tag would drift off its country: hidden until the next move.
+        map.on('movestart', () => showHint(null))
+        map.on('resize', () => showHint(null))
         map.on('mouseout', () => {
           pendingPoint = null
+          showHint(null)
+          dim(null)
           apply({ type: 'hover', code: null })
         })
       }
 
       map.on('click', (event) => {
-        const code = countryCodeAt(map, event.point)
-        apply({ type: 'click', code })
-        if (code !== null) {
-          onSelectRef.current(code)
+        if (flying) {
+          return
+        }
+        const outcome = clickOutcome(countryCodeAt(map, event.point), canHover)
+        if (outcome.open !== null) {
+          apply({ type: 'click', code: outcome.open })
+          open(outcome.open)
+        } else if (canHover) {
+          apply({ type: 'click', code: null })
+        } else {
+          pick(outcome.picked)
         }
       })
     })
 
     return () => {
-      download.abort()
+      disposed = true
       window.clearTimeout(liftTimer)
+      window.clearTimeout(hintTimer)
       if (frame !== undefined) {
         window.cancelAnimationFrame(frame)
       }
       map.remove()
     }
   }, [containerRef])
+
+  return { hint, picked, openPicked }
 }

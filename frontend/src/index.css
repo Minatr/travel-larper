@@ -1,27 +1,35 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens (CLAUDE.md, Direction artistique): the "Night blue" palette,
- * neutral graphite surfaces, a blue globe (lib/globeStyle.ts) and a single
- * turquoise accent. System font, rounded corners. The variable names follow
- * shadcn/ui so its components pick them up. The app is dark only: the
- * globe, its main page, is dark like space, and a light frame around it
- * never matched. The surfaces are graphite, like the space around the
- * globe, so that the blue stays the globe's own color.
+ * Design tokens (CLAUDE.md, Direction artistique): paper travel objects
+ * (luggage tags) over a dark, space-like background. Five color roles:
+ * background (graphite, blue for the maps in lib/globeStyle.ts), paper
+ * (cream panels), ink (printed decoration, never on something clickable),
+ * action (black buttons) and selection (turquoise: raised country, focus).
+ * The variable names follow shadcn/ui so its components pick them up. The
+ * app is dark only: a light frame around the globe never matched.
  */
 :root {
   /* Dark scrollbars and form controls, whatever the system theme. */
   color-scheme: dark;
-  --radius: 0.75rem;
+  --radius: 0.625rem;
   --background: #0d0f13;
   --foreground: #e8eaee;
-  --card: #15181e;
-  --card-foreground: #e8eaee;
   --muted: #1d2129;
   --muted-foreground: #9aa3b2;
   --border: rgb(255 255 255 / 10%);
-  --primary: #2dd4bf;
-  --primary-foreground: #04201c;
+  /* Paper: tags, panels and the header labels. */
+  --card: #efe9dc;
+  --card-foreground: #17191e;
+  --card-muted-foreground: #6a6252;
+  /* Ink: the one variable to change to recolor every printed detail. */
+  --ink: #e8641b;
+  /* Action: buttons. */
+  --primary: #0d0f13;
+  --primary-foreground: #efe9dc;
+  /* Selection: what is chosen, and the keyboard focus. */
+  --selection: #2dd4bf;
+  --selection-foreground: #04201c;
   --ring: #2dd4bf;
   /*
    * Space around the globe (GlobePage). It is graphite rather than blue: a
@@ -39,11 +47,18 @@
 
 @theme inline {
   --font-sans:
-    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --font-display: 'Archivo Variable', 'Arial Narrow', sans-serif;
+  --font-barcode: 'Libre Barcode 39 Text', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-card-muted-foreground: var(--card-muted-foreground);
+  --color-ink: var(--ink);
+  --color-selection: var(--selection);
+  --color-selection-foreground: var(--selection-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
@@ -58,6 +73,63 @@
 @layer components {
   .globe-space {
     background: var(--globe-space);
+  }
+
+  /* Titles printed on a tag: Archivo, condensed, heavy, in capitals. */
+  .tag-title {
+    font-family: var(--font-display);
+    font-stretch: 75%;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  /*
+   * Luggage tag: both corners cut on the eyelet side. clip-path also clips
+   * box shadows: put the shadow on a parent, with a drop-shadow filter.
+   */
+  .tag-shape-left {
+    clip-path: polygon(
+      1.25rem 0,
+      100% 0,
+      100% 100%,
+      1.25rem 100%,
+      0 calc(100% - 1.25rem),
+      0 1.25rem
+    );
+  }
+
+  /* The same tag, eyelet on the right: for tags left of the globe. */
+  .tag-shape-right {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 1.25rem) 0,
+      100% 1.25rem,
+      100% calc(100% - 1.25rem),
+      calc(100% - 1.25rem) 100%,
+      0 100%
+    );
+  }
+
+  /* A tag showing up: a short fade, none for those who reduce motion. */
+  .tag-appear {
+    animation: tag-appear 150ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tag-appear {
+      animation: none;
+    }
+  }
+
+  /* Small label tag: a point on the left, where the string goes. */
+  .tag-label-left {
+    clip-path: polygon(0.75rem 0, 100% 0, 100% 100%, 0.75rem 100%, 0 50%);
+  }
+}
+
+@keyframes tag-appear {
+  from {
+    opacity: 0;
   }
 }
 

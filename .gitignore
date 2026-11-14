@@ -16,7 +16,7 @@ frontend/dist/
 *.tsbuildinfo
 npm-debug.log*
 
-# Données téléchargées (make data)
+# Données téléchargées (make geo)
 data/geo/*.geojson
 
 # Éditeurs et système

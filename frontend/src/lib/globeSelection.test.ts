@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  clickOutcome,
   EMPTY_SELECTION,
   type GlobeEvent,
   type GlobeSelection,
@@ -67,5 +68,48 @@ describe('raisedCountries', () => {
 
   it('raises nothing by default', () => {
     expect(raisedCountries(EMPTY_SELECTION)).toEqual(new Set())
+  })
+})
+
+describe('clickOutcome', () => {
+  it.each([
+    {
+      name: 'a click opens',
+      code: 'FR',
+      canHover: true,
+      want: { open: 'FR', picked: null },
+    },
+    {
+      name: 'a click on Antarctica opens nothing',
+      code: 'AQ',
+      canHover: true,
+      want: { open: null, picked: null },
+    },
+    {
+      name: 'a click on the ocean opens nothing',
+      code: null,
+      canHover: true,
+      want: { open: null, picked: null },
+    },
+    {
+      name: 'a tap only picks',
+      code: 'FR',
+      canHover: false,
+      want: { open: null, picked: 'FR' },
+    },
+    {
+      name: 'a tap on Antarctica picks it, for its message',
+      code: 'AQ',
+      canHover: false,
+      want: { open: null, picked: 'AQ' },
+    },
+    {
+      name: 'a tap on the ocean clears the pick',
+      code: null,
+      canHover: false,
+      want: { open: null, picked: null },
+    },
+  ])('$name', ({ code, canHover, want }) => {
+    expect(clickOutcome(code, canHover)).toEqual(want)
   })
 })

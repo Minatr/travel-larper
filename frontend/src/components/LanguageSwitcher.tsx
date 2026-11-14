@@ -8,15 +8,19 @@ import {
 import { cn } from '../lib/utils.ts'
 
 /**
- * Lets the visitor switch the interface language. The choice is remembered on
- * this browser; it will move to the user profile once accounts exist.
- *
+ * Lets the visitor switch the interface language, on a paper label: the
+ * current language is printed in black. The choice is remembered on this
+ * browser; it will move to the user profile once accounts exist.
  */
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation()
 
   return (
-    <div role="group" aria-label={t('language.label')} className="flex gap-1">
+    <div
+      role="group"
+      aria-label={t('language.label')}
+      className="flex gap-0.5 rounded-md bg-card p-0.5 shadow-lg"
+    >
       {SUPPORTED_LANGUAGES.map((language) => {
         const isCurrent = i18n.resolvedLanguage === language
         return (
@@ -32,10 +36,10 @@ export function LanguageSwitcher() {
             }}
             // 44 px: the smallest comfortable touch target on a phone.
             className={cn(
-              'min-h-11 min-w-11 rounded-md px-2 text-sm font-medium uppercase',
+              'tag-title min-h-11 min-w-11 rounded-sm px-2 text-base',
               isCurrent
-                ? 'bg-muted text-foreground'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-primary text-primary-foreground'
+                : 'text-card-muted-foreground hover:text-card-foreground',
             )}
           >
             {language}

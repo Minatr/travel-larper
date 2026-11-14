@@ -11,9 +11,11 @@ import { afterEach, vi } from 'vitest'
 import i18n from '../i18n/index.ts'
 
 // jsdom draws nothing and has no WebGL: MapLibre is replaced by a stub that
-// accepts the calls useGlobe makes. The globe rendering is checked by hand.
+// accepts the calls the globe and the country map make. Their rendering is
+// checked by hand.
 vi.mock('maplibre-gl', () => ({
   setWorkerUrl: () => {},
+  LngLatBounds: class {},
   MapLibreMap: class {
     on() {}
     once() {}

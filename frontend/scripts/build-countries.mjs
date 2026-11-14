@@ -2,7 +2,7 @@
  * Builds public/geo/countries.json from Natural Earth (public domain):
  * https://github.com/nvkelso/natural-earth-vector/tree/master/geojson
  *
- * Usage, from frontend/:
+ * Run by `make geo`. By hand, from frontend/:
  *   node scripts/build-countries.mjs <ne_110m_admin_0_countries.geojson> \
  *     <ne_50m_admin_0_countries.geojson>
  *
