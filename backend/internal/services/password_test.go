@@ -121,4 +121,17 @@ func TestPasswordHasherStopsWaitingWhenContextEnds(t *testing.T) {
 	if _, err := hasher.Verify(ctx, "password", encoded); !errors.Is(err, context.Canceled) {
 		t.Fatalf("Verify() error = %v, want %v", err, context.Canceled)
 	}
+	if err := hasher.SimulateVerify(ctx, "password"); !errors.Is(err, context.Canceled) {
+		t.Fatalf("SimulateVerify() error = %v, want %v", err, context.Canceled)
+	}
+}
+
+func TestPasswordHasherSimulateVerifyReleasesItsSlot(t *testing.T) {
+	hasher := NewPasswordHasher(testArgon2Params, testMaxConcurrentHashes)
+
+	for range testMaxConcurrentHashes + 1 {
+		if err := hasher.SimulateVerify(context.Background(), "password"); err != nil {
+			t.Fatalf("SimulateVerify() error = %v", err)
+		}
+	}
 }
