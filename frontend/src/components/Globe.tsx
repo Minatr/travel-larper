@@ -1,14 +1,17 @@
-import { use, useEffect, useRef, useState } from 'react'
+import { use, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useGlobe } from '../hooks/useGlobe.ts'
 import { useKeyPress } from '../hooks/useKeyPress.ts'
+import type { LngLat } from '../lib/countryAnchor.ts'
 import { isShortScreen } from '../lib/screen.ts'
+import { skyOffset } from '../lib/starfield.ts'
 import { cn } from '../lib/utils.ts'
 import { CountryBubble } from './CountryBubble.tsx'
 import { CountryPanel } from './CountryPanel.tsx'
 import { CountrySearch } from './CountrySearch.tsx'
 import { HeaderContext } from './headerContext.ts'
+import { Starfield } from './Starfield.tsx'
 
 /** Height of the touch panel, to center a chosen country above it. */
 const PANEL_INSET_PX = 200
@@ -44,12 +47,19 @@ export function Globe({
 }: GlobeProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
+  const skyRef = useRef<SVGPatternElement>(null)
+  // Set on the element directly: it changes on every frame of a move.
+  const moveSky = useCallback((center: LngLat) => {
+    const { x, y } = skyOffset(center)
+    skyRef.current?.setAttribute('patternTransform', `translate(${x} ${y})`)
+  }, [])
   const globe = useGlobe(
     containerRef,
     onOpenCountry,
     onLanded,
     countryOpen,
     countryShown,
+    moveSky,
   )
   const [searchFocused, setSearchFocused] = useState(false)
   const phone = !globe.canHover
@@ -86,6 +96,7 @@ export function Globe({
       aria-label={t('globe.label')}
       className="absolute inset-0 overflow-hidden"
     >
+      <Starfield ref={skyRef} />
       {/*
         The map gets its own element: MapLibre's CSS sets `position: relative`
         on its container, which beats Tailwind's `absolute` (unlayered CSS

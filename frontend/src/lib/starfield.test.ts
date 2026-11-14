@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { starfield } from './starfield.ts'
+import { SKY_SIZE, skyOffset, starfield } from './starfield.ts'
 
 describe('starfield', () => {
   it('draws the same sky for the same seed', () => {
@@ -16,5 +16,15 @@ describe('starfield', () => {
       expect(star.opacity).toBeGreaterThan(0)
       expect(star.opacity).toBeLessThanOrEqual(1)
     }
+  })
+
+  it('moves the sky with the globe, one tile per full turn', () => {
+    const still = skyOffset([0, 0])
+    expect(still.x).toBeCloseTo(0)
+    expect(still.y).toBeCloseTo(0)
+    // Dragging the globe east shows lands further west: the sky follows.
+    expect(skyOffset([-90, 0]).x).toBe(SKY_SIZE / 4)
+    expect(skyOffset([0, 45]).y).toBe(SKY_SIZE / 8)
+    expect(skyOffset([180, 0]).x - skyOffset([-180, 0]).x).toBe(-SKY_SIZE)
   })
 })

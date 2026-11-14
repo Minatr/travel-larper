@@ -143,7 +143,7 @@ export type GlobePointer = {
  * raises a country and shows its name, a click flies to it; on a touch
  * screen, a tap picks it and the panel's button flies to it. The country
  * page then loads on top (`onOpenCountry`), and `onLanded` is called when
- * the flight ends. Once the page covers the globe (`countryShown`), the
+ * the flight ends, and `onMove` with the center at every move. Once the page covers the globe (`countryShown`), the
  * country is lowered; when `countryOpen` turns false, the globe flies back
  * to where it was.
  *
@@ -157,6 +157,7 @@ export function useGlobe(
   onLanded: () => void,
   countryOpen: boolean,
   countryShown: boolean,
+  onMove: (center: LngLat) => void,
 ): GlobePointer {
   const [hint, setHint] = useState<CountryHint | null>(null)
   const [searchedHint, setSearchedHint] = useState<CountryHint | null>(null)
@@ -175,9 +176,11 @@ export function useGlobe(
   // Latest callback without re-creating the map when it changes.
   const onOpenRef = useRef(onOpenCountry)
   const onLandedRef = useRef(onLanded)
+  const onMoveRef = useRef(onMove)
   useEffect(() => {
     onOpenRef.current = onOpenCountry
     onLandedRef.current = onLanded
+    onMoveRef.current = onMove
   })
   // Set once the map exists.
   const lowerRef = useRef<() => void>(() => {})
@@ -580,6 +583,12 @@ export function useGlobe(
         })
       }
 
+      const reportMove = () => {
+        const { lng, lat } = map.getCenter()
+        onMoveRef.current([lng, lat])
+      }
+      reportMove()
+      map.on('move', reportMove)
       map.on('move', placeSearchedTag)
       map.on('resize', placeSearchedTag)
 
