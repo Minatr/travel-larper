@@ -21,3 +21,14 @@ func (q *Queries) InsertUser(ctx context.Context, email, passwordHash string) (b
 	}
 	return true, nil
 }
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, bool, error) {
+	user, err := q.GetUserByEmail(ctx, email)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return User{}, false, nil
+	}
+	if err != nil {
+		return User{}, false, fmt.Errorf("find user by email: %w", err)
+	}
+	return user, true, nil
+}

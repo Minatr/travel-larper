@@ -48,9 +48,10 @@ frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 	$(COMPOSE) up --build --watch frontend
 
 # Les tests d'intégration travaillent dans des schémas temporaires de la base
-# de dev : les données locales ne sont pas touchées.
+# de dev : les données locales ne sont pas touchées. Le contrat est monté en
+# lecture seule pour le test qui compare les routes publiques à openapi.yaml.
 test: ## Lance les tests du backend (Docker, avec la base) et du frontend (outils locaux)
-	$(COMPOSE) run --rm --build backend sh -c 'TEST_DATABASE_URL="$$DATABASE_URL" go test ./...'
+	$(COMPOSE) run --rm --build --volume ./api:/api:ro backend sh -c 'TEST_DATABASE_URL="$$DATABASE_URL" go test ./...'
 	cd frontend && npm test
 
 # lint et format utilisent les outils installés sur la machine (voir README),

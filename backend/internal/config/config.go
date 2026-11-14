@@ -34,7 +34,10 @@ type Config struct {
 	// RegisterRateLimitPerHour is stricter than RateLimitPerMinute because
 	// each registration runs an expensive argon2id hash.
 	RegisterRateLimitPerHour int
-	Argon2                   Argon2Params
+	// LoginRateLimitPerMinute to slow down attacks
+	LoginRateLimitPerMinute int
+	SessionIdleTimeout      time.Duration
+	Argon2                  Argon2Params
 	// MaxConcurrentPasswordHashes caps the argon2id hashes running at once.
 	MaxConcurrentPasswordHashes int
 	ReadHeaderTimeout           time.Duration
@@ -67,6 +70,14 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	loginRateLimit, err := positiveInt("LOGIN_RATE_LIMIT_PER_MINUTE", defaultLoginRateLimitPerMinute)
+	if err != nil {
+		return Config{}, err
+	}
+	sessionIdleTimeoutHours, err := positiveInt("SESSION_IDLE_TIMEOUT_HOURS", defaultSessionIdleTimeoutHours)
+	if err != nil {
+		return Config{}, err
+	}
 	production, err := isProduction()
 	if err != nil {
 		return Config{}, err
@@ -79,6 +90,8 @@ func Load() (Config, error) {
 		RateLimitPerMinute:          rateLimit,
 		MaxBodyBytes:                int64(maxBodyBytes),
 		RegisterRateLimitPerHour:    registerRateLimit,
+		LoginRateLimitPerMinute:     loginRateLimit,
+		SessionIdleTimeout:          time.Duration(sessionIdleTimeoutHours) * time.Hour,
 		Argon2:                      defaultArgon2Params(),
 		MaxConcurrentPasswordHashes: maxConcurrentPasswordHashes,
 		ReadHeaderTimeout:           readHeaderTimeout,

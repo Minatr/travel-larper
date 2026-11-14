@@ -46,8 +46,8 @@ function RegisterSuccess() {
       <p className="mb-4 text-muted-foreground">
         {t('register.success.message')}
       </p>
-      <Link to="/" className="text-sm font-medium underline">
-        {t('register.success.backHome')}
+      <Link to="/login" className="text-sm font-medium underline">
+        {t('register.success.login')}
       </Link>
     </>
   )

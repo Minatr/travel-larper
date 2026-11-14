@@ -8,14 +8,35 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"slices"
 	"strings"
 	"testing"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/Minatr/travel-larper/backend/internal/api"
 	"github.com/Minatr/travel-larper/backend/internal/controllers"
+	"github.com/Minatr/travel-larper/backend/internal/services"
 )
 
 type healthyChecker struct{}
+
+type rejectingAuthenticator struct{}
+
+func (rejectingAuthenticator) Authenticate(context.Context, string) (services.Session, error) {
+	return services.Session{}, services.ErrInvalidSession
+}
+
+type rejectingSessionManager struct{}
+
+func (rejectingSessionManager) Login(context.Context, string, string) (services.Session, error) {
+	return services.Session{}, services.ErrInvalidCredentials
+}
+
+func (rejectingSessionManager) Logout(context.Context, string) error {
+	return nil
+}
 
 type acceptingRegistrar struct{}
 
@@ -27,14 +48,19 @@ func (healthyChecker) Check(context.Context) error {
 	return nil
 }
 
-var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20, RegisterRateLimitPerHour: 1000}
+const contractPath = "../../../api/openapi.yaml"
+
+var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20, RegisterRateLimitPerHour: 1000, LoginRateLimitPerMinute: 1000}
 
 func discardLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }
 
 func TestRoutes(t *testing.T) {
-	handler := Routes(Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())}, discardLogger(), testOptions)
+	handler := Routes(Controllers{
+		HealthController:  controllers.NewHealthController(healthyChecker{}, discardLogger()),
+		SessionController: controllers.NewSessionController(rejectingSessionManager{}, false, discardLogger()),
+	}, rejectingAuthenticator{}, discardLogger(), testOptions)
 
 	tests := []struct {
 		name          string
@@ -47,6 +73,8 @@ func TestRoutes(t *testing.T) {
 		{name: "route outside the base path", method: http.MethodGet, path: "/health", wantStatus: http.StatusNotFound, wantErrorCode: api.ErrorCodeNotFound},
 		{name: "unknown route", method: http.MethodGet, path: "/api/unknown", wantStatus: http.StatusNotFound, wantErrorCode: api.ErrorCodeNotFound},
 		{name: "wrong method", method: http.MethodPost, path: "/api/health", wantStatus: http.StatusMethodNotAllowed, wantErrorCode: api.ErrorCodeMethodNotAllowed},
+		{name: "protected route without a session", method: http.MethodGet, path: "/api/auth/me", wantStatus: http.StatusUnauthorized, wantErrorCode: api.ErrorCodeUnauthorized},
+		{name: "logout without a session", method: http.MethodPost, path: "/api/auth/logout", wantStatus: http.StatusNoContent},
 	}
 
 	for _, tt := range tests {
@@ -75,9 +103,9 @@ func TestRoutesLimitRegistrationOnly(t *testing.T) {
 	options := testOptions
 	options.RegisterRateLimitPerHour = 2
 	handler := Routes(Controllers{
-		HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger()),
-		AuthController:   controllers.NewAuthController(acceptingRegistrar{}, discardLogger()),
-	}, discardLogger(), options)
+		HealthController:       controllers.NewHealthController(healthyChecker{}, discardLogger()),
+		RegistrationController: controllers.NewRegistrationController(acceptingRegistrar{}, discardLogger()),
+	}, rejectingAuthenticator{}, discardLogger(), options)
 	send := func(method, path, body string) *httptest.ResponseRecorder {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(method, path, strings.NewReader(body)))
@@ -100,6 +128,63 @@ func TestRoutesLimitRegistrationOnly(t *testing.T) {
 
 	if recorder := send(http.MethodGet, "/api/health", ""); recorder.Code != http.StatusOK {
 		t.Fatalf("health after the registration limit: status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+}
+
+func TestRoutesLimitLogin(t *testing.T) {
+	options := testOptions
+	options.LoginRateLimitPerMinute = 2
+	handler := Routes(Controllers{
+		SessionController: controllers.NewSessionController(rejectingSessionManager{}, false, discardLogger()),
+	}, rejectingAuthenticator{}, discardLogger(), options)
+	login := func() *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(`{"email":"bob@example.com","password":"guess"}`)))
+		return recorder
+	}
+
+	for i := range options.LoginRateLimitPerMinute {
+		if recorder := login(); recorder.Code != http.StatusUnauthorized {
+			t.Fatalf("attempt %d: status = %d, want %d", i+1, recorder.Code, http.StatusUnauthorized)
+		}
+	}
+	recorder := login()
+	if recorder.Code != http.StatusTooManyRequests {
+		t.Fatalf("attempt over the limit: status = %d, want %d", recorder.Code, http.StatusTooManyRequests)
+	}
+	assertErrorCode(t, recorder, api.ErrorCodeRateLimited)
+}
+
+// TestPublicRoutesMatchTheContract keeps publicRoutes and openapi.yaml in
+// step: a route is public exactly when the contract declares no `security`.
+func TestPublicRoutesMatchTheContract(t *testing.T) {
+	raw, err := os.ReadFile(contractPath)
+	if err != nil {
+		t.Fatalf("read contract: %v", err)
+	}
+	var contract struct {
+		Paths map[string]map[string]struct {
+			Security []map[string][]string `yaml:"security"`
+		} `yaml:"paths"`
+	}
+	if err := yaml.Unmarshal(raw, &contract); err != nil {
+		t.Fatalf("parse contract: %v", err)
+	}
+
+	var wantPublic []string
+	for path, operations := range contract.Paths {
+		for _, operation := range operations {
+			if len(operation.Security) == 0 {
+				wantPublic = append(wantPublic, basePath+path)
+				break
+			}
+		}
+	}
+
+	got := slices.Sorted(slices.Values(publicRoutes))
+	slices.Sort(wantPublic)
+	if !slices.Equal(got, wantPublic) {
+		t.Fatalf("publicRoutes = %v, want the routes without security in openapi.yaml: %v", got, wantPublic)
 	}
 }
 
