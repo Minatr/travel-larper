@@ -248,6 +248,9 @@ export function useGlobe(
     let unmark = () => {}
     // While the globe flies, the pointer neither raises nor opens countries.
     let flying = false
+    // While the globe moves (drag, inertia, zoom), no tag shows: it would
+    // be laid out mid-move and stay there, off its country.
+    let moving = false
     // Hovered country that cannot open, dimmed so the hover visibly lands.
     let dimmed: string | null = null
 
@@ -281,10 +284,13 @@ export function useGlobe(
       window.clearTimeout(hintTimer)
       setHint(null)
       if (code !== null) {
-        hintTimer = window.setTimeout(
-          () => setHint(hintFor(code)),
-          LIFT_DELAY_MS,
-        )
+        hintTimer = window.setTimeout(() => {
+          if (moving) {
+            hint = null
+          } else {
+            setHint(hintFor(code))
+          }
+        }, LIFT_DELAY_MS)
       }
     }
 
@@ -525,7 +531,7 @@ export function useGlobe(
     // of each frame is looked up.
     function onHoverFrame() {
       frame = undefined
-      if (pendingPoint === null || flying) {
+      if (pendingPoint === null || flying || moving) {
         return
       }
       const code = countryCodeAt(map, pendingPoint)
@@ -558,7 +564,13 @@ export function useGlobe(
           frame ??= window.requestAnimationFrame(onHoverFrame)
         })
         // The tag would drift off its country: hidden until the next move.
-        map.on('movestart', () => showHint(null))
+        map.on('movestart', () => {
+          moving = true
+          showHint(null)
+        })
+        map.on('moveend', () => {
+          moving = false
+        })
         map.on('resize', () => showHint(null))
         map.on('mouseout', () => {
           pendingPoint = null

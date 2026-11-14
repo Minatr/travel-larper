@@ -111,18 +111,19 @@ export function Globe({
           }
         }}
         blurOnSelect={phone}
+        withLogo={!phone}
         inert={countryOpen}
         className={cn(
           'absolute transition duration-300 ease-out',
           // Placed by its top, 1.5 rem above the bottom: the result list
           // then opens below the field instead of pushing it up.
-          phone
-            ? 'inset-x-3 top-[calc(100%-4.5rem)]'
-            : 'top-3 left-1/2 w-96 max-w-[calc(100%-28rem)] -translate-x-1/2',
+          phone ? 'inset-x-3 top-[calc(100%-4.5rem)]' : 'top-3 left-4 w-96',
           // From the bottom to the header's row: the screen's height, less
           // the field (3 rem) and its margins (1.5 rem below, 0.75 rem above).
           searchAtTop && '-translate-y-[calc(100dvh-5.25rem)]',
-          countryOpen && 'opacity-0',
+          // A country opens: up and off the screen on a computer, its
+          // hanging logo too (12 rem clears both); faded out on a phone.
+          countryOpen && (phone ? 'opacity-0' : '-translate-y-48'),
         )}
       />
       {/* After the search, so Tab goes from the field to its button. */}

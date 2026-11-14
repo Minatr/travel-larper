@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { Outlet, useMatch, useNavigate } from 'react-router'
 
 import { Globe } from '../components/Globe.tsx'
+import { Starfield } from '../components/Starfield.tsx'
 import type { CountryOutletContext } from '../lib/countryTransition.ts'
 
 /**
@@ -27,6 +28,7 @@ export function GlobePage() {
 
   return (
     <div className="globe-space relative flex-1">
+      <Starfield />
       <Globe
         onOpenCountry={openCountry}
         onLanded={onLanded}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useCountrySearch } from '../hooks/useCountrySearch.ts'
 import { splitOnMatch } from '../lib/countrySearch.ts'
 import { cn } from '../lib/utils.ts'
+import { HangingLogo } from './HangingLogo.tsx'
 
 /** Props of {@link CountrySearch}. */
 type CountrySearchProps = {
@@ -21,6 +22,8 @@ type CountrySearchProps = {
   className?: string
   /** Out of reach (hidden, or covered by a country page). */
   inert?: boolean
+  /** Hangs the app's name from the field (computer). */
+  withLogo?: boolean
 }
 
 /** Paper search field over the globe, with its result list (combobox). */
@@ -32,6 +35,7 @@ export function CountrySearch({
   blurOnSelect,
   className,
   inert,
+  withLogo = false,
 }: CountrySearchProps) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -51,45 +55,64 @@ export function CountrySearch({
   const showList = search.ready && search.listOpen && search.query.trim() !== ''
 
   return (
-    <div className={cn('drop-shadow-lg', className)} inert={inert}>
-      <div className="flex min-h-12 items-center gap-2 rounded-md bg-card px-3 text-card-foreground focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring">
-        <SearchIcon />
-        <input
-          ref={inputRef}
-          type="search"
-          role="combobox"
-          aria-label={t('search.label')}
-          aria-expanded={showList}
-          aria-controls={listId}
-          aria-autocomplete="list"
-          aria-activedescendant={
-            showList && search.results.length > 0
-              ? optionId(search.activeIndex)
-              : undefined
-          }
-          placeholder={t('search.placeholder')}
-          autoComplete="off"
-          enterKeyHint="search"
-          value={search.query}
-          onChange={(event) => search.change(event.target.value)}
-          onKeyDown={(event) => {
-            if (search.press(event.key)) {
-              event.preventDefault()
-            } else if (event.key === 'Escape') {
-              event.currentTarget.blur()
-            }
-          }}
-          onFocus={() => {
-            search.prepare()
-            onFocusChange(true)
-          }}
-          onBlur={() => {
-            search.closeList()
-            onFocusChange(false)
-          }}
-          className="min-w-0 flex-1 bg-transparent py-3 text-base outline-none placeholder:text-card-muted-foreground"
+    <div className={cn('isolate drop-shadow-lg', className)} inert={inert}>
+      {/* A new one each time the field comes back, so that it swings again. */}
+      {withLogo && <HangingLogo key={String(inert)} />}
+      {/*
+        A luggage tag, like the others: point and eyelet on the left, a small
+        printed label. Its cut shape clips outlines: focus shows as an inner
+        line in the selection color.
+      */}
+      <label className="tag-label-left flex min-h-12 cursor-text items-center gap-3 bg-card pr-3 pl-5 text-card-foreground focus-within:shadow-[inset_0_-2px_0_var(--ring)]">
+        <span
+          aria-hidden
+          className="size-2.5 shrink-0 rounded-full bg-background ring-2 ring-ink"
         />
-      </div>
+        <span className="flex min-w-0 flex-1 flex-col py-1.5">
+          <span
+            aria-hidden
+            className="text-[0.625rem] leading-none font-semibold tracking-[0.18em] text-ink uppercase"
+          >
+            {t('globe.destination')}
+          </span>
+          <input
+            ref={inputRef}
+            type="search"
+            role="combobox"
+            aria-label={t('search.label')}
+            aria-expanded={showList}
+            aria-controls={listId}
+            aria-autocomplete="list"
+            aria-activedescendant={
+              showList && search.results.length > 0
+                ? optionId(search.activeIndex)
+                : undefined
+            }
+            placeholder={t('search.placeholder')}
+            autoComplete="off"
+            enterKeyHint="search"
+            value={search.query}
+            onChange={(event) => search.change(event.target.value)}
+            onKeyDown={(event) => {
+              if (search.press(event.key)) {
+                event.preventDefault()
+              } else if (event.key === 'Escape') {
+                event.currentTarget.blur()
+              }
+            }}
+            onFocus={() => {
+              search.prepare()
+              onFocusChange(true)
+            }}
+            onBlur={() => {
+              search.closeList()
+              onFocusChange(false)
+            }}
+            className="mt-1 min-w-0 bg-transparent text-base leading-tight outline-none placeholder:text-card-muted-foreground"
+          />
+        </span>
+        <SearchIcon />
+      </label>
       <ul
         id={listId}
         role="listbox"

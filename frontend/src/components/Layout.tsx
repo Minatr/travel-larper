@@ -11,15 +11,18 @@ import { LanguageSwitcher } from './LanguageSwitcher.tsx'
  * runs under it up to the top of the screen. It is no bar, just two paper
  * labels (CLAUDE.md, Direction artistique): the logo, a small luggage tag,
  * and the language switch. Text pages leave room for it with PageContainer.
- * On a country page the logo flies away: it would only take room there,
- * and the page has its own way back to the globe. A page can also hide
- * both labels (HeaderContext).
+ * There is no logo on the globe and its country pages: the globe is the
+ * home page, the search takes its corner, and a country page has its own
+ * way back. A page can also hide both labels (HeaderContext).
  */
 export function Layout() {
   const { t } = useTranslation()
-  const countryOpen = useMatch('/countries/:code') !== null
+  // Both hooks always run: no `||` between them.
+  const onGlobeHome = useMatch('/') !== null
+  const onCountryPage = useMatch('/countries/:code') !== null
+  const onGlobe = onGlobeHome || onCountryPage
   const [hiddenByPage, setHiddenByPage] = useState(false)
-  const logoGone = countryOpen || hiddenByPage
+  const logoGone = onGlobe || hiddenByPage
 
   return (
     <div className="relative flex min-h-dvh flex-col">

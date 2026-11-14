@@ -244,7 +244,7 @@ travel-larper/
 | --- | --- | --- |
 | **Fond** | espace, globe, cartes, pages | graphite et bleu nuit (tableaux ci-dessous) |
 | **Papier** | étiquettes, panneaux, en-tête (logo, langue, recherche), formulaires | crème `#efe9dc`, texte `#17191e`, texte secondaire `#6a6252` |
-| **Encre** | détails imprimés **décoratifs** : petites étiquettes en capitales, étoile de priorité, œillet, liseré, code-barres | orange `#e8641b` (provisoire, jugé un peu vif) |
+| **Encre** | détails imprimés **décoratifs** : petites étiquettes en capitales, étoile de priorité, œillet, liseré, code-barres | orange brûlé `#a8450f` (contraste 5:1 sur le papier : lisible pour les petites mentions) |
 | **Action** | boutons | noir `#0d0f13`, texte crème ; la flèche éventuelle prend l'encre |
 | **Sélection** | pays soulevé, contour de focus clavier, élément actif sur une carte | turquoise `#2dd4bf` |
 
@@ -279,7 +279,7 @@ Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui), `fronten
 | Papier (`--card`) | `#efe9dc` |
 | Texte sur papier (`--card-foreground`) | `#17191e` |
 | Texte secondaire sur papier (`--card-muted-foreground`) | `#6a6252` |
-| Encre (`--ink`) | `#e8641b` |
+| Encre (`--ink`) | `#a8450f` |
 | Action (`--primary`) | `#0d0f13`, texte `#efe9dc` (`--primary-foreground`) |
 | Sélection (`--ring`, `--selection`) | `#2dd4bf`, texte `#04201c` |
 
@@ -287,7 +287,7 @@ Globe :
 
 | Élément | Couleur |
 | --- | --- |
-| Espace autour (`--globe-space`) | dégradé radial graphite, `#1a1d24` → `#040506` (neutre, pour que le globe bleu ressorte) |
+| Espace autour (`--globe-space`) | dégradé radial graphite, `#1a1d24` → `#040506` (neutre, pour que le globe bleu ressorte), deux nuages très légers violet et ambre, et de petites étoiles pâles couleur papier (`Starfield`) : jamais de bleu |
 | Océan et frontières | `#0a1a33` |
 | Pays (7 nuances, une par groupe Natural Earth) | `#2b5080` `#2f5788` `#284b78` `#335d8f` `#2d5384` `#264872` `#376396` |
 | Pays soulevé | `#2dd4bf` (sélection) |

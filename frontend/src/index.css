@@ -29,7 +29,8 @@
   --card-foreground: #17191e;
   --card-muted-foreground: #6a6252;
   /* Ink: the one variable to change to recolor every printed detail. */
-  --ink: #e8641b;
+  /* Burnt orange: 5:1 on the paper, readable for the small printed labels. */
+  --ink: #a8450f;
   /* Action: buttons. */
   --primary: #0d0f13;
   --primary-foreground: #efe9dc;
@@ -42,13 +43,17 @@
    * blue space would blend with the blue globe, a neutral one lets the
    * globe stand out.
    */
-  --globe-space: radial-gradient(
-    circle at center,
-    #1a1d24 0%,
-    #111318 40%,
-    #090a0d 75%,
-    #040506 100%
-  );
+  --globe-space:
+    /* Faint violet and amber clouds: space, but never the globe's blue. */
+    radial-gradient(ellipse at 12% 18%, rgb(124 92 160 / 9%), transparent 45%),
+    radial-gradient(ellipse at 88% 85%, rgb(170 110 70 / 6%), transparent 40%),
+    radial-gradient(
+      circle at center,
+      #1a1d24 0%,
+      #111318 40%,
+      #090a0d 75%,
+      #040506 100%
+    );
 }
 
 @theme inline {
@@ -121,9 +126,30 @@
     animation: tag-appear 150ms ease-out;
   }
 
+  /* A hanging tag swinging once it shows up (after the field slides in). */
+  .tag-swing {
+    animation: tag-swing 1.2s ease-out 0.3s;
+  }
+
   /* Small label tag: a point on the left, where the string goes. */
   .tag-label-left {
     clip-path: polygon(0.75rem 0, 100% 0, 100% 100%, 0.75rem 100%, 0 50%);
+  }
+}
+
+/* Around its resting tilt (rotate-[20deg]), each swing smaller. */
+@keyframes tag-swing {
+  20% {
+    rotate: 36deg;
+  }
+  45% {
+    rotate: 8deg;
+  }
+  70% {
+    rotate: 27deg;
+  }
+  88% {
+    rotate: 16deg;
   }
 }
 
