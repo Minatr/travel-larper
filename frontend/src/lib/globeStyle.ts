@@ -29,6 +29,22 @@ export const COUNTRIES_LAYER = 'countries-fill'
 export const MAP_COLORS_LAYER = 'countries-map-colors'
 /** Id of the 3D layer of the raised countries. */
 export const RAISED_LAYER = 'countries-raised'
+/** Id of the source of the search's marker: one point (searchMarker). */
+export const MARKER_SOURCE = 'search-marker'
+/** Layer darkening the countries other than the searched one. */
+export const SPOTLIGHT_LAYER = 'search-spotlight'
+/** Steady ring around the searched country, and the pulse going out of it. */
+export const RING_LAYER = 'search-ring'
+export const PULSE_LAYER = 'search-pulse'
+
+/** Darkening of the other countries while one is searched, from 0 to 1. */
+export const SPOTLIGHT_OPACITY = 0.45
+
+/** Fade of that darkening, in and out. */
+const SPOTLIGHT_FADE_MS = 300
+
+/** Radius of the steady ring, in pixels: big enough to find a microstate. */
+export const RING_RADIUS_PX = 16
 const BORDERS_LAYER = 'countries-borders'
 const BACKGROUND_LAYER = 'background'
 
@@ -84,6 +100,8 @@ const COLORS: {
   border: string
   raised: string
   dimmed: string
+  shadow: string
+  ring: string
 } = {
   ocean: '#0a1a33',
   land: [
@@ -98,6 +116,9 @@ const COLORS: {
   border: '#0a1a33',
   raised: '#2dd4bf',
   dimmed: '#1a3354',
+  // The space around the globe, and the paper (--card in index.css).
+  shadow: '#040506',
+  ring: '#efe9dc',
 }
 
 // Raised country in the selection color, a hovered country that cannot open
@@ -153,6 +174,10 @@ export function globeStyle(overflowZoom: number): GlobeStyle {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
       },
+      [MARKER_SOURCE]: {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      },
     },
     layers: [
       {
@@ -182,12 +207,52 @@ export function globeStyle(overflowZoom: number): GlobeStyle {
         paint: { 'line-color': COLORS.border, 'line-width': BORDER_WIDTH },
       },
       {
+        // Off (opacity 0) until a search; searchMarker filters out the
+        // searched country, which stays lit.
+        id: SPOTLIGHT_LAYER,
+        type: 'fill',
+        source: COUNTRIES_SOURCE,
+        paint: {
+          'fill-color': COLORS.shadow,
+          'fill-opacity': 0,
+          'fill-opacity-transition': { duration: SPOTLIGHT_FADE_MS },
+        },
+      },
+      {
         id: RAISED_LAYER,
         type: 'fill-extrusion',
         source: RAISED_SOURCE,
         paint: {
           'fill-extrusion-color': COLORS.raised,
           'fill-extrusion-height': RAISED_HEIGHT_METERS,
+        },
+      },
+      // Rings lying on the globe ('map' alignment), smaller towards its edge.
+      {
+        id: PULSE_LAYER,
+        type: 'circle',
+        source: MARKER_SOURCE,
+        paint: {
+          'circle-radius': RING_RADIUS_PX,
+          'circle-opacity': 0,
+          'circle-stroke-color': COLORS.ring,
+          'circle-stroke-width': 2,
+          'circle-stroke-opacity': 0,
+          'circle-pitch-alignment': 'map',
+          'circle-pitch-scale': 'map',
+        },
+      },
+      {
+        id: RING_LAYER,
+        type: 'circle',
+        source: MARKER_SOURCE,
+        paint: {
+          'circle-radius': RING_RADIUS_PX,
+          'circle-opacity': 0,
+          'circle-stroke-color': COLORS.ring,
+          'circle-stroke-width': 2,
+          'circle-pitch-alignment': 'map',
+          'circle-pitch-scale': 'map',
         },
       },
     ],

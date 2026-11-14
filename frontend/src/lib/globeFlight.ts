@@ -70,12 +70,14 @@ const LOWER_SHARE = 0.25
 /** Last zoom level MapLibre shows a layer at, by default. */
 const MAX_LAYER_ZOOM = 24
 
-/** Users' ways of moving the map, off during a flight. */
+/**
+ * Users' ways of moving the map, off during a flight. Right-click rotation
+ * (dragRotate) stays off for good (useGlobe).
+ */
 const INTERACTIONS = [
   'dragPan',
   'scrollZoom',
   'boxZoom',
-  'dragRotate',
   'keyboard',
   'doubleClickZoom',
   'touchZoomRotate',
