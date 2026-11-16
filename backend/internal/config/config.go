@@ -31,10 +31,16 @@ type Config struct {
 	Production         bool
 	RateLimitPerMinute int
 	MaxBodyBytes       int64
-	ReadHeaderTimeout  time.Duration
-	WriteTimeout       time.Duration
-	IdleTimeout        time.Duration
-	ShutdownTimeout    time.Duration
+	// RegisterRateLimitPerHour is stricter than RateLimitPerMinute because
+	// each registration runs an expensive argon2id hash.
+	RegisterRateLimitPerHour int
+	Argon2                   Argon2Params
+	// MaxConcurrentPasswordHashes caps the argon2id hashes running at once.
+	MaxConcurrentPasswordHashes int
+	ReadHeaderTimeout           time.Duration
+	WriteTimeout                time.Duration
+	IdleTimeout                 time.Duration
+	ShutdownTimeout             time.Duration
 }
 
 // Load reads the configuration from the environment.
@@ -57,21 +63,28 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	registerRateLimit, err := positiveInt("REGISTER_RATE_LIMIT_PER_HOUR", defaultRegisterRateLimitPerHour)
+	if err != nil {
+		return Config{}, err
+	}
 	production, err := isProduction()
 	if err != nil {
 		return Config{}, err
 	}
 
 	return Config{
-		DatabaseURL:        databaseURL,
-		APIPort:            apiPort,
-		Production:         production,
-		RateLimitPerMinute: rateLimit,
-		MaxBodyBytes:       int64(maxBodyBytes),
-		ReadHeaderTimeout:  readHeaderTimeout,
-		WriteTimeout:       writeTimeout,
-		IdleTimeout:        idleTimeout,
-		ShutdownTimeout:    shutdownTimeout,
+		DatabaseURL:                 databaseURL,
+		APIPort:                     apiPort,
+		Production:                  production,
+		RateLimitPerMinute:          rateLimit,
+		MaxBodyBytes:                int64(maxBodyBytes),
+		RegisterRateLimitPerHour:    registerRateLimit,
+		Argon2:                      defaultArgon2Params(),
+		MaxConcurrentPasswordHashes: maxConcurrentPasswordHashes,
+		ReadHeaderTimeout:           readHeaderTimeout,
+		WriteTimeout:                writeTimeout,
+		IdleTimeout:                 idleTimeout,
+		ShutdownTimeout:             shutdownTimeout,
 	}, nil
 }
 

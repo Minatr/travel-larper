@@ -3,7 +3,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 )
@@ -11,9 +10,6 @@ import (
 // databasePingTimeout bounds the health check so a hung database cannot
 // block the caller.
 const databasePingTimeout = 2 * time.Second
-
-// ErrDatabaseUnavailable is returned when the database cannot be reached.
-var ErrDatabaseUnavailable = errors.New("database unavailable")
 
 // DatabasePinger checks that the database is reachable.
 type DatabasePinger interface {

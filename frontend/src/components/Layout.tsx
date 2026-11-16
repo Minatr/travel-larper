@@ -8,12 +8,12 @@ import { LanguageSwitcher } from './LanguageSwitcher.tsx'
 
 /**
  * Frame shared by every page: a header floating over the page, so the globe
- * runs under it up to the top of the screen. It is no bar, just two paper
+ * runs under it up to the top of the screen. It is no bar, just paper
  * labels (CLAUDE.md, Direction artistique): the logo, a small luggage tag,
- * and the language switch. Text pages leave room for it with PageContainer.
- * There is no logo on the globe and its country pages: the globe is the
+ * the sign-up link and the language switch. Text pages leave room for it
+ * with PageContainer. There is no logo on the globe and its country pages: the globe is the
  * home page, the search takes its corner, and a country page has its own
- * way back. A page can also hide both labels (HeaderContext).
+ * way back. A page can also hide all the labels (HeaderContext).
  */
 export function Layout() {
   const { t } = useTranslation()
@@ -49,15 +49,21 @@ export function Layout() {
             {t('app.name')}
           </span>
         </Link>
-        <div
+        <nav
           inert={hiddenByPage}
           className={cn(
-            'pointer-events-auto transition duration-300 ease-out motion-reduce:transition-none',
+            'pointer-events-auto flex items-center gap-2 transition duration-300 ease-out motion-reduce:transition-none',
             hiddenByPage && '-translate-y-20 opacity-0',
           )}
         >
+          <Link
+            to="/register"
+            className="tag-title flex min-h-11 items-center rounded-md bg-card px-3 text-base text-card-muted-foreground shadow-lg hover:text-card-foreground"
+          >
+            {t('nav.register')}
+          </Link>
           <LanguageSwitcher />
-        </div>
+        </nav>
       </header>
       <main className="flex flex-1 flex-col">
         {/* React Router renders here the page that matches the URL. */}

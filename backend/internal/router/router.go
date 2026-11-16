@@ -5,6 +5,7 @@ package router
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
@@ -19,25 +20,32 @@ import (
 // forward them with a single rule. It matches `servers` in openapi.yaml.
 const basePath = "/api"
 
-// server bundles the controllers into a single api.ServerInterface.
-type server struct {
+// registerRoute is the chi pattern of the registration route, which gets a
+// stricter rate limit.
+const registerRoute = basePath + "/auth/register"
+
+// Controllers bundles the controllers into a single api.ServerInterface.
+type Controllers struct {
 	*controllers.HealthController
+	*controllers.AuthController
 }
 
 // Compile-time check: a route of openapi.yaml without a controller method
 // breaks the build instead of failing at runtime.
-var _ api.ServerInterface = server{}
+var _ api.ServerInterface = Controllers{}
 
 // Options holds the settings of the middlewares shared by every route.
 type Options struct {
 	RateLimitPerMinute int
 	MaxBodyBytes       int64
 	HSTS               bool
+
+	RegisterRateLimitPerHour int
 }
 
 // Routes builds the HTTP handler that maps every route of openapi.yaml to
 // its controller method.
-func Routes(health *controllers.HealthController, logger *slog.Logger, options Options) http.Handler {
+func Routes(handlers Controllers, logger *slog.Logger, options Options) http.Handler {
 	router := chi.NewRouter()
 	router.Use(
 		chimiddleware.RequestID,
@@ -56,9 +64,12 @@ func Routes(health *controllers.HealthController, logger *slog.Logger, options O
 	router.MethodNotAllowed(func(w http.ResponseWriter, _ *http.Request) {
 		views.WriteError(w, logger, api.ErrorCodeMethodNotAllowed)
 	})
-	return api.HandlerWithOptions(server{HealthController: health}, api.ChiServerOptions{
-		BaseURL:          basePath,
-		BaseRouter:       router,
+	return api.HandlerWithOptions(handlers, api.ChiServerOptions{
+		BaseURL:    basePath,
+		BaseRouter: router,
+		Middlewares: []api.MiddlewareFunc{
+			middleware.RouteRateLimit(registerRoute, options.RegisterRateLimitPerHour, time.Hour, logger),
+		},
 		ErrorHandlerFunc: invalidParameterHandler(logger),
 	})
 }
