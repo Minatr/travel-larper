@@ -37,7 +37,7 @@ export function Layout() {
           to="/"
           inert={logoGone}
           className={cn(
-            'pointer-events-auto origin-left rotate-2 py-1.5 drop-shadow-lg sm:py-0 transition duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring',
+            'pointer-events-auto origin-left rotate-2 py-1.5 drop-shadow-lg sm:py-0 transition duration-300 ease-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring',
             logoGone && '-translate-y-20 -rotate-6 opacity-0',
           )}
         >
@@ -52,7 +52,7 @@ export function Layout() {
         <div
           inert={hiddenByPage}
           className={cn(
-            'pointer-events-auto transition duration-300 ease-out',
+            'pointer-events-auto transition duration-300 ease-out motion-reduce:transition-none',
             hiddenByPage && '-translate-y-20 opacity-0',
           )}
         >

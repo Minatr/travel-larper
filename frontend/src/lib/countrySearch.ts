@@ -3,17 +3,23 @@ import { hasMap } from './countryCode.ts'
 /** A country as the search knows it: its name and other common names. */
 export type CountryEntry = { code: string; name: string; aliases?: string[] }
 
+/** A country ready to search: its names already normalized, once per language. */
+export type SearchableCountry = CountryEntry & {
+  searchName: string
+  searchAliases: string[]
+}
+
 /** A result, with the common name that matched when the name itself did not. */
 export type CountryResult = { code: string; name: string; alias?: string }
 
 /** Most results shown at once. */
-export const MAX_RESULTS = 6
+const MAX_RESULTS = 6
 
 /**
  * Lower case, without accents, hyphens as spaces, one kind of apostrophe:
  * "États-Unis" becomes "etats unis", "Côte d’Ivoire" "cote d'ivoire".
  */
-export function normalizeForSearch(text: string): string {
+function normalizeForSearch(text: string): string {
   return foldCase(text).trim()
 }
 
@@ -55,13 +61,26 @@ export function splitOnMatch(name: string, query: string): NameParts {
 }
 
 /**
+ * Prepares `entries` for {@link searchCountries}, leaving out countries
+ * without a map. To redo only when the names change (language).
+ */
+export function prepareCountries(entries: CountryEntry[]): SearchableCountry[] {
+  return entries
+    .filter((entry) => hasMap(entry.code))
+    .map((entry) => ({
+      ...entry,
+      searchName: normalizeForSearch(entry.name),
+      searchAliases: (entry.aliases ?? []).map(normalizeForSearch),
+    }))
+}
+
+/**
  * Countries whose name, or a common name, holds `query`, those starting
- * with it first ("ma": Madagascar before Guatemala). Countries without a
- * map are left out.
+ * with it first ("ma": Madagascar before Guatemala).
  */
 export function searchCountries(
   query: string,
-  entries: CountryEntry[],
+  countries: SearchableCountry[],
   language: string,
 ): CountryResult[] {
   const needle = normalizeForSearch(query)
@@ -70,10 +89,7 @@ export function searchCountries(
   }
   const starting: CountryResult[] = []
   const containing: CountryResult[] = []
-  for (const entry of entries) {
-    if (!hasMap(entry.code)) {
-      continue
-    }
+  for (const entry of countries) {
     const match = bestMatch(entry, needle)
     if (match === null) {
       continue
@@ -98,27 +114,25 @@ export function searchCountries(
 
 // How `entry` matches: by its name first, else by a common name.
 function bestMatch(
-  entry: CountryEntry,
+  entry: SearchableCountry,
   needle: string,
 ): { starts: boolean; alias?: string } | null {
-  const name = normalizeForSearch(entry.name)
-  if (name.startsWith(needle)) {
+  if (entry.searchName.startsWith(needle)) {
     return { starts: true }
   }
-  const aliases = entry.aliases ?? []
-  const startingAlias = aliases.find((alias) =>
-    normalizeForSearch(alias).startsWith(needle),
+  const starting = entry.searchAliases.findIndex((alias) =>
+    alias.startsWith(needle),
   )
-  if (startingAlias !== undefined) {
-    return { starts: true, alias: startingAlias }
+  if (starting !== -1) {
+    return { starts: true, alias: entry.aliases?.[starting] }
   }
-  if (name.includes(needle)) {
+  if (entry.searchName.includes(needle)) {
     return { starts: false }
   }
-  const containingAlias = aliases.find((alias) =>
-    normalizeForSearch(alias).includes(needle),
+  const containing = entry.searchAliases.findIndex((alias) =>
+    alias.includes(needle),
   )
-  return containingAlias === undefined
+  return containing === -1
     ? null
-    : { starts: false, alias: containingAlias }
+    : { starts: false, alias: entry.aliases?.[containing] }
 }

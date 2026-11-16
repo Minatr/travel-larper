@@ -1,4 +1,4 @@
-import type { Ref } from 'react'
+import { memo, type Ref } from 'react'
 
 import { SKY_SIZE, starfield } from '../lib/starfield.ts'
 
@@ -18,9 +18,10 @@ type StarfieldProps = {
 /**
  * Faint stars behind the globe, in paper white rather than blue so the
  * globe still stands out. The stars are a repeated tile, so the sky can
- * move without ever showing an edge.
+ * move without ever showing an edge. Memoized: the globe re-renders on
+ * every frame while the searched country's tag follows it.
  */
-export function Starfield({ ref }: StarfieldProps) {
+export const Starfield = memo(function Starfield({ ref }: StarfieldProps) {
   return (
     <svg
       aria-hidden
@@ -51,4 +52,4 @@ export function Starfield({ ref }: StarfieldProps) {
       <rect width={SKY_SIZE} height={SKY_SIZE} fill="url(#starfield)" />
     </svg>
   )
-}
+})

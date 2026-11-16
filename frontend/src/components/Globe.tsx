@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useGlobe } from '../hooks/useGlobe.ts'
 import { useKeyPress } from '../hooks/useKeyPress.ts'
 import type { LngLat } from '../lib/countryAnchor.ts'
-import { isShortScreen } from '../lib/screen.ts'
+import { isShortScreen, prefersReducedMotion } from '../lib/screen.ts'
 import { skyOffset } from '../lib/starfield.ts'
 import { cn } from '../lib/utils.ts'
 import { CountryBubble } from './CountryBubble.tsx'
@@ -49,10 +49,18 @@ export function Globe({
   const containerRef = useRef<HTMLDivElement>(null)
   const skyRef = useRef<SVGPatternElement>(null)
   // Set on the element directly: it changes on every frame of a move.
-  const moveSky = useCallback((center: LngLat) => {
-    const { x, y } = skyOffset(center)
-    skyRef.current?.setAttribute('patternTransform', `translate(${x} ${y})`)
-  }, [])
+  // Still sky for those who reduce motion.
+  const [stillSky] = useState(prefersReducedMotion)
+  const moveSky = useCallback(
+    (center: LngLat) => {
+      if (stillSky) {
+        return
+      }
+      const { x, y } = skyOffset(center)
+      skyRef.current?.setAttribute('patternTransform', `translate(${x} ${y})`)
+    },
+    [stillSky],
+  )
   const globe = useGlobe(
     containerRef,
     onOpenCountry,
@@ -125,7 +133,7 @@ export function Globe({
         withLogo={!phone}
         inert={countryOpen}
         className={cn(
-          'absolute transition duration-300 ease-out',
+          'absolute transition duration-300 ease-out motion-reduce:transition-none',
           // Placed by its top, 1.5 rem above the bottom: the result list
           // then opens below the field instead of pushing it up.
           phone ? 'inset-x-3 top-[calc(100%-4.5rem)]' : 'top-3 left-4 w-96',

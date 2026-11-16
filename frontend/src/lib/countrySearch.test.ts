@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  type CountryEntry,
+  prepareCountries,
   searchCountries,
   splitOnMatch,
 } from './countrySearch.ts'
 
-const ENTRIES: CountryEntry[] = [
+const ENTRIES = prepareCountries([
   { code: 'GT', name: 'Guatemala' },
   { code: 'ML', name: 'Mali' },
   { code: 'MG', name: 'Madagascar' },
@@ -15,7 +15,7 @@ const ENTRIES: CountryEntry[] = [
   { code: 'FR', name: 'France' },
   { code: 'CI', name: 'Côte d’Ivoire' },
   { code: 'GB', name: 'Royaume-Uni', aliases: ['UK', 'Angleterre'] },
-]
+])
 
 describe('searchCountries', () => {
   const cases: { name: string; query: string; want: string[] }[] = [
@@ -47,10 +47,12 @@ describe('searchCountries', () => {
   })
 
   it('shows six results at most', () => {
-    const many = Array.from({ length: 10 }, (_, index) => ({
-      code: `A${String.fromCharCode(65 + index)}`,
-      name: `Aland ${index}`,
-    }))
+    const many = prepareCountries(
+      Array.from({ length: 10 }, (_, index) => ({
+        code: `A${String.fromCharCode(65 + index)}`,
+        name: `Aland ${index}`,
+      })),
+    )
 
     expect(searchCountries('aland', many, 'fr')).toHaveLength(6)
   })

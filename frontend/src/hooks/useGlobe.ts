@@ -311,7 +311,8 @@ export function useGlobe(
         centroid !== null && facesViewer(center.toArray(), centroid)
           ? map.project(centroid)
           : pendingPoint
-      return { ...layoutFor(code, anchor), searched: code === searchedCode }
+      // Never the searched country: showHint leaves it to its own tag.
+      return { ...layoutFor(code, anchor), searched: false }
     }
 
     function layoutFor(code: string, anchor: Point) {

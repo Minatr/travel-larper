@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next'
 
 import { COUNTRY_ALIASES } from '../lib/countryAliases.ts'
 import { countryName } from '../lib/countryName.ts'
-import { type CountryResult, searchCountries } from '../lib/countrySearch.ts'
+import {
+  type CountryResult,
+  prepareCountries,
+  searchCountries,
+} from '../lib/countrySearch.ts'
 import { fetchCountries } from '../services/countries.ts'
 
 /** Enter this soon after a choice is a double press, not a wish to open. */
@@ -67,18 +71,24 @@ export function useCountrySearch(
   const loading = useRef(false)
   const chosenAt = useRef(0)
 
-  const results = useMemo(() => {
+  // Names only change with the language, not on each key.
+  const countries = useMemo(() => {
     if (codes === null) {
       return []
     }
     const aliases = COUNTRY_ALIASES[i18n.resolvedLanguage ?? ''] ?? {}
-    const entries = codes.map((code) => ({
-      code,
-      name: countryName(code, i18n.language),
-      aliases: aliases[code],
-    }))
-    return searchCountries(query, entries, i18n.language)
-  }, [codes, query, i18n.language, i18n.resolvedLanguage])
+    return prepareCountries(
+      codes.map((code) => ({
+        code,
+        name: countryName(code, i18n.language),
+        aliases: aliases[code],
+      })),
+    )
+  }, [codes, i18n.language, i18n.resolvedLanguage])
+  const results = useMemo(
+    () => searchCountries(query, countries, i18n.language),
+    [countries, query, i18n.language],
+  )
 
   function prepare() {
     if (codes !== null || loading.current) {

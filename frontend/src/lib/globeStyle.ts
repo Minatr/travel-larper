@@ -34,7 +34,7 @@ export const MARKER_SOURCE = 'search-marker'
 /** Layer darkening the countries other than the searched one. */
 export const SPOTLIGHT_LAYER = 'search-spotlight'
 /** Steady ring around the searched country, and the pulse going out of it. */
-export const RING_LAYER = 'search-ring'
+const RING_LAYER = 'search-ring'
 export const PULSE_LAYER = 'search-pulse'
 
 /** Darkening of the other countries while one is searched, from 0 to 1. */

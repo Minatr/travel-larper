@@ -121,7 +121,7 @@
     );
   }
 
-  /* A tag showing up: a short fade. */
+  /* A tag showing up: a short fade, none for those who reduce motion. */
   .tag-appear {
     animation: tag-appear 150ms ease-out;
   }
@@ -129,6 +129,13 @@
   /* A hanging tag swinging once it shows up (after the field slides in). */
   .tag-swing {
     animation: tag-swing 1.2s ease-out 0.3s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tag-appear,
+    .tag-swing {
+      animation: none;
+    }
   }
 
   /* Small label tag: a point on the left, where the string goes. */
