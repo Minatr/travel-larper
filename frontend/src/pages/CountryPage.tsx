@@ -1,10 +1,11 @@
 import { type ReactNode, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useOutletContext, useParams } from 'react-router'
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router'
 
 import { CountryMap } from '../components/CountryMap.tsx'
 import { PageContainer } from '../components/PageContainer.tsx'
 import { useCountry } from '../hooks/useCountry.ts'
+import { useKeyPress } from '../hooks/useKeyPress.ts'
 import { useReveal } from '../hooks/useReveal.ts'
 import { countryName } from '../lib/countryName.ts'
 import { type CountryOutletContext, FADE_MS } from '../lib/countryTransition.ts'
@@ -26,6 +27,10 @@ export function CountryPage() {
       onCountryShown()
     }
   }, [visible, onCountryShown])
+  // Escape goes back to the globe, like the back link; during the flight,
+  // it undoes a click on the wrong country.
+  const navigate = useNavigate()
+  useKeyPress('Escape', () => void navigate('/'))
 
   if (country.kind === 'notFound') {
     return (

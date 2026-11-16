@@ -30,7 +30,14 @@
     "destination": "Destination",
     "openMap": "Ouvrir la carte",
     "clickToOpen": "Cliquer pour ouvrir la carte",
-    "noMap": "Pas de carte pour ce pays"
+    "enterToOpen": "Appuyer sur Entrée ou cliquer sur le pays pour ouvrir sa carte",
+    "noMap": "Pas de carte pour ce pays",
+    "close": "Fermer"
+  },
+  "search": {
+    "label": "Rechercher un pays",
+    "placeholder": "Rechercher un pays…",
+    "noResult": "Aucun pays trouvé"
   },
   "country": {
     "mapLabel": "Carte : {{name}}",

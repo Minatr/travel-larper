@@ -1,0 +1,46 @@
+/**
+ * Common names the browser's official ones miss ("UK" for the United
+ * Kingdom), by app language, then by country code. Searched like the names.
+ */
+export const COUNTRY_ALIASES: Record<string, Record<string, string[]>> = {
+  en: {
+    AE: ['UAE', 'Emirates'],
+    BA: ['Bosnia and Herzegovina'],
+    CD: ['DRC', 'Democratic Republic of the Congo'],
+    CG: ['Republic of the Congo'],
+    CI: ['Ivory Coast'],
+    CV: ['Cabo Verde'],
+    CZ: ['Czech Republic'],
+    GB: ['UK', 'England', 'Great Britain', 'Britain', 'Scotland', 'Wales'],
+    KN: ['Saint Kitts and Nevis'],
+    KR: ['Korea'],
+    MK: ['Macedonia'],
+    NL: ['Holland'],
+    PS: ['Palestine'],
+    ST: ['Sao Tome and Principe'],
+    SZ: ['Swaziland'],
+    TL: ['East Timor'],
+    TR: ['Turkey'],
+    US: ['USA', 'America', 'United States of America'],
+    VA: ['Vatican', 'Holy See'],
+    VC: ['Saint Vincent and the Grenadines'],
+  },
+  fr: {
+    AE: ['EAU', 'Émirats'],
+    CD: ['RDC', 'République démocratique du Congo'],
+    CF: ['Centrafrique'],
+    CG: ['République du Congo'],
+    CV: ['Cabo Verde'],
+    CZ: ['République tchèque'],
+    GB: ['UK', 'Angleterre', 'Grande-Bretagne', 'Écosse', 'Pays de Galles'],
+    KN: ['Saint-Kitts-et-Nevis'],
+    KR: ['Corée'],
+    MK: ['Macédoine'],
+    NL: ['Hollande'],
+    PS: ['Palestine'],
+    SZ: ['Swaziland'],
+    TL: ['Timor-Leste'],
+    US: ['USA', 'Amérique', "États-Unis d'Amérique"],
+    VA: ['Vatican', 'Saint-Siège'],
+  },
+}

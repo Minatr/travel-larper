@@ -21,6 +21,8 @@ vi.mock('maplibre-gl', () => ({
     once() {}
     remove() {}
     setFeatureState() {}
+    touchZoomRotate = { disableRotation() {} }
+    keyboard = { disableRotation() {} }
     getCanvas() {
       return document.createElement('canvas')
     }

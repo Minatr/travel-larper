@@ -27,6 +27,8 @@ export type CountryHint = {
   code: string
   /** Where the tag and its string go on the globe. */
   layout: TagLayout
+  /** Country found by the search: its tag tells how to open it. */
+  searched: boolean
 }
 
 /** Width of the tag, in pixels (CountryBubble draws it at this width). */
