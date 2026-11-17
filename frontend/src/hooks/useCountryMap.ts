@@ -10,16 +10,8 @@ import {
   OUTSIDE_LAND_COLOR,
 } from '../lib/countryMapTheme.ts'
 import { outsideMask } from '../lib/countryMask.ts'
-import {
-  FRAME_PADDING_PX,
-  MAP_STYLE_TIMEOUT_MS,
-} from '../lib/countryTransition.ts'
-import {
-  lockRotation,
-  MapLibreMap,
-  mapPixelRatio,
-  UPRIGHT_OPTIONS,
-} from '../lib/maplibre.ts'
+import { FRAME_PADDING_PX, MAP_STYLE_TIMEOUT_MS } from '../lib/countryTransition.ts'
+import { lockRotation, MapLibreMap, mapPixelRatio, UPRIGHT_OPTIONS } from '../lib/maplibre.ts'
 import type { CountryMapData } from '../lib/countryMapData.ts'
 import { type Bounds, FULL_TURN_DEGREES } from '../lib/geo.ts'
 import { mercatorCamera, mercatorView } from '../lib/mercatorCamera.ts'
@@ -39,10 +31,9 @@ const PAN_MARGIN_SHARE = 0.25
 const ZOOM_OUT_LEVELS = 0.5
 
 /**
- * Mounts a country's detailed map in `containerRef`. A mask dims the other
- * countries; the sea, land borders and the country's labels stay above it.
- * The view stays around the country. Calls `onReady` once fully drawn, or
- * `onFailed` when its style cannot load (OpenFreeMap down or unreachable).
+ * Mounts a country's detailed map in `containerRef`. A mask dims the other countries; the sea, land borders and the
+ * country's labels stay above it. The view stays around the country. Calls `onReady` once fully drawn, or `onFailed`
+ * when its style cannot load (OpenFreeMap down or unreachable).
  */
 export function useCountryMap(
   containerRef: RefObject<HTMLElement | null>,
@@ -68,25 +59,20 @@ export function useCountryMap(
       container,
       style: COUNTRY_MAP_STYLE,
       // Same camera as the end of the globe's flight.
-      ...mercatorCamera(
-        bounds,
-        container.clientWidth,
-        container.clientHeight,
-        FRAME_PADDING_PX,
-      ),
+      ...mercatorCamera(bounds, container.clientWidth, container.clientHeight, FRAME_PADDING_PX),
       // OpenStreetMap's licence requires the credit, behind an "i" button.
       attributionControl: { compact: true },
       pixelRatio: mapPixelRatio(),
       // Only moved and zoomed: turning it is of no use.
       ...UPRIGHT_OPTIONS,
-      // Resized by the observer below, which first lifts the limits: with
-      // them, a phone turned sideways would be zoomed in by force.
+      // Resized by the observer below, which first lifts the limits: with them, a phone turned sideways would be zoomed
+      // in by force.
       trackResize: false,
     })
     lockRotation(map)
 
-    // A failure before the style loads leaves the map blank: the style
-    // itself failed. Later ones are single tiles, retried by MapLibre.
+    // A failure before the style loads leaves the map blank: the style itself failed. Later ones are single tiles,
+    // retried by MapLibre.
     let styleLoaded = false
     function failed() {
       if (!styleLoaded) {
@@ -101,23 +87,15 @@ export function useCountryMap(
     const styleTimer = window.setTimeout(failed, MAP_STYLE_TIMEOUT_MS)
     let resizeObserver: ResizeObserver | undefined
 
-    // The framed view of the country at the map's current size, and limits
-    // around it that never cut into the view shown.
+    // The framed view of the country at the map's current size, and limits around it that never cut into the view
+    // shown.
     function setLimits() {
       const { clientWidth, clientHeight } = map.getContainer()
       // A map hidden or shrunk to nothing (page closing) frames nothing.
-      if (
-        clientWidth <= 2 * FRAME_PADDING_PX ||
-        clientHeight <= 2 * FRAME_PADDING_PX
-      ) {
+      if (clientWidth <= 2 * FRAME_PADDING_PX || clientHeight <= 2 * FRAME_PADDING_PX) {
         return
       }
-      const camera = mercatorCamera(
-        bounds,
-        clientWidth,
-        clientHeight,
-        FRAME_PADDING_PX,
-      )
+      const camera = mercatorCamera(bounds, clientWidth, clientHeight, FRAME_PADDING_PX)
       const framed = mercatorView(camera, clientWidth, clientHeight)
       const shown = map.getBounds()
       map.setMaxBounds(
@@ -131,8 +109,8 @@ export function useCountryMap(
       map.setMinZoom(Math.min(camera.zoom - ZOOM_OUT_LEVELS, map.getZoom()))
     }
 
-    // Set up as soon as the style is known, before any tile is drawn: "load"
-    // would wait for the whole first view, drawn raw (seconds for Russia).
+    // Set up as soon as the style is known, before any tile is drawn: "load" would wait for the whole first view, drawn
+    // raw (seconds for Russia).
     map.once('style.load', () => {
       styleLoaded = true
       window.clearTimeout(styleTimer)
@@ -152,8 +130,8 @@ export function useCountryMap(
       }
       showLabelsWithin(map, labelArea)
 
-      // Limits from the framed view, not the country: on a narrow phone the
-      // view is taller, and limits smaller than it force a zoom in.
+      // Limits from the framed view, not the country: on a narrow phone the view is taller, and limits smaller than it
+      // force a zoom in.
       setLimits()
       resizeObserver = new ResizeObserver(() => {
         map.setMaxBounds(null)
@@ -190,14 +168,12 @@ function recolor(map: MapLibreMap) {
   }
 }
 
-// Place names go above the mask, so a name over the coast is not cut, but
-// only inside the country: no Geneva on France's map.
+// Place names go above the mask, so a name over the coast is not cut, but only inside the country: no Geneva on
+// France's map.
 function showLabelsWithin(map: MapLibreMap, area: MultiPolygon) {
   const labelLayers = map
     .getStyle()
-    .layers.filter(
-      (layer) => layer.type === 'symbol' && layer.id.startsWith(PLACE_PREFIX),
-    )
+    .layers.filter((layer) => layer.type === 'symbol' && layer.id.startsWith(PLACE_PREFIX))
   for (const { id } of labelLayers) {
     addFilter(map, id, ['within', area])
     map.moveLayer(id)
@@ -205,28 +181,18 @@ function showLabelsWithin(map: MapLibreMap, area: MultiPolygon) {
 }
 
 // Narrows a style layer down to the features that also pass `extra`.
-function addFilter(
-  map: MapLibreMap,
-  layer: string,
-  extra: ExpressionSpecification,
-) {
+function addFilter(map: MapLibreMap, layer: string, extra: ExpressionSpecification) {
   // The dark style uses expression filters only, which combine with `extra`.
-  const filter = map.getFilter(layer) as
-    ExpressionSpecification | null | undefined
-  map.setFilter(
-    layer,
-    filter === null || filter === undefined ? extra : ['all', filter, extra],
-  )
+  const filter = map.getFilter(layer) as ExpressionSpecification | null | undefined
+  map.setFilter(layer, filter === null || filter === undefined ? extra : ['all', filter, extra])
 }
 
 /**
- * Last latitude a flat map shows: MapLibre rejects bounds past the poles,
- * and bounds at the poles break its limits.
+ * Last latitude a flat map shows: MapLibre rejects bounds past the poles, and bounds at the poles break its limits.
  */
 const MERCATOR_MAX_LATITUDE = 85.051129
-// The view plus a margin, capped at the edge of the map but never inside
-// the view (Russia got stuck at sea). Null when the limits would go round
-// the world, which MapLibre cannot keep a view within.
+// The view plus a margin, capped at the edge of the map but never inside the view (Russia got stuck at sea). Null when
+// the limits would go round the world, which MapLibre cannot keep a view within.
 function widen([west, south, east, north]: Bounds): Bounds | null {
   const marginX = (east - west) * PAN_MARGIN_SHARE
   if (east - west + 2 * marginX >= FULL_TURN_DEGREES) {

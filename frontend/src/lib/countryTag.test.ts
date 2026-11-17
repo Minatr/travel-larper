@@ -18,12 +18,7 @@ describe('tagLayout', () => {
   })
 
   it('flips to the other side rather than leave the screen', () => {
-    const layout = tagLayout(
-      { x: WIDTH - TAG_WIDTH_PX / 2, y: 400 },
-      CENTER,
-      WIDTH,
-      HEIGHT,
-    )
+    const layout = tagLayout({ x: WIDTH - TAG_WIDTH_PX / 2, y: 400 }, CENTER, WIDTH, HEIGHT)
 
     expect(layout.side).toBe('left')
   })
@@ -45,8 +40,6 @@ describe('tagLayout', () => {
 
 describe('stringPath', () => {
   it('sags between its two ends', () => {
-    expect(stringPath({ x: 0, y: 0 }, { x: 100, y: 0 })).toBe(
-      'M 0 0 Q 50 10 100 0',
-    )
+    expect(stringPath({ x: 0, y: 0 }, { x: 100, y: 0 })).toBe('M 0 0 Q 50 10 100 0')
   })
 })

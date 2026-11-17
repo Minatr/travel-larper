@@ -8,9 +8,7 @@ const REGISTER_URL = '/api/auth/register'
 export type RegisterResult = { ok: true } | { ok: false; code: ApiErrorCode }
 
 /** Calls POST /api/auth/register; throws only if the API is unreachable. */
-export async function register(
-  request: RegisterRequest,
-): Promise<RegisterResult> {
+export async function register(request: RegisterRequest): Promise<RegisterResult> {
   const response = await fetch(REGISTER_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

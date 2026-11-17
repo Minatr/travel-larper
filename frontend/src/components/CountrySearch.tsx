@@ -59,20 +59,13 @@ export function CountrySearch({
       {/* A new one each time the field comes back, so that it swings again. */}
       {withLogo && <HangingLogo key={String(inert)} />}
       {/*
-        A luggage tag, like the others: point and eyelet on the left, a small
-        printed label. Its cut shape clips outlines: focus shows as an inner
-        line in the selection color.
+        A luggage tag, like the others: point and eyelet on the left, a small printed label. Its cut shape clips
+        outlines: focus shows as an inner line in the selection color.
       */}
       <label className="tag-label-left flex min-h-12 cursor-text items-center gap-3 bg-card pr-3 pl-5 text-card-foreground focus-within:shadow-[inset_0_-2px_0_var(--ring)]">
-        <span
-          aria-hidden
-          className="size-2.5 shrink-0 rounded-full bg-background ring-2 ring-ink"
-        />
+        <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-background ring-2 ring-ink" />
         <span className="flex min-w-0 flex-1 flex-col py-1.5">
-          <span
-            aria-hidden
-            className="text-[0.625rem] leading-none font-semibold tracking-[0.18em] text-ink uppercase"
-          >
+          <span aria-hidden className="text-[0.625rem] leading-none font-semibold tracking-[0.18em] text-ink uppercase">
             {t('globe.destination')}
           </span>
           <input
@@ -83,11 +76,7 @@ export function CountrySearch({
             aria-expanded={showList}
             aria-controls={listId}
             aria-autocomplete="list"
-            aria-activedescendant={
-              showList && search.results.length > 0
-                ? optionId(search.activeIndex)
-                : undefined
-            }
+            aria-activedescendant={showList && search.results.length > 0 ? optionId(search.activeIndex) : undefined}
             placeholder={t('search.placeholder')}
             autoComplete="off"
             enterKeyHint="search"
@@ -132,8 +121,7 @@ export function CountrySearch({
             onClick={() => search.choose(entry)}
             className={cn(
               'flex min-h-11 cursor-pointer items-center px-3',
-              index === search.activeIndex &&
-                'bg-selection text-selection-foreground',
+              index === search.activeIndex && 'bg-selection text-selection-foreground',
             )}
           >
             {entry.alias === undefined ? (
@@ -152,10 +140,7 @@ export function CountrySearch({
         ))}
       </ul>
       {showList && search.results.length === 0 && (
-        <p
-          role="status"
-          className="mt-2 rounded-md bg-card px-3 py-3 text-card-muted-foreground"
-        >
+        <p role="status" className="mt-2 rounded-md bg-card px-3 py-3 text-card-muted-foreground">
           {t('search.noResult')}
         </p>
       )}

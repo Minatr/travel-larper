@@ -1,6 +1,6 @@
 /**
- * Name of the country `code` in `language`, from the browser ("DE" in French:
- * "Allemagne"). Falls back to `code` for an unknown or malformed code.
+ * Name of the country `code` in `language`, from the browser ("DE" in French: "Allemagne"). Falls back to `code` for an
+ * unknown or malformed code.
  */
 export function countryName(code: string, language: string): string {
   const names = displayNamesFor(language)

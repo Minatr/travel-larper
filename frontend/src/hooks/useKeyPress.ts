@@ -4,15 +4,10 @@ import { useEffect, useRef } from 'react'
 const CONTROLS = 'input, textarea, select, button, a'
 
 /**
- * Calls `onPress` on `key`, wherever the focus is, while `enabled`. A key
- * already used by a field (default prevented) is left alone, and so is
- * one pressed on a control when `skipControls`.
+ * Calls `onPress` on `key`, wherever the focus is, while `enabled`. A key already used by a field (default prevented)
+ * is left alone, and so is one pressed on a control when `skipControls`.
  */
-export function useKeyPress(
-  key: string,
-  onPress: () => void,
-  { enabled = true, skipControls = false } = {},
-) {
+export function useKeyPress(key: string, onPress: () => void, { enabled = true, skipControls = false } = {}) {
   const onPressRef = useRef(onPress)
   useEffect(() => {
     onPressRef.current = onPress
@@ -23,13 +18,8 @@ export function useKeyPress(
       return
     }
     const onKey = (event: KeyboardEvent) => {
-      const onControl =
-        event.target instanceof Element && event.target.closest(CONTROLS)
-      if (
-        event.key === key &&
-        !event.defaultPrevented &&
-        !(skipControls && onControl)
-      ) {
+      const onControl = event.target instanceof Element && event.target.closest(CONTROLS)
+      if (event.key === key && !event.defaultPrevented && !(skipControls && onControl)) {
         onPressRef.current()
       }
     }

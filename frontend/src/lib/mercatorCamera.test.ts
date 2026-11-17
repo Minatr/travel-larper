@@ -19,8 +19,7 @@ describe('mercatorCamera', () => {
   })
 
   it('centers on the middle as drawn, north of the middle latitude', () => {
-    // The flat map stretches the north: halfway down the drawing lies north
-    // of 50°, the average of 20° and 80°.
+    // The flat map stretches the north: halfway down the drawing lies north of 50°, the average of 20° and 80°.
     const camera = mercatorCamera([0, 20, 10, 80], 1000, 1000, 0)
 
     expect(camera.center[1]).toBeGreaterThan(50)
@@ -46,10 +45,8 @@ describe('mercatorView', () => {
     expect(east).toBeGreaterThanOrEqual(10 - EPSILON)
     expect(south).toBeLessThanOrEqual(41 + EPSILON)
     expect(north).toBeGreaterThanOrEqual(51 - EPSILON)
-    const fitsWidth =
-      Math.abs(west + 5) < EPSILON && Math.abs(east - 10) < EPSILON
-    const fitsHeight =
-      Math.abs(south - 41) < EPSILON && Math.abs(north - 51) < EPSILON
+    const fitsWidth = Math.abs(west + 5) < EPSILON && Math.abs(east - 10) < EPSILON
+    const fitsHeight = Math.abs(south - 41) < EPSILON && Math.abs(north - 51) < EPSILON
     expect(fitsWidth || fitsHeight).toBe(true)
   })
 })

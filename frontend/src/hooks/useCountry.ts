@@ -7,10 +7,7 @@ import { fetchCountries, fetchCountryShape } from '../services/countries.ts'
 
 /** State of a country looked up by code: loading, found, unknown or failed. */
 export type CountryState =
-  | { kind: 'loading' }
-  | { kind: 'found'; map: CountryMapData }
-  | { kind: 'notFound' }
-  | { kind: 'unavailable' }
+  { kind: 'loading' } | { kind: 'found'; map: CountryMapData } | { kind: 'notFound' } | { kind: 'unavailable' }
 
 /** Finds the country `code` (ISO, any case) and what its map needs. */
 export function useCountry(code: string): CountryState {
@@ -36,23 +33,17 @@ export function useCountry(code: string): CountryState {
   return state
 }
 
-async function loadCountry(
-  code: string,
-  signal: AbortSignal,
-): Promise<CountryState> {
+async function loadCountry(code: string, signal: AbortSignal): Promise<CountryState> {
   if (!hasMap(code)) {
     return { kind: 'notFound' }
   }
-  // Both downloads start together; a failed shape only matters once the code
-  // is known to exist.
+  // Both downloads start together; a failed shape only matters once the code is known to exist.
   const shapeRequest = fetchCountryShape(code, signal).then(
     (shape) => ({ shape }),
     (error: unknown) => ({ error }),
   )
   const countries: Countries = await fetchCountries()
-  const country = countries.features.find(
-    (feature) => feature.properties.code === code,
-  )
+  const country = countries.features.find((feature) => feature.properties.code === code)
   if (country === undefined) {
     return { kind: 'notFound' }
   }

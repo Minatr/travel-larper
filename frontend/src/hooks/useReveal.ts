@@ -19,8 +19,8 @@ export type Reveal = {
 type MapStatus = 'loading' | 'ready' | 'failed'
 
 /**
- * Shows the country page once the globe has landed (`flying` false) and its
- * map is ready, or after MAP_WAIT_MS with the map still loading.
+ * Shows the country page once the globe has landed (`flying` false) and its map is ready, or after MAP_WAIT_MS with the
+ * map still loading.
  */
 export function useReveal(flying: boolean): Reveal {
   const [map, setMap] = useState<MapStatus>('loading')

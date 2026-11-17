@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  prepareCountries,
-  searchCountries,
-  splitOnMatch,
-} from './countrySearch.ts'
+import { prepareCountries, searchCountries, splitOnMatch } from './countrySearch.ts'
 
 const ENTRIES = prepareCountries([
   { code: 'GT', name: 'Guatemala' },
@@ -35,15 +31,11 @@ describe('searchCountries', () => {
   ]
 
   it.each(cases)('$name', ({ query, want }) => {
-    expect(
-      searchCountries(query, ENTRIES, 'fr').map((entry) => entry.code),
-    ).toEqual(want)
+    expect(searchCountries(query, ENTRIES, 'fr').map((entry) => entry.code)).toEqual(want)
   })
 
   it('tells which common name matched', () => {
-    expect(searchCountries('uk', ENTRIES, 'fr')).toEqual([
-      { code: 'GB', name: 'Royaume-Uni', alias: 'UK' },
-    ])
+    expect(searchCountries('uk', ENTRIES, 'fr')).toEqual([{ code: 'GB', name: 'Royaume-Uni', alias: 'UK' }])
   })
 
   it('shows six results at most', () => {

@@ -2,12 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { hasMap } from '../lib/countryCode.ts'
 import { countryName } from '../lib/countryName.ts'
-import {
-  type CountryHint,
-  EYELET_OFFSET_PX,
-  stringPath,
-  TAG_WIDTH_PX,
-} from '../lib/countryTag.ts'
+import { type CountryHint, EYELET_OFFSET_PX, stringPath, TAG_WIDTH_PX } from '../lib/countryTag.ts'
 import { fittedTitleSize } from '../lib/tagTitle.ts'
 import { cn } from '../lib/utils.ts'
 
@@ -31,14 +26,9 @@ type CountryBubbleProps = {
 }
 
 /**
- * Mouse only: the hovered country's tag, or the one found by the search,
- * tied to the country by a string.
+ * Mouse only: the hovered country's tag, or the one found by the search, tied to the country by a string.
  */
-export function CountryBubble({
-  hint,
-  onClose,
-  faded = false,
-}: CountryBubbleProps) {
+export function CountryBubble({ hint, onClose, faded = false }: CountryBubbleProps) {
   const { t, i18n } = useTranslation()
   if (hint === null) {
     return null
@@ -49,25 +39,13 @@ export function CountryBubble({
   const closable = onClose !== undefined
   const { anchor, eyelet, side, tiltDegrees } = layout
   // Placed and tilted by its eyelet.
-  const eyeletX =
-    side === 'right' ? EYELET_OFFSET_PX.x : TAG_WIDTH_PX - EYELET_OFFSET_PX.x
+  const eyeletX = side === 'right' ? EYELET_OFFSET_PX.x : TAG_WIDTH_PX - EYELET_OFFSET_PX.x
 
   return (
-    // Mouse only; the mouse goes through it to the countries below, except
-    // on its close button.
-    <div
-      className={cn(
-        'pointer-events-none absolute inset-0 transition-opacity duration-200',
-        faded && 'opacity-40',
-      )}
-    >
+    // Mouse only; the mouse goes through it to the countries below, except on its close button.
+    <div className={cn('pointer-events-none absolute inset-0 transition-opacity duration-200', faded && 'opacity-40')}>
       <svg aria-hidden className="tag-appear absolute inset-0 size-full">
-        <path
-          d={stringPath(anchor, eyelet)}
-          fill="none"
-          stroke="var(--card)"
-          strokeWidth="1.5"
-        />
+        <path d={stringPath(anchor, eyelet)} fill="none" stroke="var(--card)" strokeWidth="1.5" />
         <circle cx={anchor.x} cy={anchor.y} r="3" fill="var(--card)" />
       </svg>
       <div
@@ -108,21 +86,14 @@ export function CountryBubble({
               ×
             </button>
           )}
-          <p
-            aria-hidden
-            className="text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase"
-          >
+          <p aria-hidden className="text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase">
             {t('globe.destination')}
           </p>
           <p
             aria-hidden
             className="tag-title leading-none"
             style={{
-              fontSize: fittedTitleSize(
-                name,
-                TITLE_WIDTH_PX - (closable ? CLOSE_ROOM_PX : 0),
-                TITLE_MAX_PX,
-              ),
+              fontSize: fittedTitleSize(name, TITLE_WIDTH_PX - (closable ? CLOSE_ROOM_PX : 0), TITLE_MAX_PX),
             }}
           >
             {name}
@@ -137,9 +108,7 @@ export function CountryBubble({
                 <span className="text-ink">→</span>
               </>
             ) : (
-              <span className="text-card-muted-foreground">
-                {t('globe.noMap')}
-              </span>
+              <span className="text-card-muted-foreground">{t('globe.noMap')}</span>
             )}
           </p>
         </div>

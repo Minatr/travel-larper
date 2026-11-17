@@ -7,13 +7,11 @@ import { HeaderContext } from './headerContext.ts'
 import { LanguageSwitcher } from './LanguageSwitcher.tsx'
 
 /**
- * Frame shared by every page: a header floating over the page, so the globe
- * runs under it up to the top of the screen. It is no bar, just paper
- * labels (CLAUDE.md, Direction artistique): the logo, a small luggage tag,
- * the sign-up link and the language switch. Text pages leave room for it
- * with PageContainer. There is no logo on the globe and its country pages: the globe is the
- * home page, the search takes its corner, and a country page has its own
- * way back. A page can also hide all the labels (HeaderContext).
+ * Frame shared by every page: a header floating over the page, so the globe runs under it up to the top of the screen.
+ * It is no bar, just paper labels (CLAUDE.md, Direction artistique): the logo, a small luggage tag, the sign-up link
+ * and the language switch. Text pages leave room for it with PageContainer. There is no logo on the globe and its
+ * country pages: the globe is the home page, the search takes its corner, and a country page has its own way back. A
+ * page can also hide all the labels (HeaderContext).
  */
 export function Layout() {
   const { t } = useTranslation()
@@ -29,9 +27,8 @@ export function Layout() {
       {/* Clicks between the labels reach the globe below. */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
         {/*
-          Drooping to the right, like a tag hanging from its eyelet; smaller on
-          a phone, where it would hide the globe (its padding keeps a 44 px
-          touch target around the smaller label). Out of reach once gone.
+          Drooping to the right, like a tag hanging from its eyelet; smaller on a phone, where it would hide the globe
+          (its padding keeps a 44 px touch target around the smaller label). Out of reach once gone.
         */}
         <Link
           to="/"
@@ -42,10 +39,7 @@ export function Layout() {
           )}
         >
           <span className="tag-label-left tag-title flex min-h-8 items-center gap-2 bg-card pr-3 pl-3.5 text-sm tracking-wide text-card-foreground sm:min-h-11 sm:gap-2.5 sm:pr-3.5 sm:pl-4 sm:text-lg">
-            <span
-              aria-hidden
-              className="size-2 rounded-full bg-background ring-2 ring-ink"
-            />
+            <span aria-hidden className="size-2 rounded-full bg-background ring-2 ring-ink" />
             {t('app.name')}
           </span>
         </Link>

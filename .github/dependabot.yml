@@ -1,8 +1,7 @@
 # Dependabot: security updates only.
 #
-# open-pull-requests-limit: 0 turns off the routine version updates. The
-# security updates (enabled in the repository settings) still open a PR
-# when a dependency has a known vulnerability and a fixed version exists.
+# open-pull-requests-limit: 0 turns off the routine version updates. The security updates (enabled in the repository
+# settings) still open a PR when a dependency has a known vulnerability and a fixed version exists.
 version: 2
 updates:
   - package-ecosystem: gomod

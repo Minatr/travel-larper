@@ -1,5 +1,5 @@
-# sqlc configuration, run by `make generate`: the schema comes from the
-# migrations, the queries from queries/, the Go code goes to internal/models.
+# sqlc configuration, run by `make generate`: the schema comes from the migrations, the queries from queries/, the Go
+# code goes to internal/models.
 version: "2"
 sql:
   - engine: postgresql

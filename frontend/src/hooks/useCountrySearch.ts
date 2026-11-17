@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { COUNTRY_ALIASES } from '../lib/countryAliases.ts'
 import { countryName } from '../lib/countryName.ts'
-import {
-  type CountryResult,
-  prepareCountries,
-  searchCountries,
-} from '../lib/countrySearch.ts'
+import { type CountryResult, prepareCountries, searchCountries } from '../lib/countrySearch.ts'
 import { fetchCountries } from '../services/countries.ts'
 
 /** Enter this soon after a choice is a double press, not a wish to open. */
@@ -34,9 +30,8 @@ export type CountrySearch = {
 }
 
 /**
- * Search over the globe's countries. Choosing a result selects it
- * (`onSelect`), Enter again opens it (`onOpen`). The field keeps its name
- * until another country, or none, is `selected`, then empties.
+ * Search over the globe's countries. Choosing a result selects it (`onSelect`), Enter again opens it (`onOpen`). The
+ * field keeps its name until another country, or none, is `selected`, then empties.
  */
 export function useCountrySearch(
   onSelect: (code: string) => void,
@@ -85,10 +80,7 @@ export function useCountrySearch(
       })),
     )
   }, [codes, i18n.language, i18n.resolvedLanguage])
-  const results = useMemo(
-    () => searchCountries(query, countries, i18n.language),
-    [countries, query, i18n.language],
-  )
+  const results = useMemo(() => searchCountries(query, countries, i18n.language), [countries, query, i18n.language])
 
   function prepare() {
     if (codes !== null || loading.current) {
@@ -96,9 +88,7 @@ export function useCountrySearch(
     }
     loading.current = true
     fetchCountries()
-      .then((countries) =>
-        setCodes(countries.features.map((country) => country.properties.code)),
-      )
+      .then((countries) => setCodes(countries.features.map((country) => country.properties.code)))
       .catch((error: unknown) => console.error('search: countries', error))
       .finally(() => {
         loading.current = false
@@ -129,9 +119,7 @@ export function useCountrySearch(
           return false
         }
         setListOpen(true)
-        setActiveIndex(
-          (index) => (index + (key === 'ArrowDown' ? 1 : count - 1)) % count,
-        )
+        setActiveIndex((index) => (index + (key === 'ArrowDown' ? 1 : count - 1)) % count)
         return true
       case 'Enter':
         if (listOpen && results[activeIndex] !== undefined) {

@@ -16,8 +16,8 @@ export type CountryResult = { code: string; name: string; alias?: string }
 const MAX_RESULTS = 6
 
 /**
- * Lower case, without accents, hyphens as spaces, one kind of apostrophe:
- * "États-Unis" becomes "etats unis", "Côte d’Ivoire" "cote d'ivoire".
+ * Lower case, without accents, hyphens as spaces, one kind of apostrophe: "États-Unis" becomes "etats unis", "Côte
+ * d’Ivoire" "cote d'ivoire".
  */
 function normalizeForSearch(text: string): string {
   return foldCase(text).trim()
@@ -61,8 +61,8 @@ export function splitOnMatch(name: string, query: string): NameParts {
 }
 
 /**
- * Prepares `entries` for {@link searchCountries}, leaving out countries
- * without a map. To redo only when the names change (language).
+ * Prepares `entries` for {@link searchCountries}, leaving out countries without a map. To redo only when the names
+ * change (language).
  */
 export function prepareCountries(entries: CountryEntry[]): SearchableCountry[] {
   return entries
@@ -75,14 +75,10 @@ export function prepareCountries(entries: CountryEntry[]): SearchableCountry[] {
 }
 
 /**
- * Countries whose name, or a common name, holds `query`, those starting
- * with it first ("ma": Madagascar before Guatemala).
+ * Countries whose name, or a common name, holds `query`, those starting with it first ("ma": Madagascar before
+ * Guatemala).
  */
-export function searchCountries(
-  query: string,
-  countries: SearchableCountry[],
-  language: string,
-): CountryResult[] {
+export function searchCountries(query: string, countries: SearchableCountry[], language: string): CountryResult[] {
   const needle = normalizeForSearch(query)
   if (needle === '') {
     return []
@@ -104,35 +100,22 @@ export function searchCountries(
       containing.push(result)
     }
   }
-  const byName = (a: CountryResult, b: CountryResult) =>
-    a.name.localeCompare(b.name, language)
-  return [...starting.sort(byName), ...containing.sort(byName)].slice(
-    0,
-    MAX_RESULTS,
-  )
+  const byName = (a: CountryResult, b: CountryResult) => a.name.localeCompare(b.name, language)
+  return [...starting.sort(byName), ...containing.sort(byName)].slice(0, MAX_RESULTS)
 }
 
 // How `entry` matches: by its name first, else by a common name.
-function bestMatch(
-  entry: SearchableCountry,
-  needle: string,
-): { starts: boolean; alias?: string } | null {
+function bestMatch(entry: SearchableCountry, needle: string): { starts: boolean; alias?: string } | null {
   if (entry.searchName.startsWith(needle)) {
     return { starts: true }
   }
-  const starting = entry.searchAliases.findIndex((alias) =>
-    alias.startsWith(needle),
-  )
+  const starting = entry.searchAliases.findIndex((alias) => alias.startsWith(needle))
   if (starting !== -1) {
     return { starts: true, alias: entry.aliases?.[starting] }
   }
   if (entry.searchName.includes(needle)) {
     return { starts: false }
   }
-  const containing = entry.searchAliases.findIndex((alias) =>
-    alias.includes(needle),
-  )
-  return containing === -1
-    ? null
-    : { starts: false, alias: entry.aliases?.[containing] }
+  const containing = entry.searchAliases.findIndex((alias) => alias.includes(needle))
+  return containing === -1 ? null : { starts: false, alias: entry.aliases?.[containing] }
 }

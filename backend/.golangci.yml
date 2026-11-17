@@ -5,22 +5,32 @@ linters:
   # standard = errcheck, govet, ineffassign, staticcheck, unused.
   default: standard
   enable:
-    # Style rules; "exported" enforces a comment starting with the name on
-    # every exported identifier (CLAUDE.md, section Commentaires).
+    # Style rules; "exported" enforces a comment starting with the name on every exported identifier (CLAUDE.md, section
+    # Commentaires).
     - revive
     # Errors compared with errors.Is / errors.As and wrapped with %w.
     - errorlint
     # Common security mistakes (SQL built from strings, missing timeouts…).
     - gosec
     - misspell
-  # No exclusion preset: the "comments" preset would silence the missing
-  # comment warnings we rely on.
+    # Lines over 120 columns that golines cannot cut (comments, strings).
+    - lll
+  settings:
+    lll:
+      line-length: 120
+      tab-width: 4
+  # No exclusion preset: the "comments" preset would silence the missing comment warnings we rely on.
 
 formatters:
   enable:
     - gofmt
     - goimports
+    # Cuts the code lines over 120 columns.
+    - golines
   settings:
+    golines:
+      max-len: 120
+      tab-len: 4
     goimports:
       # Our own packages are grouped after the third-party ones.
       local-prefixes:

@@ -9,8 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// InsertUser creates a pending user and returns false when the email is
-// already taken, whatever its case.
+// InsertUser creates a pending user and returns false when the email is already taken, whatever its case.
 func (q *Queries) InsertUser(ctx context.Context, email, passwordHash string) (bool, error) {
 	_, err := q.CreateUser(ctx, CreateUserParams{Email: email, PasswordHash: passwordHash})
 	if errors.Is(err, pgx.ErrNoRows) {

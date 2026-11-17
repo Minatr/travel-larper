@@ -12,23 +12,21 @@ import { type CountryOutletContext, FADE_MS } from '../lib/countryTransition.ts'
 import { NotFoundPage } from './NotFoundPage.tsx'
 
 /**
- * Page of a country, `/countries/:code`: its map, above the globe
- * (GlobePage's outlet), invisible until the map is ready.
+ * Page of a country, `/countries/:code`: its map, above the globe (GlobePage's outlet), invisible until the map is
+ * ready.
  */
 export function CountryPage() {
   const { t, i18n } = useTranslation()
   const { code = '' } = useParams()
   const country = useCountry(code)
   const { flying, onCountryShown } = useOutletContext<CountryOutletContext>()
-  const { visible, loading, failed, onMapReady, onMapFailed } =
-    useReveal(flying)
+  const { visible, loading, failed, onMapReady, onMapFailed } = useReveal(flying)
   useEffect(() => {
     if (visible) {
       onCountryShown()
     }
   }, [visible, onCountryShown])
-  // Escape goes back to the globe, like the back link; during the flight,
-  // it undoes a click on the wrong country.
+  // Escape goes back to the globe, like the back link; during the flight, it undoes a click on the wrong country.
   const navigate = useNavigate()
   useKeyPress('Escape', () => void navigate('/'))
 
@@ -54,12 +52,7 @@ export function CountryPage() {
   return (
     <Overlay visible={visible}>
       {country.kind === 'found' && (
-        <CountryMap
-          name={name}
-          data={country.map}
-          onReady={onMapReady}
-          onFailed={onMapFailed}
-        />
+        <CountryMap name={name} data={country.map} onReady={onMapReady} onFailed={onMapFailed} />
       )}
       {loading && (
         <p
@@ -70,8 +63,8 @@ export function CountryPage() {
         </p>
       )}
       {/*
-        On the header's row: its logo flies away on this page (Layout). The
-        right margin keeps clear of the language switch.
+        On the header's row: its logo flies away on this page (Layout). The right margin keeps clear of the language
+        switch.
       */}
       <div className="absolute top-3 right-28 left-4 flex items-center gap-3">
         <Link
@@ -81,8 +74,7 @@ export function CountryPage() {
           {t('country.backToGlobe')}
         </Link>
         {/*
-          A title, not a control: plain text, not paper, so it does not look
-          clickable.
+          A title, not a control: plain text, not paper, so it does not look clickable.
         */}
         <h1 className="tag-title truncate text-2xl drop-shadow-md">{name}</h1>
       </div>
@@ -90,16 +82,9 @@ export function CountryPage() {
   )
 }
 
-// Covers the globe. Even invisible, it catches clicks: no second country
-// opens during the transition. Its content is inert meanwhile: no click,
-// no focus with Tab, nothing read by screen readers.
-function Overlay({
-  visible,
-  children,
-}: {
-  visible: boolean
-  children: ReactNode
-}) {
+// Covers the globe. Even invisible, it catches clicks: no second country opens during the transition. Its content is
+// inert meanwhile: no click, no focus with Tab, nothing read by screen readers.
+function Overlay({ visible, children }: { visible: boolean; children: ReactNode }) {
   return (
     <div
       className="absolute inset-0 bg-background"

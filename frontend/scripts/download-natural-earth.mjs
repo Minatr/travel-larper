@@ -1,8 +1,7 @@
 /**
- * Downloads the Natural Earth sources (about 30 MB) into data/geo/ for
- * `make geo`, once. Pinned to the version public/geo/ was built from.
- * In Node, not in the Makefile: on Windows, make runs cmd.exe, which lacks
- * `mkdir -p` and shell tests.
+ * Downloads the Natural Earth sources (about 30 MB) into data/geo/ for `make geo`, once. Pinned to the version
+ * public/geo/ was built from.
+ * In Node, not in the Makefile: on Windows, make runs cmd.exe, which lacks `mkdir -p` and shell tests.
  */
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 

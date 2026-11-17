@@ -34,7 +34,11 @@ func discardLogger() *slog.Logger {
 }
 
 func TestRoutes(t *testing.T) {
-	handler := Routes(Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())}, discardLogger(), testOptions)
+	handler := Routes(
+		Controllers{HealthController: controllers.NewHealthController(healthyChecker{}, discardLogger())},
+		discardLogger(),
+		testOptions,
+	)
 
 	tests := []struct {
 		name          string
@@ -43,10 +47,33 @@ func TestRoutes(t *testing.T) {
 		wantStatus    int
 		wantErrorCode api.ErrorCode
 	}{
-		{name: "health route under the base path", method: http.MethodGet, path: "/api/health", wantStatus: http.StatusOK},
-		{name: "route outside the base path", method: http.MethodGet, path: "/health", wantStatus: http.StatusNotFound, wantErrorCode: api.ErrorCodeNotFound},
-		{name: "unknown route", method: http.MethodGet, path: "/api/unknown", wantStatus: http.StatusNotFound, wantErrorCode: api.ErrorCodeNotFound},
-		{name: "wrong method", method: http.MethodPost, path: "/api/health", wantStatus: http.StatusMethodNotAllowed, wantErrorCode: api.ErrorCodeMethodNotAllowed},
+		{
+			name:       "health route under the base path",
+			method:     http.MethodGet,
+			path:       "/api/health",
+			wantStatus: http.StatusOK,
+		},
+		{
+			name:          "route outside the base path",
+			method:        http.MethodGet,
+			path:          "/health",
+			wantStatus:    http.StatusNotFound,
+			wantErrorCode: api.ErrorCodeNotFound,
+		},
+		{
+			name:          "unknown route",
+			method:        http.MethodGet,
+			path:          "/api/unknown",
+			wantStatus:    http.StatusNotFound,
+			wantErrorCode: api.ErrorCodeNotFound,
+		},
+		{
+			name:          "wrong method",
+			method:        http.MethodPost,
+			path:          "/api/health",
+			wantStatus:    http.StatusMethodNotAllowed,
+			wantErrorCode: api.ErrorCodeMethodNotAllowed,
+		},
 	}
 
 	for _, tt := range tests {
@@ -107,7 +134,13 @@ func TestInvalidParameterHandlerHidesTheError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	internalDetail := "strconv.ParseInt: parsing \"abc\""
 
-	invalidParameterHandler(discardLogger())(recorder, httptest.NewRequest(http.MethodGet, "/api/health", nil), errors.New(internalDetail))
+	invalidParameterHandler(
+		discardLogger(),
+	)(
+		recorder,
+		httptest.NewRequest(http.MethodGet, "/api/health", nil),
+		errors.New(internalDetail),
+	)
 
 	if recorder.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusBadRequest)

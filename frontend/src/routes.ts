@@ -1,7 +1,6 @@
 /**
- * Every page of the app and its URL. React Router reads this list: the
- * entries in `children` are displayed inside Layout, in its <Outlet />.
- * A new page is one more entry in `children`, e.g.
+ * Every page of the app and its URL. React Router reads this list: the entries in `children` are displayed inside
+ * Layout, in its <Outlet />. A new page is one more entry in `children`, e.g.
  * `{ path: 'trips', Component: TripsPage }`.
  */
 import type { RouteObject } from 'react-router'
@@ -14,9 +13,8 @@ import { NotFoundPage } from './pages/NotFoundPage.tsx'
 import { RegisterPage } from './pages/RegisterPage.tsx'
 
 /**
- * Kept apart from main.tsx so the tests mount the very same routes in a
- * memory router. `Component: X` rather than `element: <X />` keeps this file
- * free of JSX.
+ * Kept apart from main.tsx so the tests mount the very same routes in a memory router. `Component: X` rather than
+ * `element: <X />` keeps this file free of JSX.
  */
 export const routes: RouteObject[] = [
   {

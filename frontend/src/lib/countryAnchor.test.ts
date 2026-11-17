@@ -16,9 +16,7 @@ function square(west: number, south: number, size: number): Position[] {
 
 describe('countryAnchor', () => {
   it('takes the centroid of a polygon', () => {
-    expect(
-      countryAnchor({ type: 'Polygon', coordinates: [square(0, 40, 10)] }),
-    ).toEqual([5, 45])
+    expect(countryAnchor({ type: 'Polygon', coordinates: [square(0, 40, 10)] })).toEqual([5, 45])
   })
 
   it('hangs from the largest polygon, not from the overseas ones', () => {

@@ -36,8 +36,7 @@ export default defineConfig([
           contexts: ['TSTypeAliasDeclaration', 'TSInterfaceDeclaration'],
         },
       ],
-      // Types already document parameters and return values; comments
-      // explain the why, not the what.
+      // Types already document parameters and return values; comments explain the why, not the what.
       'jsdoc/require-param': 'off',
       'jsdoc/require-returns': 'off',
     },

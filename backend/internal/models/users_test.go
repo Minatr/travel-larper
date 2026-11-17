@@ -26,7 +26,10 @@ func newQueries(t *testing.T) *models.Queries {
 func TestCreateUser(t *testing.T) {
 	queries := newQueries(t)
 
-	user, err := queries.CreateUser(context.Background(), models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash"})
+	user, err := queries.CreateUser(
+		context.Background(),
+		models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash"},
+	)
 	if err != nil {
 		t.Fatalf("create user: %v", err)
 	}

@@ -1,6 +1,5 @@
-# Development image: Vite dev server with hot reload, sources synced by
-# Compose Watch. The production image will serve the static build instead
-# (see docs/environnement.md).
+# Development image: Vite dev server with hot reload, sources synced by Compose Watch. The production image will serve
+# the static build instead (see docs/environnement.md).
 FROM node:24-alpine
 
 WORKDIR /app

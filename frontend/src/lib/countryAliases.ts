@@ -1,6 +1,6 @@
 /**
- * Common names the browser's official ones miss ("UK" for the United
- * Kingdom), by app language, then by country code. Searched like the names.
+ * Common names the browser's official ones miss ("UK" for the United Kingdom), by app language, then by country code.
+ * Searched like the names.
  */
 export const COUNTRY_ALIASES: Record<string, Record<string, string[]>> = {
   en: {

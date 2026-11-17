@@ -7,8 +7,8 @@ import (
 	"github.com/Minatr/travel-larper/backend/internal/api"
 )
 
-// WriteError writes an error in the shared Error format. The message is fixed
-// per code: internal details never reach the client.
+// WriteError writes an error in the shared Error format. The message is fixed per code: internal details never reach
+// the client.
 func WriteError(w http.ResponseWriter, logger *slog.Logger, code api.ErrorCode) {
 	status, message := describeError(code)
 	WriteJSON(w, logger, status, api.Error{Code: code, Message: message})
