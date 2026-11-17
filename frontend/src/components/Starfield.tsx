@@ -16,10 +16,9 @@ type StarfieldProps = {
 }
 
 /**
- * Faint stars behind the globe, in paper white rather than blue so the
- * globe still stands out. The stars are a repeated tile, so the sky can
- * move without ever showing an edge. Memoized: the globe re-renders on
- * every frame while the searched country's tag follows it.
+ * Faint stars behind the globe, in paper white rather than blue so the globe still stands out. The stars are a repeated
+ * tile, so the sky can move without ever showing an edge. Memoized: the globe re-renders on every frame while the
+ * searched country's tag follows it.
  */
 export const Starfield = memo(function Starfield({ ref }: StarfieldProps) {
   return (
@@ -30,22 +29,9 @@ export const Starfield = memo(function Starfield({ ref }: StarfieldProps) {
       className="pointer-events-none absolute inset-0 size-full"
     >
       <defs>
-        <pattern
-          ref={ref}
-          id="starfield"
-          patternUnits="userSpaceOnUse"
-          width={SKY_SIZE}
-          height={SKY_SIZE}
-        >
+        <pattern ref={ref} id="starfield" patternUnits="userSpaceOnUse" width={SKY_SIZE} height={SKY_SIZE}>
           {STARS.map((star, index) => (
-            <circle
-              key={index}
-              cx={star.x}
-              cy={star.y}
-              r={star.radius}
-              fill="var(--card)"
-              opacity={star.opacity}
-            />
+            <circle key={index} cx={star.x} cy={star.y} r={star.radius} fill="var(--card)" opacity={star.opacity} />
           ))}
         </pattern>
       </defs>

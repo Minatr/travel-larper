@@ -5,8 +5,8 @@ import { Globe } from '../components/Globe.tsx'
 import type { CountryOutletContext } from '../lib/countryTransition.ts'
 
 /**
- * Home page: the globe, under the floating header. A country page opens
- * above it in its outlet; the globe stays mounted to fly back on return.
+ * Home page: the globe, under the floating header. A country page opens above it in its outlet; the globe stays mounted
+ * to fly back on return.
  */
 export function GlobePage() {
   const navigate = useNavigate()

@@ -15,15 +15,14 @@ export type CountryMapData = {
 }
 
 /**
- * Starting tolerance of `labelArea`: a thousandth of the framed area's
- * diagonal (about a pixel), at least 0.005° (about 500 m).
+ * Starting tolerance of `labelArea`: a thousandth of the framed area's diagonal (about a pixel), at least 0.005° (about
+ * 500 m).
  */
 const LABEL_AREA_PRECISION_SHARE = 1 / 1000
 const MIN_LABEL_AREA_TOLERANCE_DEGREES = 0.005
 /**
- * Most points of `labelArea`: MapLibre tests each label against each point
- * (Russia took 750 ms at 1,300 points). Coarser, a border town may land on
- * the wrong side, a fair price.
+ * Most points of `labelArea`: MapLibre tests each label against each point (Russia took 750 ms at 1,300 points).
+ * Coarser, a border town may land on the wrong side, a fair price.
  */
 const MAX_LABEL_AREA_POINTS = 300
 
@@ -31,8 +30,8 @@ const MAX_LABEL_AREA_POINTS = 300
 const SHAPE_MARGIN_SHARE = 1
 
 /**
- * Map data of a country from its globe shape (for the framing) and its
- * detailed shape, or null when no detailed part lies near the framed area.
+ * Map data of a country from its globe shape (for the framing) and its detailed shape, or null when no detailed part
+ * lies near the framed area.
  */
 export function countryMapData(
   globeShape: Polygon | MultiPolygon,
@@ -43,20 +42,13 @@ export function countryMapData(
   if (shape === null) {
     return null
   }
-  const labelArea = simplifyToBudget(
-    shape,
-    labelAreaTolerance(bounds),
-    MAX_LABEL_AREA_POINTS,
-  )
+  const labelArea = simplifyToBudget(shape, labelAreaTolerance(bounds), MAX_LABEL_AREA_POINTS)
   return { shape, labelArea, bounds }
 }
 
 function labelAreaTolerance([west, south, east, north]: Bounds): number {
   const diagonal = Math.hypot(east - west, north - south)
-  return Math.max(
-    diagonal * LABEL_AREA_PRECISION_SHARE,
-    MIN_LABEL_AREA_TOLERANCE_DEGREES,
-  )
+  return Math.max(diagonal * LABEL_AREA_PRECISION_SHARE, MIN_LABEL_AREA_TOLERANCE_DEGREES)
 }
 
 function around([west, south, east, north]: Bounds): Bounds {

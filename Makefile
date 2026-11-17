@@ -47,14 +47,14 @@ backend: ## Lance la base et le backend Go seuls
 frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 	$(COMPOSE) up --build --watch frontend
 
-# Les tests d'intégration travaillent dans des schémas temporaires de la base
-# de dev : les données locales ne sont pas touchées.
+# Les tests d'intégration travaillent dans des schémas temporaires de la base de dev : les données locales ne sont pas
+# touchées.
 test: ## Lance les tests du backend (Docker, avec la base) et du frontend (outils locaux)
 	$(COMPOSE) run --rm --build backend sh -c 'TEST_DATABASE_URL="$$DATABASE_URL" go test ./...'
 	cd frontend && npm test
 
-# lint et format utilisent les outils installés sur la machine (voir README),
-# comme les vérifications Lefthook avant chaque commit.
+# lint et format utilisent les outils installés sur la machine (voir README), comme les vérifications Lefthook avant
+# chaque commit.
 lint: ## Vérifie lint et formatage, backend et frontend (outils locaux)
 	cd backend && golangci-lint run ./...
 	cd frontend && npm run lint && npm run format:check
@@ -67,8 +67,8 @@ audit: ## Cherche les failles connues dans les dépendances (outils locaux)
 	cd backend && go tool govulncheck ./...
 	cd frontend && npm audit --omit=dev --audit-level=high
 
-# Les mêmes vérifications que la CI, à lancer avant d'ouvrir une PR. Le build
-# du frontend est le seul à vérifier les types TypeScript.
+# Les mêmes vérifications que la CI, à lancer avant d'ouvrir une PR. Le build du frontend est le seul à vérifier les
+# types TypeScript.
 check: lint test audit ## Lance toutes les vérifications de la CI : lint, tests, failles, types et build
 	cd frontend && npm run build
 
@@ -76,16 +76,15 @@ generate: ## Génère le code depuis api/openapi.yaml et les requêtes SQL (outi
 	cd backend && go generate ./... && go tool sqlc generate
 	cd frontend && npm run generate
 
-# Les sources Natural Earth (environ 30 Mo) sont téléchargées une seule fois
-# dans data/geo/ (non versionné), à la version qui a produit les fichiers
-# versionnés de frontend/public/geo/ : la commande redonne exactement les mêmes.
+# Les sources Natural Earth (environ 30 Mo) sont téléchargées une seule fois dans data/geo/ (non versionné), à la
+# version qui a produit les fichiers versionnés de frontend/public/geo/ : la commande redonne exactement les mêmes.
 geo: ## Régénère les formes des pays du globe et des cartes (télécharge ~30 Mo la première fois)
 	cd frontend && node scripts/download-natural-earth.mjs
 	cd frontend && node scripts/build-countries.mjs ../data/geo/ne_110m_admin_0_countries.geojson ../data/geo/ne_50m_admin_0_countries.geojson
 	cd frontend && node scripts/build-country-shapes.mjs ../data/geo/ne_10m_admin_0_countries.geojson ../data/geo/ne_10m_admin_0_countries_gbr.geojson
 
-# Les migrations s'appliquent au démarrage du backend : cette cible crée
-# seulement le fichier, numéroté à la suite du dernier.
+# Les migrations s'appliquent au démarrage du backend : cette cible crée seulement le fichier, numéroté à la suite du
+# dernier.
 migrate-new: ## Crée une migration vide : make migrate-new name=add_role
 	@echo "$(name)" | grep -qE '^[a-z0-9_]+$$' || { echo "Usage : make migrate-new name=<minuscules_chiffres_underscores>"; exit 1; }
 	@last=$$(ls backend/migrations | grep -E '^[0-9]+_.*\.sql$$' | sort | tail -n 1 | cut -d_ -f1); \

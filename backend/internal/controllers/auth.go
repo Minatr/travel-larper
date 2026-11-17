@@ -62,8 +62,7 @@ func (c *AuthController) registrationErrorCode(err error) api.ErrorCode {
 	}
 }
 
-// decodeJSONBody reads the request body into target and returns the error
-// code to answer with when it cannot.
+// decodeJSONBody reads the request body into target and returns the error code to answer with when it cannot.
 func decodeJSONBody(r *http.Request, target any) (api.ErrorCode, bool) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -82,8 +81,8 @@ func decodeJSONBody(r *http.Request, target any) (api.ErrorCode, bool) {
 	return api.ErrorCodeInvalidBody, false
 }
 
-// rejectTrailingData fails when the body holds more than one JSON value:
-// Decode stops after the first one and would silently ignore the rest.
+// rejectTrailingData fails when the body holds more than one JSON value: Decode stops after the first one and would
+// silently ignore the rest.
 func rejectTrailingData(decoder *json.Decoder) error {
 	err := decoder.Decode(&struct{}{})
 	switch {

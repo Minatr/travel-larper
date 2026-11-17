@@ -41,16 +41,60 @@ func TestRegistrationServiceRegister(t *testing.T) {
 		wantEmail string
 	}{
 		{name: "nominal", email: "bob@example.com", password: "12345678", wantEmail: "bob@example.com"},
-		{name: "surrounding spaces trimmed", email: "  bob@example.com ", password: "12345678", wantEmail: "bob@example.com"},
-		{name: "longest password", email: "bob@example.com", password: strings.Repeat("a", 128), wantEmail: "bob@example.com"},
-		{name: "emojis count as one character", email: "bob@example.com", password: strings.Repeat("🙂", 8), wantEmail: "bob@example.com"},
+		{
+			name:      "surrounding spaces trimmed",
+			email:     "  bob@example.com ",
+			password:  "12345678",
+			wantEmail: "bob@example.com",
+		},
+		{
+			name:      "longest password",
+			email:     "bob@example.com",
+			password:  strings.Repeat("a", 128),
+			wantEmail: "bob@example.com",
+		},
+		{
+			name:      "emojis count as one character",
+			email:     "bob@example.com",
+			password:  strings.Repeat("🙂", 8),
+			wantEmail: "bob@example.com",
+		},
 		{name: "not an email", email: "bob", password: "12345678", wantErr: ErrInvalidEmail},
-		{name: "email with a display name", email: "Bob <bob@example.com>", password: "12345678", wantErr: ErrInvalidEmail},
-		{name: "email too long", email: strings.Repeat("a", 243) + "@example.com", password: "12345678", wantErr: ErrInvalidEmail},
+		{
+			name:     "email with a display name",
+			email:    "Bob <bob@example.com>",
+			password: "12345678",
+			wantErr:  ErrInvalidEmail,
+		},
+		{
+			name:     "email too long",
+			email:    strings.Repeat("a", 243) + "@example.com",
+			password: "12345678",
+			wantErr:  ErrInvalidEmail,
+		},
 		{name: "password too short", email: "bob@example.com", password: "1234567", wantErr: ErrPasswordTooShort},
-		{name: "password too long", email: "bob@example.com", password: strings.Repeat("a", 129), wantErr: ErrPasswordTooLong},
-		{name: "email taken", email: "bob@example.com", password: "12345678", users: fakeUserInserter{taken: true}, wantErr: ErrEmailTaken, wantEmail: "bob@example.com"},
-		{name: "database failure", email: "bob@example.com", password: "12345678", users: fakeUserInserter{err: errDatabase}, wantErr: errDatabase, wantEmail: "bob@example.com"},
+		{
+			name:     "password too long",
+			email:    "bob@example.com",
+			password: strings.Repeat("a", 129),
+			wantErr:  ErrPasswordTooLong,
+		},
+		{
+			name:      "email taken",
+			email:     "bob@example.com",
+			password:  "12345678",
+			users:     fakeUserInserter{taken: true},
+			wantErr:   ErrEmailTaken,
+			wantEmail: "bob@example.com",
+		},
+		{
+			name:      "database failure",
+			email:     "bob@example.com",
+			password:  "12345678",
+			users:     fakeUserInserter{err: errDatabase},
+			wantErr:   errDatabase,
+			wantEmail: "bob@example.com",
+		},
 		{name: "hash failure", email: "bob@example.com", password: "12345678", hashErr: errHash, wantErr: errHash},
 	}
 

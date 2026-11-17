@@ -9,8 +9,7 @@ function renderAt(path: string) {
   render(<RouterProvider router={router} />)
 }
 
-// Serves one square country with the given code: in the countries file,
-// and as its own detailed shape.
+// Serves one square country with the given code: in the countries file, and as its own detailed shape.
 function stubCountries(code: string) {
   const square = {
     type: 'Polygon',
@@ -34,8 +33,8 @@ function stubCountries(code: string) {
       },
     ],
   }
-  // A new Response per call: the globe and the country page both fetch the
-  // countries file, and a body can be read only once.
+  // A new Response per call: the globe and the country page both fetch the countries file, and a body can be read only
+  // once.
   vi.stubGlobal(
     'fetch',
     vi.fn((url: string) =>
@@ -59,13 +58,8 @@ describe('routes', () => {
   it('shows the not found page for an unknown URL', () => {
     renderAt('/does-not-exist')
 
-    expect(
-      screen.getByRole('heading', { name: 'Page not found' }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute(
-      'href',
-      '/',
-    )
+    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/')
   })
 
   it('shows the globe on the home page', () => {
@@ -75,9 +69,7 @@ describe('routes', () => {
 
     renderAt('/')
 
-    expect(
-      screen.getByRole('region', { name: 'World globe' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'World globe' })).toBeInTheDocument()
   })
 
   it('shows the map of a country on /countries/:code', async () => {
@@ -85,14 +77,9 @@ describe('routes', () => {
 
     renderAt('/countries/FR')
 
-    expect(
-      await screen.findByRole('region', { name: 'Map of France' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Map of France' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'France' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '← Globe' })).toHaveAttribute(
-      'href',
-      '/',
-    )
+    expect(screen.getByRole('link', { name: '← Globe' })).toHaveAttribute('href', '/')
   })
 
   it('shows the not found page for an unknown country code', async () => {
@@ -100,9 +87,7 @@ describe('routes', () => {
 
     renderAt('/countries/XX')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Page not found' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
   })
 
   it('shows the not found page for a malformed country code', async () => {
@@ -110,13 +95,8 @@ describe('routes', () => {
 
     renderAt('/countries/..%2Ffr')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Page not found' }),
-    ).toBeInTheDocument()
-    expect(fetch).not.toHaveBeenCalledWith(
-      expect.stringContaining('/geo/countries/..'),
-      expect.anything(),
-    )
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('/geo/countries/..'), expect.anything())
   })
 
   it('shows the health page, translated, on /status', async () => {
@@ -125,12 +105,8 @@ describe('routes', () => {
 
     renderAt('/status')
 
-    expect(
-      screen.getByRole('heading', { name: 'Service status' }),
-    ).toBeInTheDocument()
-    expect(
-      await screen.findByText('The API is unreachable.'),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Service status' })).toBeInTheDocument()
+    expect(await screen.findByText('The API is unreachable.')).toBeInTheDocument()
   })
 
   it('switches to French with the language switcher and remembers it', async () => {
@@ -140,13 +116,8 @@ describe('routes', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Français' }))
 
-    expect(
-      await screen.findByRole('heading', { name: 'Page introuvable' }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    expect(await screen.findByRole('heading', { name: 'Page introuvable' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute('aria-pressed', 'true')
     expect(window.localStorage.getItem('language')).toBe('fr')
   })
 })

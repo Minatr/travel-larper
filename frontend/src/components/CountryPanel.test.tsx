@@ -30,9 +30,7 @@ describe('CountryPanel', () => {
   it('has no close button by default', () => {
     render(<CountryPanel code="FR" onOpen={vi.fn()} />)
 
-    expect(
-      screen.queryByRole('button', { name: 'Close' }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
   })
 
   it('has no button for a country without a map', () => {

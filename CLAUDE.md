@@ -192,6 +192,7 @@ travel-larper/
 ### Général
 - **Code, noms, commentaires, commits et messages de log en anglais.** Textes affichés à l'utilisateur via i18n (anglais par défaut, français disponible). Documentation du projet (README, ce fichier, PR) en français.
 - Respecter `.editorconfig` : UTF-8, fins de ligne LF, 2 espaces (tabulations pour Go et Makefile), retour à la ligne final.
+- **120 caractères par ligne au maximum**, partout (une tabulation compte pour 4). Prettier et golines coupent le code au `make format` ; les commentaires se coupent à la main à 120 (Prettier ne les touche pas, `lll` les signale en Go). Seules exceptions : ce qu'on ne peut pas couper sans changer le code (classes Tailwind, URL, commandes shell).
 - Des noms explicites plutôt que des abréviations ; des fonctions courtes qui font une seule chose.
 - **Pas de code mort ni de code commenté** : Git garde l'historique.
 - **Pas de `TODO` orphelin** : toujours lié à un ticket, par exemple `// TODO(TL-12): handle expired invitations`.
@@ -226,7 +227,7 @@ travel-larper/
 - La logique métier (services, planner, calculs Tricount et budget) est testée en priorité.
 
 ### Qualité automatisée
-- **Backend** : golangci-lint v2 (`backend/.golangci.yml`) avec revive, errorlint, gosec et les formateurs gofmt/goimports.
+- **Backend** : golangci-lint v2 (`backend/.golangci.yml`) avec revive, errorlint, gosec, lll et les formateurs gofmt/goimports/golines.
 - **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`), Prettier (`frontend/.prettierrc.json`) et tests Vitest + Testing Library (`npm test`, lancés aussi par `make test`).
 - **Avant chaque commit** : Lefthook (`lefthook.yml`) formate et vérifie les fichiers modifiés. Les outils sont installés sur la machine (voir README), pas dans Docker, pour que le commit reste instantané.
 - **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build ; `generated` : vérifie que le code généré est à jour). Les jobs `backend` et `frontend` cherchent aussi les failles connues des dépendances (govulncheck ; `npm audit` sur les dépendances livrées, gravité élevée ou critique).

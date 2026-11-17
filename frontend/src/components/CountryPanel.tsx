@@ -7,8 +7,7 @@ import { fittedTitleSize } from '../lib/tagTitle.ts'
 import { cn } from '../lib/utils.ts'
 
 /**
- * Room for the country's name on a phone, beside the barcode: the narrowest
- * panel, so the name fits on every screen.
+ * Room for the country's name on a phone, beside the barcode: the narrowest panel, so the name fits on every screen.
  */
 const TITLE_WIDTH_PX = 210
 
@@ -29,8 +28,7 @@ type CountryPanelProps = {
 }
 
 /**
- * Touch screens: the tapped country's luggage tag, with a button to open
- * its map.
+ * Touch screens: the tapped country's luggage tag, with a button to open its map.
  */
 export function CountryPanel({ code, onOpen, onClose }: CountryPanelProps) {
   const { t, i18n } = useTranslation()
@@ -62,9 +60,7 @@ export function CountryPanel({ code, onOpen, onClose }: CountryPanelProps) {
             ×
           </button>
         )}
-        <p className="text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase">
-          {t('globe.destination')}
-        </p>
+        <p className="text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase">{t('globe.destination')}</p>
         <div className="flex items-end justify-between gap-3">
           <h2
             className="tag-title text-(length:--title-size) leading-[0.9] short:text-(length:--short-title-size)"
@@ -78,10 +74,7 @@ export function CountryPanel({ code, onOpen, onClose }: CountryPanelProps) {
             {name}
           </h2>
           {/* Code 39 barcode font: the asterisks are its start and stop. */}
-          <span
-            aria-hidden
-            className="shrink-0 font-barcode text-3xl leading-none text-ink short:hidden"
-          >
+          <span aria-hidden className="shrink-0 font-barcode text-3xl leading-none text-ink short:hidden">
             *{code}*
           </span>
         </div>
@@ -98,9 +91,7 @@ export function CountryPanel({ code, onOpen, onClose }: CountryPanelProps) {
             </span>
           </button>
         ) : (
-          <p className="mt-3 text-sm text-card-muted-foreground">
-            {t('globe.noMap')}
-          </p>
+          <p className="mt-3 text-sm text-card-muted-foreground">{t('globe.noMap')}</p>
         )}
       </div>
     </section>

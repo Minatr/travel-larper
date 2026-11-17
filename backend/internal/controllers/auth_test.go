@@ -40,15 +40,70 @@ func TestAuthControllerRegister(t *testing.T) {
 	}{
 		{name: "created", body: validBody, wantStatus: http.StatusCreated, wantCalled: true},
 		{name: "trailing whitespace", body: validBody + "\n ", wantStatus: http.StatusCreated, wantCalled: true},
-		{name: "malformed JSON", body: `{"email":`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
-		{name: "data after the JSON", body: `{"email":"bob@example.com","password":"12345678"} trailing`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
-		{name: "two JSON objects", body: `{"email":"bob@example.com","password":"12345678"}{}`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
-		{name: "unknown field", body: `{"email":"bob@example.com","password":"12345678","role":"admin"}`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
-		{name: "invalid email", body: validBody, registerErr: services.ErrInvalidEmail, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidEmail, wantCalled: true},
-		{name: "password too short", body: validBody, registerErr: services.ErrPasswordTooShort, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodePasswordTooShort, wantCalled: true},
-		{name: "password too long", body: validBody, registerErr: services.ErrPasswordTooLong, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodePasswordTooLong, wantCalled: true},
-		{name: "email taken", body: validBody, registerErr: services.ErrEmailTaken, wantStatus: http.StatusConflict, wantCode: api.ErrorCodeEmailTaken, wantCalled: true},
-		{name: "unexpected error", body: validBody, registerErr: errors.New("connection reset"), wantStatus: http.StatusInternalServerError, wantCode: api.ErrorCodeInternalError, wantCalled: true},
+		{
+			name:       "malformed JSON",
+			body:       `{"email":`,
+			wantStatus: http.StatusBadRequest,
+			wantCode:   api.ErrorCodeInvalidBody,
+		},
+		{
+			name:       "data after the JSON",
+			body:       `{"email":"bob@example.com","password":"12345678"} trailing`,
+			wantStatus: http.StatusBadRequest,
+			wantCode:   api.ErrorCodeInvalidBody,
+		},
+		{
+			name:       "two JSON objects",
+			body:       `{"email":"bob@example.com","password":"12345678"}{}`,
+			wantStatus: http.StatusBadRequest,
+			wantCode:   api.ErrorCodeInvalidBody,
+		},
+		{
+			name:       "unknown field",
+			body:       `{"email":"bob@example.com","password":"12345678","role":"admin"}`,
+			wantStatus: http.StatusBadRequest,
+			wantCode:   api.ErrorCodeInvalidBody,
+		},
+		{
+			name:        "invalid email",
+			body:        validBody,
+			registerErr: services.ErrInvalidEmail,
+			wantStatus:  http.StatusBadRequest,
+			wantCode:    api.ErrorCodeInvalidEmail,
+			wantCalled:  true,
+		},
+		{
+			name:        "password too short",
+			body:        validBody,
+			registerErr: services.ErrPasswordTooShort,
+			wantStatus:  http.StatusBadRequest,
+			wantCode:    api.ErrorCodePasswordTooShort,
+			wantCalled:  true,
+		},
+		{
+			name:        "password too long",
+			body:        validBody,
+			registerErr: services.ErrPasswordTooLong,
+			wantStatus:  http.StatusBadRequest,
+			wantCode:    api.ErrorCodePasswordTooLong,
+			wantCalled:  true,
+		},
+		{
+			name:        "email taken",
+			body:        validBody,
+			registerErr: services.ErrEmailTaken,
+			wantStatus:  http.StatusConflict,
+			wantCode:    api.ErrorCodeEmailTaken,
+			wantCalled:  true,
+		},
+		{
+			name:        "unexpected error",
+			body:        validBody,
+			registerErr: errors.New("connection reset"),
+			wantStatus:  http.StatusInternalServerError,
+			wantCode:    api.ErrorCodeInternalError,
+			wantCalled:  true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -57,7 +112,10 @@ func TestAuthControllerRegister(t *testing.T) {
 			controller := NewAuthController(registrar, slog.New(slog.NewTextHandler(io.Discard, nil)))
 			recorder := httptest.NewRecorder()
 
-			controller.Register(recorder, httptest.NewRequest(http.MethodPost, "/api/auth/register", strings.NewReader(tt.body)))
+			controller.Register(
+				recorder,
+				httptest.NewRequest(http.MethodPost, "/api/auth/register", strings.NewReader(tt.body)),
+			)
 
 			if recorder.Code != tt.wantStatus {
 				t.Fatalf("status = %d, want %d", recorder.Code, tt.wantStatus)
@@ -92,7 +150,11 @@ func TestAuthControllerRegisterRejectsLargeBody(t *testing.T) {
 	registrar := &fakeRegistrar{}
 	controller := NewAuthController(registrar, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost, "/api/auth/register", strings.NewReader(`{"email":"`+strings.Repeat("a", 100)+`"}`))
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/auth/register",
+		strings.NewReader(`{"email":"`+strings.Repeat("a", 100)+`"}`),
+	)
 	// What the MaxBodySize middleware does when the body has no Content-Length.
 	request.Body = http.MaxBytesReader(recorder, request.Body, 10)
 

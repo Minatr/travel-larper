@@ -6,8 +6,8 @@ import { boxOf, polygonsOf } from './geo.ts'
 export type LngLat = [number, number]
 
 /**
- * Point the hover tag hangs from: the centroid of the largest polygon
- * (France: the mainland, not its overseas territories).
+ * Point the hover tag hangs from: the centroid of the largest polygon (France: the mainland, not its overseas
+ * territories).
  */
 export function countryAnchor(shape: Polygon | MultiPolygon): LngLat {
   let best: { area: number; center: LngLat } | null = null
@@ -59,8 +59,6 @@ function toRadians(degrees: number): number {
 export function facesViewer(center: LngLat, point: LngLat): boolean {
   const [lng0, lat0] = [center[0], center[1]].map(toRadians)
   const [lng1, lat1] = [point[0], point[1]].map(toRadians)
-  const cosine =
-    Math.sin(lat0) * Math.sin(lat1) +
-    Math.cos(lat0) * Math.cos(lat1) * Math.cos(lng1 - lng0)
+  const cosine = Math.sin(lat0) * Math.sin(lat1) + Math.cos(lat0) * Math.cos(lat1) * Math.cos(lng1 - lng0)
   return cosine >= Math.cos(FACING_MAX_DEGREES * DEGREES_TO_RADIANS)
 }

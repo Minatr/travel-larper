@@ -34,10 +34,7 @@ describe('RegisterPage', () => {
   it('is linked from the header', () => {
     renderRegisterPage()
 
-    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute(
-      'href',
-      '/register',
-    )
+    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register')
   })
 
   it('creates the account and shows the confirmation', async () => {
@@ -46,9 +43,7 @@ describe('RegisterPage', () => {
 
     fillAndSubmit('bob@example.com', '12345678')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Account created' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Account created' })).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/auth/register',
       expect.objectContaining({
@@ -67,9 +62,7 @@ describe('RegisterPage', () => {
 
     fillAndSubmit('bob@example.com', '1234567')
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'The password must be at least 8 characters long.',
-    )
+    expect(await screen.findByRole('alert')).toHaveTextContent('The password must be at least 8 characters long.')
     expect(fetchMock).not.toHaveBeenCalled()
   })
 

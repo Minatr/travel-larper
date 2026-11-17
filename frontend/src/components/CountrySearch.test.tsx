@@ -51,9 +51,7 @@ describe('CountrySearch', () => {
 
     fireEvent.change(field, { target: { value: 'SPÁIN' } })
 
-    expect(
-      await screen.findByRole('option', { name: 'Spain' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('option', { name: 'Spain' })).toBeInTheDocument()
   })
 
   it('selects a country with Enter', async () => {

@@ -4,21 +4,15 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
-import {
-  DEFAULT_LANGUAGE,
-  detectLanguage,
-  readStoredLanguage,
-} from './languages.ts'
+import { DEFAULT_LANGUAGE, detectLanguage, readStoredLanguage } from './languages.ts'
 import en from './locales/en.json'
 import fr from './locales/fr.json'
 
 /**
- * Translations of every supported language. English is the reference: the
- * other languages must have exactly its keys.
+ * Translations of every supported language. English is the reference: the other languages must have exactly its keys.
  *
- * `satisfies typeof en` checks fr.json against the shape of en.json without
- * changing its type, so a key missing in French fails the compilation. Keys
- * that exist in French only are not caught here: the i18n test does it.
+ * `satisfies typeof en` checks fr.json against the shape of en.json without changing its type, so a key missing in
+ * French fails the compilation. Keys that exist in French only are not caught here: the i18n test does it.
  */
 export const resources = {
   en: { translation: en },

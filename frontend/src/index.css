@@ -1,19 +1,17 @@
 @import 'tailwindcss';
 
 /*
- * Short screens (small phones, e.g. iPhone SE): `short:` styles keep the
- * panels compact there. Keep in step with SHORT_SCREEN_QUERY (lib/screen.ts).
+ * Short screens (small phones, e.g. iPhone SE): `short:` styles keep the panels compact there. Keep in step with
+ * SHORT_SCREEN_QUERY (lib/screen.ts).
  */
 @custom-variant short (@media (max-height: 700px));
 
 /*
- * Design tokens (CLAUDE.md, Direction artistique): paper travel objects
- * (luggage tags) over a dark, space-like background. Five color roles:
- * background (graphite, blue for the maps in lib/globeStyle.ts), paper
- * (cream panels), ink (printed decoration, never on something clickable),
- * action (black buttons) and selection (turquoise: raised country, focus).
- * The variable names follow shadcn/ui so its components pick them up. The
- * app is dark only: a light frame around the globe never matched.
+ * Design tokens (CLAUDE.md, Direction artistique): paper travel objects (luggage tags) over a dark, space-like
+ * background. Five color roles: background (graphite, blue for the maps in lib/globeStyle.ts), paper (cream panels),
+ * ink (printed decoration, never on something clickable), action (black buttons) and selection (turquoise: raised
+ * country, focus). The variable names follow shadcn/ui so its components pick them up. The app is dark only: a light
+ * frame around the globe never matched.
  */
 :root {
   /* Dark scrollbars and form controls, whatever the system theme. */
@@ -39,27 +37,18 @@
   --selection-foreground: #04201c;
   --ring: #2dd4bf;
   /*
-   * Space around the globe (GlobePage). It is graphite rather than blue: a
-   * blue space would blend with the blue globe, a neutral one lets the
-   * globe stand out.
+   * Space around the globe (GlobePage). It is graphite rather than blue: a blue space would blend with the blue globe,
+   * a neutral one lets the globe stand out.
    */
   --globe-space:
     /* Faint violet and amber clouds: space, but never the globe's blue. */
     radial-gradient(ellipse at 12% 18%, rgb(124 92 160 / 9%), transparent 45%),
     radial-gradient(ellipse at 88% 85%, rgb(170 110 70 / 6%), transparent 40%),
-    radial-gradient(
-      circle at center,
-      #1a1d24 0%,
-      #111318 40%,
-      #090a0d 75%,
-      #040506 100%
-    );
+    radial-gradient(circle at center, #1a1d24 0%, #111318 40%, #090a0d 75%, #040506 100%);
 }
 
 @theme inline {
-  --font-sans:
-    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Archivo Variable', 'Arial Narrow', sans-serif;
   --font-barcode: 'Libre Barcode 39 Text', monospace;
   --color-background: var(--background);
@@ -95,18 +84,11 @@
   }
 
   /*
-   * Luggage tag: both corners cut on the eyelet side. clip-path also clips
-   * box shadows: put the shadow on a parent, with a drop-shadow filter.
+   * Luggage tag: both corners cut on the eyelet side. clip-path also clips box shadows: put the shadow on a parent,
+   * with a drop-shadow filter.
    */
   .tag-shape-left {
-    clip-path: polygon(
-      1.25rem 0,
-      100% 0,
-      100% 100%,
-      1.25rem 100%,
-      0 calc(100% - 1.25rem),
-      0 1.25rem
-    );
+    clip-path: polygon(1.25rem 0, 100% 0, 100% 100%, 1.25rem 100%, 0 calc(100% - 1.25rem), 0 1.25rem);
   }
 
   /* The same tag, eyelet on the right: for tags left of the globe. */
@@ -176,8 +158,8 @@
   }
 
   /*
-   * MapLibre makes the map focusable for its arrow keys: after a drag, any
-   * key drew the browser's focus frame around the whole screen.
+   * MapLibre makes the map focusable for its arrow keys: after a drag, any key drew the browser's focus frame around
+   * the whole screen.
    */
   .maplibregl-canvas:focus-visible {
     outline: none;

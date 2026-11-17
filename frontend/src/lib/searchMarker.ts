@@ -1,13 +1,7 @@
 import type { GeoJSONSource } from 'maplibre-gl'
 
 import type { LngLat } from './countryAnchor.ts'
-import {
-  MARKER_SOURCE,
-  PULSE_LAYER,
-  RING_RADIUS_PX,
-  SPOTLIGHT_LAYER,
-  SPOTLIGHT_OPACITY,
-} from './globeStyle.ts'
+import { MARKER_SOURCE, PULSE_LAYER, RING_RADIUS_PX, SPOTLIGHT_LAYER, SPOTLIGHT_OPACITY } from './globeStyle.ts'
 import type { MapLibreMap } from './maplibre.ts'
 import { prefersReducedMotion } from './screen.ts'
 
@@ -19,9 +13,7 @@ const PULSE_MS = 1100
 const PULSE_END_RADIUS_PX = 56
 
 /** One frame of the pulse: its radius and opacity, or null once over. */
-export function pulseFrame(
-  elapsedMs: number,
-): { radius: number; opacity: number } | null {
+export function pulseFrame(elapsedMs: number): { radius: number; opacity: number } | null {
   if (elapsedMs >= PULSES * PULSE_MS) {
     return null
   }
@@ -33,21 +25,15 @@ export function pulseFrame(
 }
 
 /**
- * Marks the country `code` found by the search: a ring at `anchor` sending
- * out a few pulses (none for those who reduce motion), and the other
- * countries darkened. Returns the unmarking.
+ * Marks the country `code` found by the search: a ring at `anchor` sending out a few pulses (none for those who reduce
+ * motion), and the other countries darkened. Returns the unmarking.
  */
-export function markCountry(
-  map: MapLibreMap,
-  code: string,
-  anchor: LngLat,
-): () => void {
+export function markCountry(map: MapLibreMap, code: string, anchor: LngLat): () => void {
   map.getSource<GeoJSONSource>(MARKER_SOURCE)?.setData({
     type: 'Point',
     coordinates: anchor,
   })
-  // A filter, not a feature state: MapLibre fades a plain opacity, but sets
-  // one depending on feature states at once.
+  // A filter, not a feature state: MapLibre fades a plain opacity, but sets one depending on feature states at once.
   map.setFilter(SPOTLIGHT_LAYER, ['!=', ['get', 'code'], code])
   map.setPaintProperty(SPOTLIGHT_LAYER, 'fill-opacity', SPOTLIGHT_OPACITY)
 
@@ -57,11 +43,7 @@ export function markCountry(
     : window.requestAnimationFrame(function pulse(now) {
         const state = pulseFrame(now - start)
         map.setPaintProperty(PULSE_LAYER, 'circle-radius', state?.radius ?? 0)
-        map.setPaintProperty(
-          PULSE_LAYER,
-          'circle-stroke-opacity',
-          state?.opacity ?? 0,
-        )
+        map.setPaintProperty(PULSE_LAYER, 'circle-stroke-opacity', state?.opacity ?? 0)
         if (state !== null) {
           frame = window.requestAnimationFrame(pulse)
         }

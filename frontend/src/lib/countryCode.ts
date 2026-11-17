@@ -2,8 +2,8 @@
 const COUNTRY_CODE = /^[A-Z]{2}$/
 
 /**
- * Countries without a map: Antarctica has no trip to plan, and a flat map
- * cannot show a pole. Keep in sync with scripts/build-country-shapes.mjs.
+ * Countries without a map: Antarctica has no trip to plan, and a flat map cannot show a pole. Keep in sync with
+ * scripts/build-country-shapes.mjs.
  */
 const WITHOUT_MAP = new Set(['AQ'])
 

@@ -23,10 +23,7 @@ export function CountryMap({ name, data, onReady, onFailed }: CountryMapProps) {
   useCountryMap(containerRef, data, onReady, onFailed)
 
   return (
-    <section
-      aria-label={t('country.mapLabel', { name })}
-      className="absolute inset-0"
-    >
+    <section aria-label={t('country.mapLabel', { name })} className="absolute inset-0">
       {/* Own element for the map: see the same comment in Globe.tsx. */}
       <div ref={containerRef} className="h-full w-full" />
     </section>

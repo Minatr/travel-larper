@@ -16,8 +16,7 @@ const (
 	passwordMaxLength = 128
 )
 
-// UserInserter stores a new pending user and reports false when the email
-// is already taken.
+// UserInserter stores a new pending user and reports false when the email is already taken.
 type UserInserter interface {
 	InsertUser(ctx context.Context, email, passwordHash string) (bool, error)
 }
@@ -27,8 +26,7 @@ type Hasher interface {
 	Hash(ctx context.Context, password string) (string, error)
 }
 
-// RegistrationService creates user accounts, pending until an admin
-// approves them.
+// RegistrationService creates user accounts, pending until an admin approves them.
 type RegistrationService struct {
 	users  UserInserter
 	hasher Hasher
@@ -63,8 +61,8 @@ func (s *RegistrationService) Register(ctx context.Context, email, password stri
 	return nil
 }
 
-// normalizeEmail accepts a bare address only: "Bob <bob@example.com>" is
-// valid for net/mail but not as an account email.
+// normalizeEmail accepts a bare address only: "Bob <bob@example.com>" is valid for net/mail but not as an account
+// email.
 func normalizeEmail(raw string) (string, error) {
 	email := strings.TrimSpace(raw)
 	if len(email) > emailMaxLength {

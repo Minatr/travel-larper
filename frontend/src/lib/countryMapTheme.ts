@@ -1,6 +1,6 @@
 /**
- * Colors of a country's map: OpenFreeMap's dark style, recolored in the
- * app's palette when the map loads (CLAUDE.md section 8).
+ * Colors of a country's map: OpenFreeMap's dark style, recolored in the app's palette when the map loads (CLAUDE.md
+ * section 8).
  */
 import type { Map as MapLibreMap } from 'maplibre-gl'
 
@@ -15,8 +15,7 @@ export const OUTSIDE_LAND_COLOR = '#111823'
 type PaintProperty = Parameters<MapLibreMap['setPaintProperty']>[1]
 
 /**
- * Recolored layers of the style: layer, paint property, color. A layer
- * missing from the style is skipped.
+ * Recolored layers of the style: layer, paint property, color. A layer missing from the style is skipped.
  */
 export const COUNTRY_MAP_COLORS: [string, PaintProperty, string][] = [
   ['background', 'background-color', COUNTRY_LAND_COLOR],
@@ -70,18 +69,10 @@ export const COUNTRY_MAP_COLORS: [string, PaintProperty, string][] = [
 export const COUNTRY_MAP_HIDDEN_LAYERS = ['landcover_wood']
 
 /**
- * Border layers kept to land borders: at sea, OpenStreetMap borders follow
- * the territorial waters, ringing every island.
+ * Border layers kept to land borders: at sea, OpenStreetMap borders follow the territorial waters, ringing every
+ * island.
  */
-export const LAND_BORDER_LAYERS = [
-  'boundary_state',
-  'boundary_country_z0-4',
-  'boundary_country_z5-',
-]
+export const LAND_BORDER_LAYERS = ['boundary_state', 'boundary_country_z0-4', 'boundary_country_z5-']
 
 /** Layers drawn above the mask, so the neighbours keep their shapes. */
-export const ABOVE_MASK_LAYERS = [
-  'water',
-  'boundary_country_z0-4',
-  'boundary_country_z5-',
-]
+export const ABOVE_MASK_LAYERS = ['water', 'boundary_country_z0-4', 'boundary_country_z5-']

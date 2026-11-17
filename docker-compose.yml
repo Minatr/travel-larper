@@ -1,7 +1,7 @@
 # Environnement de développement local.
 # Lancer avec `make dev` (ou `docker compose up --build --watch`).
-# Compose Watch synchronise le code dans les conteneurs : sous Windows, un
-# simple montage de dossier ne transmet pas les changements de fichiers.
+# Compose Watch synchronise le code dans les conteneurs : sous Windows, un simple montage de dossier ne transmet pas les
+# changements de fichiers.
 name: travel-larper
 
 services:

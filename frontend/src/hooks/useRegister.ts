@@ -1,10 +1,6 @@
 import { useState } from 'react'
 
-import {
-  PASSWORD_MAX_LENGTH,
-  PASSWORD_MIN_LENGTH,
-  type RegisterRequest,
-} from '../models/auth.ts'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, type RegisterRequest } from '../models/auth.ts'
 import type { ApiErrorCode } from '../models/error.ts'
 import { register } from '../services/auth.ts'
 
@@ -13,10 +9,7 @@ export type RegisterFailure = ApiErrorCode | 'unreachable'
 
 /** State of the registration form. */
 export type RegisterState =
-  | { kind: 'idle' }
-  | { kind: 'submitting' }
-  | { kind: 'registered' }
-  | { kind: 'failed'; reason: RegisterFailure }
+  { kind: 'idle' } | { kind: 'submitting' } | { kind: 'registered' } | { kind: 'failed'; reason: RegisterFailure }
 
 /** Submits a registration, checking the password length before calling the API. */
 export function useRegister() {
@@ -32,11 +25,7 @@ export function useRegister() {
     setState({ kind: 'submitting' })
     try {
       const result = await register(request)
-      setState(
-        result.ok
-          ? { kind: 'registered' }
-          : { kind: 'failed', reason: result.code },
-      )
+      setState(result.ok ? { kind: 'registered' } : { kind: 'failed', reason: result.code })
     } catch (error: unknown) {
       console.error('registration failed', error)
       setState({ kind: 'failed', reason: 'unreachable' })

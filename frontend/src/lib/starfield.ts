@@ -7,9 +7,8 @@ export const SKY_SIZE = 1000
 export type Star = { x: number; y: number; radius: number; opacity: number }
 
 /**
- * Faint stars spread at random, the same every time for a given `seed`:
- * the sky does not change from one visit to the next. Almost all are tiny
- * and dim, like distant dust; only a few stand out a little.
+ * Faint stars spread at random, the same every time for a given `seed`: the sky does not change from one visit to the
+ * next. Almost all are tiny and dim, like distant dust; only a few stand out a little.
  */
 export function starfield(count: number, seed: number): Star[] {
   const random = seeded(seed)
@@ -25,9 +24,8 @@ export function starfield(count: number, seed: number): Star[] {
 }
 
 /**
- * Shift of the sky for the globe's center: it follows the globe at about
- * half the speed of its surface, which reads as depth. A full turn shifts it
- * by exactly one tile, so the jump from 180° to -180° does not show.
+ * Shift of the sky for the globe's center: it follows the globe at about half the speed of its surface, which reads as
+ * depth. A full turn shifts it by exactly one tile, so the jump from 180° to -180° does not show.
  */
 export function skyOffset([lng, lat]: LngLat): { x: number; y: number } {
   return { x: (-lng / 360) * SKY_SIZE, y: (lat / 360) * SKY_SIZE }

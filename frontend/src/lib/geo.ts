@@ -2,8 +2,8 @@
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
 /**
- * West, south, east and north edges, in degrees. East goes past 180 for a
- * country across the antimeridian (Russia: 27 to 190).
+ * West, south, east and north edges, in degrees. East goes past 180 for a country across the antimeridian (Russia: 27
+ * to 190).
  */
 export type Bounds = [number, number, number, number]
 

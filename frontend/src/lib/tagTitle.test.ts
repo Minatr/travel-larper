@@ -15,8 +15,6 @@ describe('fittedTitleSize', () => {
   })
 
   it('wraps after hyphens rather than shrinking for the whole name', () => {
-    expect(fittedTitleSize('Saint-Vincent-et-les-Grenadines', 200, 30)).toBe(
-      fittedTitleSize('Grenadines', 200, 30),
-    )
+    expect(fittedTitleSize('Saint-Vincent-et-les-Grenadines', 200, 30)).toBe(fittedTitleSize('Grenadines', 200, 30))
   })
 })

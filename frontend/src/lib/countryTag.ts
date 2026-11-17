@@ -1,6 +1,6 @@
 /**
- * Where the hover tag goes on screen, in canvas pixels. Its string points
- * away from the globe's center, so tags spread around the globe.
+ * Where the hover tag goes on screen, in canvas pixels. Its string points away from the globe's center, so tags spread
+ * around the globe.
  */
 
 /** A position on the map's canvas, in pixels. */
@@ -56,12 +56,7 @@ const HEADER_CLEARANCE_PX = 72
 const TAG_BELOW_EYELET_PX = 96
 
 /** Lays out the tag of the country at `anchor`; flips it if it leaves the screen. */
-export function tagLayout(
-  anchor: ScreenPoint,
-  globeCenter: ScreenPoint,
-  width: number,
-  height: number,
-): TagLayout {
+export function tagLayout(anchor: ScreenPoint, globeCenter: ScreenPoint, width: number, height: number): TagLayout {
   const away = direction(anchor, globeCenter)
   let side: TagSide = away.x >= 0 ? 'right' : 'left'
   let dx = away.x * STRING_LENGTH_PX
@@ -73,11 +68,7 @@ export function tagLayout(
   }
   const eyelet = {
     x: anchor.x + dx,
-    y: clamp(
-      anchor.y + away.y * STRING_LENGTH_PX,
-      HEADER_CLEARANCE_PX,
-      height - TAG_BELOW_EYELET_PX,
-    ),
+    y: clamp(anchor.y + away.y * STRING_LENGTH_PX, HEADER_CLEARANCE_PX, height - TAG_BELOW_EYELET_PX),
   }
   const mirror = side === 'right' ? 1 : -1
   return {

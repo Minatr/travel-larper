@@ -19,7 +19,12 @@ func RateLimit(requestsPerMinute int, logger *slog.Logger) func(http.Handler) ht
 }
 
 // RouteRateLimit adds a per-IP limit to the route matching routePattern only.
-func RouteRateLimit(routePattern string, requests int, window time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
+func RouteRateLimit(
+	routePattern string,
+	requests int,
+	window time.Duration,
+	logger *slog.Logger,
+) func(http.Handler) http.Handler {
 	limit := limitByIP(requests, window, logger)
 	return func(next http.Handler) http.Handler {
 		limited := limit(next)

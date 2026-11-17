@@ -15,16 +15,11 @@ describe('fetchCountries', () => {
   })
 
   it('downloads the countries once for every caller', async () => {
-    const fetchMock = vi.fn(() =>
-      Promise.resolve(new Response(JSON.stringify(countries))),
-    )
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(JSON.stringify(countries))))
     vi.stubGlobal('fetch', fetchMock)
     const fetchCountries = await freshFetchCountries()
 
-    const [first, second] = await Promise.all([
-      fetchCountries(),
-      fetchCountries(),
-    ])
+    const [first, second] = await Promise.all([fetchCountries(), fetchCountries()])
 
     expect(fetchMock).toHaveBeenCalledOnce()
     expect(second).toBe(first)

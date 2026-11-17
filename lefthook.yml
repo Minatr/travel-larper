@@ -1,6 +1,5 @@
-# Checks run before each commit, on the staged files only so commits stay
-# fast. Activate once per clone with `lefthook install` (tools installed on
-# the machine: see README). The CI runs the full checks on every PR.
+# Checks run before each commit, on the staged files only so commits stay fast. Activate once per clone with
+# `lefthook install` (tools installed on the machine: see README). The CI runs the full checks on every PR.
 pre-commit:
   jobs:
     - name: backend-format
