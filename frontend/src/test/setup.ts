@@ -43,6 +43,13 @@ window.matchMedia = (query: string) =>
     dispatchEvent: () => false,
   }) satisfies MediaQueryList
 
+// jsdom has no ResizeObserver (the territory passes' row watches its size): nothing ever resizes there.
+window.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 // The tests check the default language, whatever the machine's settings.
 await i18n.changeLanguage('en')
 

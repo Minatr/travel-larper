@@ -35,11 +35,31 @@ describe('partsWithin', () => {
       want: [[square(-160, 60, 10)], [square(170, 50, 5)]],
     },
   ])('$name', ({ area, want }) => {
-    expect(partsWithin(shape, [...area])?.coordinates).toEqual(want)
+    expect(partsWithin(shape, [[...area]])?.coordinates).toEqual(want)
   })
 
   it('returns null when no part meets the area', () => {
-    expect(partsWithin(shape, [0, 0, 10, 10])).toBeNull()
+    expect(partsWithin(shape, [[0, 0, 10, 10]])).toBeNull()
+  })
+
+  it('keeps the parts meeting any of several areas', () => {
+    const kept = partsWithin(shape, [
+      [-110, 25, -75, 55],
+      [-165, 55, -145, 75],
+    ])
+    expect(kept?.coordinates).toEqual([[square(-100, 30, 20)], [square(-160, 60, 10)]])
+  })
+
+  it('leaves out the parts wholly inside an excluded area, not those only crossing it', () => {
+    const kept = partsWithin(
+      shape,
+      [[-180, -90, 180, 90]],
+      [
+        [-165, 55, -145, 75],
+        [-95, 35, -85, 45],
+      ],
+    )
+    expect(kept?.coordinates).toEqual([[square(-100, 30, 20)], [square(170, 50, 5)]])
   })
 })
 

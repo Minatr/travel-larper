@@ -1,15 +1,17 @@
-import { use, useCallback, useEffect, useRef, useState } from 'react'
+import { type RefObject, use, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useGlobe } from '../hooks/useGlobe.ts'
+import { type OpenPlace, useGlobe } from '../hooks/useGlobe.ts'
 import { useKeyPress } from '../hooks/useKeyPress.ts'
 import type { LngLat } from '../lib/countryAnchor.ts'
+import type { Camera } from '../lib/mercatorCamera.ts'
 import { isShortScreen, prefersReducedMotion } from '../lib/screen.ts'
 import { skyOffset } from '../lib/starfield.ts'
 import { cn } from '../lib/utils.ts'
 import { CountryBubble } from './CountryBubble.tsx'
 import { CountryPanel } from './CountryPanel.tsx'
 import { CountrySearch } from './CountrySearch.tsx'
+import type { InsetId } from '../lib/territories.ts'
 import { HeaderContext } from './headerContext.ts'
 import { Starfield } from './Starfield.tsx'
 
@@ -24,21 +26,35 @@ const SEARCH_INSET_PX = 72
 
 /** Props of {@link Globe}. */
 type GlobeProps = {
-  /** Called with the ISO code of the country clicked or tapped. */
-  onOpenCountry: (code: string) => void
+  /** Called with the ISO code of the country clicked or tapped, and its distant territory if it was one. */
+  onOpenCountry: (code: string, territory: InsetId | null) => void
   /** Called when a flight of the globe ends. */
   onLanded: () => void
   /** Whether a country page is open above the globe. */
   countryOpen: boolean
   /** Whether that page is visible, covering the globe. */
   countryShown: boolean
+  /** The country (and territory) that page shows: the globe zooms out from it on the way back. */
+  openPlace: OpenPlace | null
+  /** Camera of that page's map, once it reports one: the globe flies back from there. */
+  mapCameraRef: RefObject<Camera | null>
+  /** Set by the globe: makes it follow, out of sight, the camera in `mapCameraRef`. */
+  followMapRef: RefObject<() => void>
 }
 
 /**
  * Interactive globe filling its parent: hover a country for its tag, click it to open its map; on a touch screen, tap
  * it, then open it from the panel. A search field finds a country by name.
  */
-export function Globe({ onOpenCountry, onLanded, countryOpen, countryShown }: GlobeProps) {
+export function Globe({
+  onOpenCountry,
+  onLanded,
+  countryOpen,
+  countryShown,
+  openPlace,
+  mapCameraRef,
+  followMapRef,
+}: GlobeProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const skyRef = useRef<SVGPatternElement>(null)
@@ -54,7 +70,17 @@ export function Globe({ onOpenCountry, onLanded, countryOpen, countryShown }: Gl
     },
     [stillSky],
   )
-  const globe = useGlobe(containerRef, onOpenCountry, onLanded, countryOpen, countryShown, moveSky)
+  const globe = useGlobe(
+    containerRef,
+    onOpenCountry,
+    onLanded,
+    countryOpen,
+    countryShown,
+    moveSky,
+    openPlace,
+    mapCameraRef,
+    followMapRef,
+  )
   const [searchFocused, setSearchFocused] = useState(false)
   const phone = !globe.canHover
   const picked = globe.picked !== null
@@ -96,7 +122,7 @@ export function Globe({ onOpenCountry, onLanded, countryOpen, countryShown }: Gl
       <CountryBubble hint={globe.searchedHint} onClose={globe.closePicked} faded={globe.hint !== null} />
       <CountryBubble hint={globe.hint} />
       <CountrySearch
-        onSelect={(code) => globe.selectCountry(code, bottomInset())}
+        onSelect={(code, territory) => globe.selectCountry(code, territory, bottomInset())}
         onOpen={globe.openPicked}
         selected={globe.picked}
         onFocusChange={(focused) => {
@@ -123,7 +149,12 @@ export function Globe({ onOpenCountry, onLanded, countryOpen, countryShown }: Gl
         )}
       />
       {/* After the search, so Tab goes from the field to its button. */}
-      <CountryPanel code={phone ? globe.picked : null} onOpen={globe.openPicked} onClose={globe.closePicked} />
+      <CountryPanel
+        code={phone ? globe.picked : null}
+        territory={globe.pickedTerritory}
+        onOpen={globe.openPicked}
+        onClose={globe.closePicked}
+      />
     </section>
   )
 }

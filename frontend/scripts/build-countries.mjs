@@ -7,8 +7,9 @@
  *     <ne_50m_admin_0_countries.geojson>
  *
  * Base: the 1:110m countries, light enough for phones. Borders follow Google Maps, which the app links to, rather than
- * Natural Earth's de facto ones. The small countries missing at 1:110m come from 1:50m. Only the shape, ISO code and
- * color group are kept: the browser names a country from its code (Intl.DisplayNames).
+ * Natural Earth's de facto ones. The small countries missing at 1:110m come from 1:50m, and so do the islands a
+ * country lacks at 1:110m (Guadeloupe, Réunion): its distant territories can then be hovered and clicked. Only the
+ * shape, ISO code and color group are kept: the browser names a country from its code (Intl.DisplayNames).
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 
@@ -28,6 +29,9 @@ const SAHARA_BORDER_COAST = [-13.121613, 27.654148]
 const SAHARA_BORDER_EAST = [-8.66559, 27.656426]
 // Bounding box that singles out Crimea among Russia's polygons.
 const CRIMEA = { west: 32, east: 37, south: 44, north: 47 }
+// Smallest island added from 1:50m, in km² (the same floor as the distant territories, territories.ts).
+const MIN_ISLAND_KM2 = 20
+const KM_PER_DEGREE = 111.32
 
 const [smallScale, mediumScale] = process.argv.slice(2)
 if (smallScale === undefined || mediumScale === undefined) {
@@ -145,6 +149,55 @@ function moveCrimeaToUkraine(features) {
   setPolygons(ukraine, [[mergeRings(onlyRing(ukraine), crimea[0])]])
 }
 
+function boxOf(ring) {
+  const longitudes = ring.map(([longitude]) => longitude)
+  const latitudes = ring.map(([, latitude]) => latitude)
+  return [Math.min(...longitudes), Math.min(...latitudes), Math.max(...longitudes), Math.max(...latitudes)]
+}
+
+function boxesMeet(first, second) {
+  return first[0] <= second[2] && first[2] >= second[0] && first[1] <= second[3] && first[3] >= second[1]
+}
+
+// Shoelace formula, longitudes narrowed by the latitude's cosine.
+function areaKm2(ring) {
+  const latitude = ring.reduce((sum, [, y]) => sum + y, 0) / ring.length
+  let doubled = 0
+  for (let index = 1; index < ring.length; index++) {
+    const [x1, y1] = ring[index - 1]
+    const [x2, y2] = ring[index]
+    doubled += (x2 - x1) * (y2 + y1)
+  }
+  return (Math.abs(doubled) / 2) * Math.cos((latitude * Math.PI) / 180) * KM_PER_DEGREE ** 2
+}
+
+// Adds to each 1:110m country its 1:50m islands of MIN_ISLAND_KM2 or more lying away from its 1:110m parts (their
+// boxes do not meet): a coastal island already drawn, or swallowed by the mainland's box, stays out. Islands of its
+// dependencies sharing its code count too (Christmas Island, in Australia's Indian Ocean Territories), unless they lie
+// against another country (the British bases on Cyprus).
+function addMissingIslands(features, mediumFeatures) {
+  const partBoxes = new Map(
+    features.map((feature) => [feature, polygons(feature.geometry).map(([ring]) => boxOf(ring))]),
+  )
+  for (const feature of features) {
+    const { ADM0_A3: own, ISO_A2_EH: code } = feature.properties
+    const boxes = partBoxes.get(feature)
+    const otherBoxes = features.filter((other) => other !== feature).flatMap((other) => partBoxes.get(other))
+    const away = (box, around) => !around.some((other) => boxesMeet(box, other))
+    const islands = mediumFeatures
+      .filter((item) => item.properties.ADM0_A3 === own || (code !== MISSING && item.properties.ISO_A2_EH === code))
+      .flatMap((item) =>
+        polygons(item.geometry).map((polygon) => ({ polygon, dependency: item.properties.ADM0_A3 !== own })),
+      )
+      .filter(({ polygon: [ring], dependency }) => {
+        const box = boxOf(ring)
+        return areaKm2(ring) >= MIN_ISLAND_KM2 && away(box, boxes) && (!dependency || away(box, otherBoxes))
+      })
+      .map(({ polygon }) => polygon)
+    if (islands.length > 0) setPolygons(feature, [...polygons(feature.geometry), ...islands])
+  }
+}
+
 function round(value) {
   return Number(value.toFixed(DECIMALS))
 }
@@ -169,9 +222,11 @@ for (const [part, into] of Object.entries(MERGED)) {
 }
 separateWesternSahara(features)
 moveCrimeaToUkraine(features)
+const mediumFeatures = readFeatures(mediumScale)
+addMissingIslands(features, mediumFeatures)
 
 // Added last, so that they are drawn above the bigger countries around them (Monaco, Vatican, Hong Kong…).
-const small = readFeatures(mediumScale).filter(
+const small = mediumFeatures.filter(
   (item) => !present.has(item.properties.ADM0_A3) && COUNTRY_TYPES.has(item.properties.TYPE),
 )
 

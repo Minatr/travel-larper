@@ -1,6 +1,7 @@
 /**
  * Flights of the globe to a country's map and back. On the way in, the globe zooms onto the country, flattens and takes
- * the map's colors, ending on the map's own camera (mercatorCamera.ts): the map then takes over unseen.
+ * the map's colors, ending on the map's own camera (mercatorCamera.ts): the map then takes over unseen. On the way
+ * back, the reverse, from wherever the page left the globe (an inset, a country opened from its URL).
  * Each effect is a zoom-based expression, set once per flight (twice for an arc): no code runs on each frame.
  */
 import type {
@@ -10,9 +11,31 @@ import type {
   SkySpecification,
 } from 'maplibre-gl'
 
+import type { LngLat } from './countryAnchor.ts'
 import { COUNTRY_LAND_COLOR, OUTSIDE_LAND_COLOR } from './countryMapTheme.ts'
+import { HALF_TURN_DEGREES } from './geo.ts'
 import { ATMOSPHERE_BLEND, globeSky, MAP_COLORS_LAYER, RAISED_HEIGHT_METERS, RAISED_LAYER } from './globeStyle.ts'
 import type { Camera } from './mercatorCamera.ts'
+
+/**
+ * Zoom from which the globe overflows the screen: as MapLibre counts it at the initial view (`zoom`, for the glow's
+ * zoom expression), and in apparent size (`apparentZoom`, for flights, which cross latitudes).
+ */
+export type GlobeOverflow = { zoom: number; apparentZoom: number }
+
+/**
+ * Zoom matching the globe's apparent size. MapLibre draws the globe at the Mercator scale of the center's latitude: at
+ * the same zoom, the globe looks 2.5 times larger over Russia (70°) than over the Sahara (25°). Comparing flights by
+ * their raw zoom took Russia's (2 → 1.8, yet a zoom-in) for a standstill.
+ */
+export function apparentZoom(zoom: number, latitude: number): number {
+  return zoom - Math.log2(Math.cos((latitude * Math.PI) / HALF_TURN_DEGREES))
+}
+
+/** The zoom MapLibre needs at `latitude` for the apparent size `apparent`, the reverse of apparentZoom. */
+export function zoomForApparent(apparent: number, latitude: number): number {
+  return apparent + Math.log2(Math.cos((latitude * Math.PI) / HALF_TURN_DEGREES))
+}
 
 /** Share of the zoom range the globe stays round, before flattening. */
 const ROUND_SHARE = 0.4
@@ -25,9 +48,22 @@ const MIN_FLATTEN_ZOOM_LEVELS = 0.4
 
 /**
  * How far an arc flight zooms out before coming back in. The globe stays round on the way out and flattens on the way
- * in: the blend is set once, at the arc's lowest zoom, where it still reads as the plain globe.
+ * in (or the reverse, on the way back): the blend changes once, at the arc's lowest zoom, where it reads as the plain
+ * globe.
  */
 const ARC_DEPTH_LEVELS = 0.5
+
+/**
+ * Smallest change of raw zoom a blend can spread over: the zoom expression needs two distinct stops. Russia's flight
+ * changes it by only 0.2, but over most of the flight, as the latitude changes.
+ */
+const MIN_BLEND_ZOOM_GAP = 0.05
+
+/** Share of an arc flight's duration spent zooming out (and moving), the rest zooming back in. */
+const ARC_OUT_SHARE = 0.5
+
+/** Zoom gap under which a two-leg flight's first leg counts as finished rather than cut short. */
+const LEG_END_TOLERANCE_LEVELS = 0.01
 
 /**
  * Plain globe, as MapLibre's `'globe'` stands for. The short name cannot undo a flight: MapLibre ignores it while
@@ -58,59 +94,97 @@ const MAX_LAYER_ZOOM = 24
 const INTERACTIONS = ['dragPan', 'scrollZoom', 'boxZoom', 'keyboard', 'doubleClickZoom', 'touchZoomRotate'] as const
 
 /**
- * Flies the globe onto `camera`, framing the country `code`, controls off. The globe overflows the screen from zoom
- * `overflowZoom`.
+ * Flies the globe onto `camera`, framing the country `code`, controls off. Shares and thresholds are worked out on the
+ * apparent zoom, then turned into the raw zooms the blends follow, assuming both move alike along the flight.
  */
 export function flyIn(
   map: MapLibreMap,
   camera: Camera,
   code: string,
-  overflowZoom: number,
+  overflow: GlobeOverflow,
   durationMs: number,
   done: () => void,
 ) {
   const from = map.getZoom()
   const to = camera.zoom
-  const round = Math.max(from + (to - from) * ROUND_SHARE, overflowZoom)
-  const roundUntil = to - round >= MIN_FLATTEN_ZOOM_LEVELS ? round : from
-  if (Math.abs(to - roundUntil) >= MIN_FLATTEN_ZOOM_LEVELS) {
-    flatten(map, code, from, roundUntil, to)
+  const start = apparentZoom(from, map.getCenter().lat)
+  const end = apparentZoom(to, camera.center[1])
+  if (Math.abs(end - start) >= MIN_FLATTEN_ZOOM_LEVELS && Math.abs(to - from) >= MIN_BLEND_ZOOM_GAP) {
+    flatten(map, code, from, from + (to - from) * roundShare(start, end, overflow), to)
     fly(map, camera, durationMs, done)
     return
   }
 
   // Too little zoom change to flatten along: an arc, round on the way out.
-  const lowest = Math.min(from, to) - ARC_DEPTH_LEVELS
-  setGlobe(map, overflowZoom)
+  const lowest = zoomForApparent(Math.min(start, end) - ARC_DEPTH_LEVELS, camera.center[1])
+  setGlobe(map, overflow.zoom)
   lowerRaised(map, from, lowest)
   fly(map, camera, durationMs, done, {
-    lowestZoom: lowest,
-    atLowest: (zoom) => {
-      flatten(map, code, zoom, zoom, to)
+    camera: { center: camera.center, zoom: lowest },
+    share: ARC_OUT_SHARE,
+    between: () => {
+      flatten(map, code, lowest, lowest, to)
       // Already down at the lowest zoom: kept out of sight on the way in.
       map.setLayoutProperty(RAISED_LAYER, 'visibility', 'none')
     },
   })
 }
 
+// Share of the way the globe stays round, from apparent zoom `start` to `end`: until it overflows the screen, or
+// flattening all along when that leaves too little. Zooming out (from a small country to a larger one, after coming
+// back close to it), the globe overflows the screen all along: flattening all along too, rather than an arc zooming out
+// past the country before coming back in.
+function roundShare(start: number, end: number, overflow: GlobeOverflow): number {
+  if (end < start) {
+    return 0
+  }
+  const round = Math.max(start + (end - start) * ROUND_SHARE, overflow.apparentZoom)
+  return end - round >= MIN_FLATTEN_ZOOM_LEVELS ? (round - start) / (end - start) : 0
+}
+
 /**
- * Flies back to `camera`: flyIn's blends, still set, run backwards. Then puts the globe's own projection, glow and
- * colors back. After an arc, the way back is an arc too: the globe rounds out on the way out, and gets its own look
- * back at the lowest zoom, before coming back in.
+ * Flies back from the map of `code` to `camera`, then puts the globe's own projection, glow and colors back. Two legs:
+ * backing away on the spot while the globe rounds out, then the turn to `camera` on the plain globe. In one go, the
+ * blends, which follow the zoom, went astray: crossing latitudes, MapLibre's zoom wanders (Canada's rose from 1.7 to
+ * 2.9 on its way to 2), or hardly moves (Greenland's, which the globe shrinks by the latitude alone). The first leg
+ * speeds up and the second slows down, so the speed carries over the joint. Without `code` (the globe never flew), a
+ * plain flight.
  */
-export function flyBack(map: MapLibreMap, camera: Camera, overflowZoom: number, durationMs: number, done: () => void) {
-  const from = map.getZoom()
+export function flyBack(
+  map: MapLibreMap,
+  camera: Camera,
+  code: string | null,
+  overflow: GlobeOverflow,
+  durationMs: number,
+  done: () => void,
+) {
   const ending = () => {
-    setGlobe(map, overflowZoom)
+    setGlobe(map, overflow.zoom)
     done()
   }
-  if (Math.abs(camera.zoom - from) >= MIN_FLATTEN_ZOOM_LEVELS) {
+  if (code === null) {
     fly(map, camera, durationMs, ending)
     return
   }
+  const from = map.getZoom()
+  const latitude = map.getCenter().lat
+  const start = apparentZoom(from, latitude)
+  const end = apparentZoom(camera.zoom, camera.center[1])
+  // Round once the globe fits the screen again, or after ROUND_SHARE of the way out, whichever comes later.
+  const round = Math.max(end + (start - end) * ROUND_SHARE, overflow.apparentZoom)
+  const backing = start - round
+  if (backing < MIN_BLEND_ZOOM_GAP) {
+    setGlobe(map, overflow.zoom)
+    fly(map, camera, durationMs, ending)
+    return
+  }
+  const roundZoom = zoomForApparent(round, latitude)
+  roundOut(map, code, roundZoom, from)
   fly(map, camera, durationMs, ending, {
-    lowestZoom: Math.min(from, camera.zoom) - ARC_DEPTH_LEVELS,
-    atLowest: () => setGlobe(map, overflowZoom),
+    camera: { zoom: roundZoom },
+    share: backing / (backing + Math.abs(round - end)),
+    between: () => setGlobe(map, overflow.zoom),
+    smooth: true,
   })
 }
 
@@ -121,6 +195,14 @@ function flatten(map: MapLibreMap, code: string, from: number, roundUntil: numbe
   map.setSky(fadingSky(...glowFade(from, roundUntil, to)))
   setFadingColors(map, code, roundUntil, to)
   lowerRaised(map, from, from + (to - from) * LOWER_SHARE)
+}
+
+// Rounds the flat map of `code` back into the globe: flat at zoom `flat`, where the flight starts, round from zoom
+// `round`. The glow comes back over the last quarter, when the globe is nearly round.
+function roundOut(map: MapLibreMap, code: string, round: number, flat: number) {
+  map.setProjection(flattening(round, flat))
+  map.setSky(fadingSky(round, round + (flat - round) * GLOW_FADE_SHARE))
+  setFadingColors(map, code, round, flat)
 }
 
 // The globe's own projection, glow, colors and raised country.
@@ -174,43 +256,49 @@ function byZoom(zoomA: number, atA: number, zoomB: number, atB: number): Express
 }
 
 /**
- * An arc flight: out to `lowestZoom` and back in, `atLowest` called once with the zoom where it turns back.
+ * The first leg of a two-leg flight: to `camera` (the center kept when left out) over `share` of the duration, then
+ * `between` called once. `smooth`: speeding up, then slowing down, so the speed carries over the joint; otherwise each
+ * leg starts and ends slowly (an arc, which turns back there anyway).
  */
-type Arc = { lowestZoom: number; atLowest: (zoom: number) => void }
+type FirstLeg = { camera: { center?: LngLat; zoom: number }; share: number; between: () => void; smooth?: boolean }
 
-function fly(map: MapLibreMap, camera: Camera, durationMs: number, done: () => void, arc?: Arc) {
+function fly(map: MapLibreMap, camera: Camera, durationMs: number, done: () => void, first?: FirstLeg) {
   // Ends a flight still on (back during the way in) first: stopping it fires its "moveend", which this flight would
   // otherwise take for its own end.
   map.stop()
   setInteractive(map, false)
-  const stopWatching = arc === undefined ? () => {} : watchLowest(map, arc)
-  map.once('moveend', () => {
-    stopWatching()
+  const land = () => {
     setInteractive(map, true)
     done()
-  })
-  if (arc === undefined) {
-    map.easeTo({ ...camera, duration: durationMs })
-  } else {
-    map.flyTo({ ...camera, duration: durationMs, minZoom: arc.lowestZoom })
   }
+  if (first === undefined) {
+    map.once('moveend', land)
+    map.easeTo({ ...camera, duration: durationMs })
+    return
+  }
+
+  // Two easeTo rather than one flyTo: the turning point of a flyTo can only be guessed from its zoom events, which the
+  // globe's own zoom changes with latitude throw off (Russia's flight never flattened).
+  const firstMs = durationMs * first.share
+  map.once('moveend', () => {
+    // Cut short during the first leg: the flight ends there.
+    if (Math.abs(map.getZoom() - first.camera.zoom) > LEG_END_TOLERANCE_LEVELS) {
+      land()
+      return
+    }
+    first.between()
+    map.once('moveend', land)
+    map.easeTo({ ...camera, duration: durationMs - firstMs, ...(first.smooth === true ? { easing: easeOut } : {}) })
+  })
+  map.easeTo({ ...first.camera, duration: firstMs, ...(first.smooth === true ? { easing: easeIn } : {}) })
 }
 
-// Calls `arc.atLowest` once the zoom starts rising again. Returns the way to stop watching, for a flight that ends
-// first (cut short).
-function watchLowest(map: MapLibreMap, { atLowest }: Arc): () => void {
-  let previous = map.getZoom()
-  function onZoom() {
-    const zoom = map.getZoom()
-    if (zoom > previous) {
-      map.off('zoom', onZoom)
-      atLowest(zoom)
-    } else {
-      previous = zoom
-    }
-  }
-  map.on('zoom', onZoom)
-  return () => map.off('zoom', onZoom)
+function easeIn(progress: number): number {
+  return progress * progress
+}
+
+function easeOut(progress: number): number {
+  return 1 - (1 - progress) ** 2
 }
 
 /** Globe at zoom `round`, flat at zoom `flat`, stops in increasing order. */

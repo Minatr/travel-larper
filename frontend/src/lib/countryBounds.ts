@@ -7,6 +7,7 @@
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
 import { type Bounds, boxOf, FULL_TURN_DEGREES, HALF_TURN_DEGREES, polygonsOf } from './geo.ts'
+import { type Inset, mainFrameOf } from './territories.ts'
 
 /**
  * Gap under which two parts belong together: Borneo (600 km) stays with Malaysia, Alaska (670 km) leaves the United
@@ -19,8 +20,25 @@ const KM_PER_DEGREE = 111.32
  * street's zoom.
  */
 const MIN_FRAME_DEGREES = 0.2
+/**
+ * The same for an inset (about 50 km): a tiny island (Christmas Island) shown closer would show how rough its 1:10m
+ * outline is against the map's own coast.
+ */
+const MIN_INSET_FRAME_DEGREES = 0.5
 
 type Part = { bounds: Bounds; area: number }
+
+/**
+ * Frame of the country `code`, or of its `inset`: the decided frame when it has distant parts (territories.ts),
+ * countryBounds otherwise. The globe flies to it and the map opens on it, so both see the same picture.
+ */
+export function countryFrame(code: string, geometry: Polygon | MultiPolygon, inset: Inset | null = null): Bounds {
+  if (inset !== null) {
+    return atLeastMinFrame(inset.bounds, MIN_INSET_FRAME_DEGREES)
+  }
+  const decided = mainFrameOf(code)
+  return decided === undefined ? countryBounds(geometry) : atLeastMinFrame(decided)
+}
 
 /** Bounds to frame for a country shape. */
 export function countryBounds(geometry: Polygon | MultiPolygon): Bounds {
@@ -32,9 +50,9 @@ export function countryBounds(geometry: Polygon | MultiPolygon): Bounds {
   return atLeastMinFrame(bounds)
 }
 
-function atLeastMinFrame([west, south, east, north]: Bounds): Bounds {
-  const extraX = Math.max(0, MIN_FRAME_DEGREES - (east - west)) / 2
-  const extraY = Math.max(0, MIN_FRAME_DEGREES - (north - south)) / 2
+function atLeastMinFrame([west, south, east, north]: Bounds, minDegrees = MIN_FRAME_DEGREES): Bounds {
+  const extraX = Math.max(0, minDegrees - (east - west)) / 2
+  const extraY = Math.max(0, minDegrees - (north - south)) / 2
   return [west - extraX, south - extraY, east + extraX, north + extraY]
 }
 

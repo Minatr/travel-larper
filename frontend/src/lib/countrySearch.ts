@@ -1,7 +1,11 @@
 import { hasMap } from './countryCode.ts'
+import type { InsetId } from './territories.ts'
 
-/** A country as the search knows it: its name and other common names. */
-export type CountryEntry = { code: string; name: string; aliases?: string[] }
+/**
+ * A country as the search knows it: its name and other common names. A distant territory (French Guiana) is one too,
+ * with its country's code and name.
+ */
+export type CountryEntry = { code: string; name: string; aliases?: string[]; territory?: InsetId; country?: string }
 
 /** A country ready to search: its names already normalized, once per language. */
 export type SearchableCountry = CountryEntry & {
@@ -9,8 +13,10 @@ export type SearchableCountry = CountryEntry & {
   searchAliases: string[]
 }
 
-/** A result, with the common name that matched when the name itself did not. */
-export type CountryResult = { code: string; name: string; alias?: string }
+/**
+ * A result, with the common name that matched when the name itself did not; for a territory, its country's name.
+ */
+export type CountryResult = { code: string; name: string; alias?: string; territory?: InsetId; country?: string }
 
 /** Most results shown at once. */
 const MAX_RESULTS = 6
@@ -93,6 +99,10 @@ export function searchCountries(query: string, countries: SearchableCountry[], l
     const result: CountryResult = { code: entry.code, name: entry.name }
     if (match.alias !== undefined) {
       result.alias = match.alias
+    }
+    if (entry.territory !== undefined) {
+      result.territory = entry.territory
+      result.country = entry.country
     }
     if (match.starts) {
       starting.push(result)

@@ -38,7 +38,35 @@ function countryShape(features, code) {
   if (parts.length === 0) {
     throw new Error(`${code}: no matching feature`)
   }
+  return asGeometry(withoutFilledHoles(parts))
+}
+
+function asGeometry(parts) {
   return parts.length === 1 ? { type: 'Polygon', coordinates: parts[0] } : { type: 'MultiPolygon', coordinates: parts }
+}
+
+// Merges back a part that exactly fills another part's hole (Baikonur, leased to Russia, inside Kazakhstan): the hole
+// goes, and the part with it. Left as is, the map's mask cut the country out twice there, and dimmed it.
+function withoutFilledHoles(parts) {
+  const ringKey = (ring) =>
+    ring
+      .slice(0, -1)
+      .map(([longitude, latitude]) => `${longitude},${latitude}`)
+      .sort()
+      .join(';')
+  const partIndexes = new Map(parts.map(([outerRing], index) => [ringKey(outerRing), index]))
+  const filling = new Set()
+  const kept = parts.map(([outerRing, ...holes]) => [
+    outerRing,
+    ...holes.filter((hole) => {
+      const index = partIndexes.get(ringKey(hole))
+      if (index !== undefined) {
+        filling.add(index)
+      }
+      return index === undefined
+    }),
+  ])
+  return kept.filter((_, index) => !filling.has(index))
 }
 
 function roundCoordinates(coordinates, decimals) {

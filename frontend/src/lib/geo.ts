@@ -11,6 +11,18 @@ export type Bounds = [number, number, number, number]
 export const FULL_TURN_DEGREES = 360
 export const HALF_TURN_DEGREES = 180
 
+/** Mean radius of the Earth. */
+const EARTH_RADIUS_KM = 6371
+
+/** Distance as the crow flies between two [longitude, latitude] points (haversine formula). */
+export function distanceKm([longitude1, latitude1]: Position, [longitude2, latitude2]: Position): number {
+  const radians = (degrees: number) => (degrees * Math.PI) / HALF_TURN_DEGREES
+  const halfChord =
+    Math.sin(radians(latitude2 - latitude1) / 2) ** 2 +
+    Math.cos(radians(latitude1)) * Math.cos(radians(latitude2)) * Math.sin(radians(longitude2 - longitude1) / 2) ** 2
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(halfChord))
+}
+
 /** The polygons of a shape: one for a Polygon, each of a MultiPolygon. */
 export function polygonsOf(shape: Polygon | MultiPolygon): Position[][][] {
   return shape.type === 'Polygon' ? [shape.coordinates] : shape.coordinates

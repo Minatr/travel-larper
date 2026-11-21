@@ -113,16 +113,71 @@
     animation: tag-swing 1.2s ease-out 0.3s;
   }
 
+  /*
+   * The map's credit button, lifted above the open territories' drawer on a phone, where the drawer spans the width
+   * (useLiftedCredit sets the variable).
+   */
+  @media (width < 40rem) {
+    .maplibregl-ctrl-bottom-right {
+      bottom: var(--territory-drawer-height, 0px);
+      transition: bottom 300ms ease-out;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .maplibregl-ctrl-bottom-right {
+      transition: none;
+    }
+  }
+
+  /* A pass turning round to show its other side: the territory passes, when the place shown changes. */
+  .tag-turn {
+    animation: tag-turn 450ms ease-out backwards;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .tag-appear,
-    .tag-swing {
+    .tag-swing,
+    .tag-turn {
       animation: none;
     }
+  }
+
+  /*
+   * Boarding pass: a half circle cut from the top and bottom edges where its tear line runs, `--ticket-cut` from the
+   * left (the territory passes on a country's map).
+   */
+  .ticket-notches {
+    mask:
+      radial-gradient(circle 0.375rem at var(--ticket-cut) 0, transparent 98%, black),
+      radial-gradient(circle 0.375rem at var(--ticket-cut) 100%, transparent 98%, black);
+    mask-composite: intersect;
+  }
+
+  /* A row scrolling sideways without a scrollbar: by swipe, trackpad or keyboard, the cut-off item hinting at more. */
+  .scrollbar-hidden {
+    scrollbar-width: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
   }
 
   /* Small label tag: a point on the left, where the string goes. */
   .tag-label-left {
     clip-path: polygon(0.75rem 0, 100% 0, 100% 100%, 0.75rem 100%, 0 50%);
+  }
+}
+
+/* From edge on to facing, a little past, then back: a card flipped over by hand. */
+@keyframes tag-turn {
+  from {
+    transform: perspective(40rem) rotateY(-90deg);
+  }
+  70% {
+    transform: perspective(40rem) rotateY(12deg);
+  }
+  to {
+    transform: none;
   }
 }
 

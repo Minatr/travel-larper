@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next'
 
 import { useCountrySearch } from '../hooks/useCountrySearch.ts'
 import { splitOnMatch } from '../lib/countrySearch.ts'
+import type { InsetId } from '../lib/territories.ts'
 import { cn } from '../lib/utils.ts'
 import { HangingLogo } from './HangingLogo.tsx'
 
 /** Props of {@link CountrySearch}. */
 type CountrySearchProps = {
-  /** Called with the chosen country: the globe turns to it. */
-  onSelect: (code: string) => void
+  /** Called with the chosen country, or its distant territory: the globe turns to it. */
+  onSelect: (code: string, territory: InsetId | null) => void
   /** Called on Enter again after a choice: opens the country's map. */
   onOpen: () => void
   /** Country picked, if any: the field empties when it goes. */
@@ -41,8 +42,8 @@ export function CountrySearch({
   const inputRef = useRef<HTMLInputElement>(null)
   const listId = useId()
   const search = useCountrySearch(
-    (code) => {
-      onSelect(code)
+    (code, territory) => {
+      onSelect(code, territory)
       if (blurOnSelect) {
         inputRef.current?.blur()
       }
@@ -111,7 +112,7 @@ export function CountrySearch({
       >
         {search.results.map((entry, index) => (
           <li
-            key={entry.code}
+            key={entry.territory ?? entry.code}
             id={optionId(index)}
             role="option"
             aria-selected={index === search.activeIndex}
@@ -124,7 +125,13 @@ export function CountrySearch({
               index === search.activeIndex && 'bg-selection text-selection-foreground',
             )}
           >
-            {entry.alias === undefined ? (
+            {entry.country !== undefined ? (
+              // A territory: its country after it.
+              <span>
+                <HighlightedName name={entry.name} query={search.query} />
+                <span className="text-card-muted-foreground">{` · ${entry.country}`}</span>
+              </span>
+            ) : entry.alias === undefined ? (
               <HighlightedName name={entry.name} query={search.query} />
             ) : (
               // Found by a common name: shown after the official one.

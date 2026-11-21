@@ -2,12 +2,12 @@ import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 import { countryAnchor, facesViewer, type LngLat } from '../lib/countryAnchor.ts'
-import { countryBounds } from '../lib/countryBounds.ts'
+import { countryFrame } from '../lib/countryBounds.ts'
 import { hasMap } from '../lib/countryCode.ts'
 import { type CountryHint, tagLayout } from '../lib/countryTag.ts'
 import { markCountry } from '../lib/searchMarker.ts'
 import { FRAME_PADDING_PX, GLOBE_RETURN_MS, GLOBE_TRANSITION_MS } from '../lib/countryTransition.ts'
-import { flyBack, flyIn } from '../lib/globeFlight.ts'
+import { apparentZoom, flyBack, flyIn, type GlobeOverflow, zoomForApparent } from '../lib/globeFlight.ts'
 import { type Camera, mercatorCamera } from '../lib/mercatorCamera.ts'
 import {
   clickOutcome,
@@ -18,6 +18,7 @@ import {
 } from '../lib/globeSelection.ts'
 import { COUNTRIES_LAYER, COUNTRIES_SOURCE, globeStyle, RAISED_SOURCE } from '../lib/globeStyle.ts'
 import { lockRotation, MapLibreMap, mapPixelRatio, UPRIGHT_OPTIONS } from '../lib/maplibre.ts'
+import { findInset, type Inset, insetAt, type InsetId } from '../lib/territories.ts'
 import type { Countries, Country } from '../models/country.ts'
 import { fetchCountries } from '../services/countries.ts'
 
@@ -43,6 +44,11 @@ function overflowZoom(container: HTMLElement): number {
   return initialZoom(container) + GLOBE_OVERFLOW_ZOOM_LEVELS
 }
 
+function globeOverflow(container: HTMLElement): GlobeOverflow {
+  const zoom = overflowZoom(container)
+  return { zoom, apparentZoom: apparentZoom(zoom, INITIAL_CENTER[1]) }
+}
+
 /**
  * Zoom at which the globe fills the smaller side of the container: its height on a computer, its width on a phone. Each
  * zoom level doubles the size of the map, hence the log2.
@@ -61,6 +67,20 @@ const LIFT_DELAY_MS = 80
 // Touch screens have no hover: without this check, a tap would leave the country "hovered" forever, as no mouseleave
 // ever comes.
 const HOVER_QUERY = '(hover: hover)'
+
+/**
+ * Zoom levels out from a place's framed view on the way back from an inset, or from a country opened from its URL (in
+ * apparent size, see apparentZoom): the place then spans about a sixteenth of the screen, around it enough of the globe
+ * to find one's way, a small territory still easy to spot. Not further out than the whole globe.
+ */
+const RETURN_ZOOM_OUT_LEVELS = 4
+
+/**
+ * Fewest zoom levels out on the way back to where a country was clicked: a large country framed far out (Russia), seen
+ * from a globe zoomed in, would otherwise be flown back by zooming out and in again. Just enough for the flight to
+ * round the globe out as it backs away (MIN_FLATTEN_ZOOM_LEVELS in globeFlight.ts).
+ */
+const RETURN_MIN_ZOOM_OUT_LEVELS = 0.5
 
 /** Turn of the globe towards a country chosen in the search. */
 const SELECT_TURN_MS = 800
@@ -92,6 +112,9 @@ function cursorFor(code: string | null): string {
   return hasMap(code) ? 'pointer' : 'not-allowed'
 }
 
+/** A country page open above the globe, and the territory it shows (`?territory=`, unchecked). */
+export type OpenPlace = { code: string; territory: string | null }
+
 /** What the globe shows over the map, for the Globe component to draw. */
 export type GlobePointer = {
   /** Country under the mouse, once it rose, and where its tag hangs. */
@@ -100,13 +123,15 @@ export type GlobePointer = {
   searchedHint: CountryHint | null
   /** Country tapped, or found by the search (panel on a touch screen). */
   picked: string | null
+  /** Its distant territory tapped or found, or null for its mainland. */
+  pickedTerritory: InsetId | null
   /** Mouse (hover) rather than touch screen. */
   canHover: boolean
   /**
-   * Turns the globe to `code`, centered above `bottomInsetPx`, and pins it: its tag shows with a mouse, its panel on a
-   * touch screen.
+   * Turns the globe to `code` (or its `territory`), centered above `bottomInsetPx`, and pins it: its tag shows with a
+   * mouse, its panel on a touch screen.
    */
-  selectCountry: (code: string, bottomInsetPx: number) => void
+  selectCountry: (code: string, territory: InsetId | null, bottomInsetPx: number) => void
   /** Drops the picked country. */
   closePicked: () => void
   /** Opens the picked country (panel's button, Enter in the search). */
@@ -115,29 +140,37 @@ export type GlobePointer = {
 
 /**
  * Mounts the interactive globe in `containerRef`. With a mouse, hovering raises a country and shows its name, a click
- * flies to it; on a touch screen, a tap picks it and the panel's button flies to it. The country page then loads on top
- * (`onOpenCountry`), and `onLanded` is called when the flight ends, and `onMove` with the center at every move. Once
- * the page covers the globe (`countryShown`), the country is lowered; when `countryOpen` turns false, the globe flies
- * back to where it was.
+ * flies to it; on a touch screen, a tap picks it and the panel's button flies to it. A distant territory (French
+ * Guiana) is told apart by where the pointer is, and flown to on its own. The country page then loads on top
+ * (`onOpenCountry`), `onLanded` is called when the flight ends, and `onMove` with the center at every move. Once the
+ * page covers the globe (`countryShown`), the country is lowered and the globe follows, out of sight, the place shown
+ * (`openPlace`: the country, or the territory the page moved to). When `countryOpen` turns false, the globe flies back
+ * from the map's camera (`mapCameraRef`, followed out of sight whenever `followMapRef` is called): to where it was when
+ * the place was clicked, never closer than where it starts, when the page ended on that place; otherwise zoomed out
+ * over the place shown.
  *
  * The selection lives in plain variables, not React state: it changes on every mouse move, and only the map needs to
  * know. Only the tag shown changes state, once per country.
  */
 export function useGlobe(
   containerRef: RefObject<HTMLElement | null>,
-  onOpenCountry: (code: string) => void,
+  onOpenCountry: (code: string, territory: InsetId | null) => void,
   onLanded: () => void,
   countryOpen: boolean,
   countryShown: boolean,
   onMove: (center: LngLat) => void,
+  openPlace: OpenPlace | null,
+  mapCameraRef: RefObject<Camera | null>,
+  followMapRef: RefObject<() => void>,
 ): GlobePointer {
   const [hint, setHint] = useState<CountryHint | null>(null)
   const [searchedHint, setSearchedHint] = useState<CountryHint | null>(null)
   const [picked, setPicked] = useState<string | null>(null)
+  const [pickedTerritory, setPickedTerritory] = useState<InsetId | null>(null)
   const [canHover] = useState(() => window.matchMedia(HOVER_QUERY).matches)
   const selectCountryRef = useRef<GlobePointer['selectCountry']>(() => {})
   const selectCountry = useCallback<GlobePointer['selectCountry']>(
-    (code, bottomInsetPx) => selectCountryRef.current(code, bottomInsetPx),
+    (code, territory, bottomInsetPx) => selectCountryRef.current(code, territory, bottomInsetPx),
     [],
   )
   const closePickedRef = useRef<() => void>(() => {})
@@ -149,18 +182,38 @@ export function useGlobe(
   const onOpenRef = useRef(onOpenCountry)
   const onLandedRef = useRef(onLanded)
   const onMoveRef = useRef(onMove)
+  // Last place shown on a country page, kept once the page closes: the globe zooms out from it.
+  const lastPlaceRef = useRef(openPlace)
   useEffect(() => {
     onOpenRef.current = onOpenCountry
     onLandedRef.current = onLanded
     onMoveRef.current = onMove
+    if (openPlace !== null) {
+      lastPlaceRef.current = openPlace
+    }
   })
   // Set once the map exists.
   const lowerRef = useRef<() => void>(() => {})
+  const followRef = useRef<() => void>(() => {})
   const zoomOutRef = useRef<() => void>(() => {})
+  const openCode = openPlace?.code ?? null
+  const openTerritory = openPlace?.territory ?? null
   useEffect(() => {
     if (countryShown) {
       lowerRef.current()
+      followRef.current()
+      followMapRef.current()
     }
+  }, [countryShown, followMapRef])
+  // Another place on the page (an inset): its framed view, until the map reports its camera at the end of its glide.
+  const shownRef = useRef(countryShown)
+  useEffect(() => {
+    if (shownRef.current) {
+      followRef.current()
+    }
+  }, [openCode, openTerritory])
+  useEffect(() => {
+    shownRef.current = countryShown
   }, [countryShown])
   const wasOpenRef = useRef(countryOpen)
   useEffect(() => {
@@ -203,17 +256,25 @@ export function useGlobe(
       center: INITIAL_CENTER,
       zoom: initialZoom(container),
     }
+    // Whether the globe flew to the page open (not opened from its URL), to which place, and whether that page showed
+    // since.
+    let flewIn = false
+    let flownTo: OpenPlace | null = null
+    let pageShown = false
     let shown = new Set<string>()
     let liftTimer: number | undefined
     let pendingPoint: Point | null = null
     let frame: number | undefined
-    // Country whose tag shows (or is about to), and the timer that shows it with the lift.
+    // Country (and territory) whose tag shows or is about to, and the timer that shows it with the lift.
     let hint: string | null = null
+    let hintTerritory: Inset | null = null
     let hintTimer: number | undefined
-    // Country tapped on a touch screen, shown in the panel.
+    // Country tapped on a touch screen, shown in the panel, and its territory tapped.
     let pickedCode: string | null = null
-    // Country found by the search, and the point its ring is centered on.
+    let pickedInset: Inset | null = null
+    // Country found by the search (and its territory), and the point its ring is centered on.
     let searchedCode: string | null = null
+    let searchedInset: Inset | null = null
     let searchedAnchor: LngLat | null = null
     // Removes the search's ring and spotlight.
     let unmark = () => {}
@@ -238,13 +299,17 @@ export function useGlobe(
       dimmed = code
     }
 
-    // Shows the tag of `code` after the lift delay, or hides it at once. The searched country already has its own tag.
-    function showHint(hovered: string | null) {
-      const code = hovered === searchedCode ? null : hovered
-      if (code === hint) {
+    // Shows the tag of `code` (or its `territory`) after the lift delay, or hides it at once. The searched country
+    // already has its own tag.
+    function showHint(hovered: string | null, territory: Inset | null = null) {
+      const isSearched = hovered === searchedCode && territory === searchedInset
+      const code = isSearched ? null : hovered
+      const inset = code === null ? null : territory
+      if (code === hint && inset === hintTerritory) {
         return
       }
       hint = code
+      hintTerritory = inset
       window.clearTimeout(hintTimer)
       setHint(null)
       if (code !== null) {
@@ -252,39 +317,47 @@ export function useGlobe(
           if (moving) {
             hint = null
           } else {
-            setHint(hintFor(code))
+            setHint(hintFor(code, inset))
           }
         }, LIFT_DELAY_MS)
       }
     }
 
-    // Tag hanging from the country's centroid, or from the mouse when the centroid is behind the horizon (Russia seen
-    // from the side).
-    function hintFor(code: string): CountryHint | null {
+    // Tag hanging from the country's centroid (its territory's middle), or from the mouse when that is behind the
+    // horizon (Russia seen from the side).
+    function hintFor(code: string, inset: Inset | null): CountryHint | null {
       if (pendingPoint === null) {
         return null
       }
       const center = map.getCenter()
       const shape = shapes.get(code)
-      const centroid = shape === undefined ? null : countryAnchor(shape.geometry)
+      const centroid = inset !== null ? inset.anchor : shape === undefined ? null : countryAnchor(shape.geometry)
       const anchor = centroid !== null && facesViewer(center.toArray(), centroid) ? map.project(centroid) : pendingPoint
       // Never the searched country: showHint leaves it to its own tag.
-      return { ...layoutFor(code, anchor), searched: false }
+      return { ...layoutFor(code, inset, anchor), searched: false }
     }
 
-    function layoutFor(code: string, anchor: Point) {
+    function layoutFor(code: string, inset: Inset | null, anchor: Point) {
       const { clientWidth, clientHeight } = map.getContainer()
       return {
         code,
+        territory: inset?.id ?? null,
         layout: tagLayout(anchor, map.project(map.getCenter()), clientWidth, clientHeight),
       }
     }
 
-    // Marks the searched country, or removes the mark (null).
-    function setSearched(code: string | null) {
+    // Distant territory of `code` at `point` on the screen, or null on its mainland.
+    function insetAtPoint(code: string | null, point: Point): Inset | null {
+      return code === null ? null : insetAt(code, map.unproject(point).toArray())
+    }
+
+    // Marks the searched country (on its territory, if any), or removes the mark (null).
+    function setSearched(code: string | null, inset: Inset | null = null) {
       const shape = code === null ? undefined : shapes.get(code)
       searchedCode = shape === undefined ? null : code
-      searchedAnchor = shape === undefined ? null : countryAnchor(shape.geometry)
+      searchedInset = shape === undefined ? null : inset
+      searchedAnchor =
+        shape === undefined ? null : searchedInset !== null ? searchedInset.anchor : countryAnchor(shape.geometry)
       unmark()
       unmark =
         searchedCode === null || searchedAnchor === null ? () => {} : markCountry(map, searchedCode, searchedAnchor)
@@ -304,7 +377,7 @@ export function useGlobe(
       setSearchedHint(
         visible && searchedCode !== null && searchedAnchor !== null
           ? {
-              ...layoutFor(searchedCode, map.project(searchedAnchor)),
+              ...layoutFor(searchedCode, searchedInset, map.project(searchedAnchor)),
               searched: true,
             }
           : null,
@@ -316,20 +389,25 @@ export function useGlobe(
       setSearched(null)
       if (canHover) {
         apply({ type: 'click', code: null })
-        pickedCode = null
-        setPicked(null)
+        setPickedPlace(null, null)
       } else {
-        pick(null)
+        pick(null, null)
       }
     }
 
+    function setPickedPlace(code: string | null, inset: Inset | null) {
+      pickedCode = code
+      pickedInset = inset
+      setPicked(code)
+      setPickedTerritory(inset?.id ?? null)
+    }
+
     // Touch screens: raises the tapped country (dims one without a map) and shows it in the panel.
-    function pick(code: string | null) {
+    function pick(code: string | null, inset: Inset | null) {
       const opens = code !== null && hasMap(code)
       apply({ type: 'click', code: opens ? code : null })
       dim(opens ? null : code)
-      pickedCode = code
-      setPicked(code)
+      setPickedPlace(code, inset)
     }
 
     // Puts exactly the raised countries in the small 3D source.
@@ -378,25 +456,32 @@ export function useGlobe(
     }
 
     // Opens the country page at once, so its map loads during the flight: the page stays invisible until both are done.
-    function open(code: string) {
+    function open(code: string, inset: Inset | null) {
       const shape = shapes.get(code)
       if (shape === undefined) {
         return
       }
-      onOpenRef.current(code)
+      onOpenRef.current(code, inset?.id ?? null)
       showHint(null)
       setSearched(null)
-      pickedCode = null
-      setPicked(null)
+      setPickedPlace(null, null)
       viewBeforeOpening = {
         center: map.getCenter().toArray(),
         zoom: map.getZoom(),
       }
+      flewIn = true
+      flownTo = { code, territory: inset?.id ?? null }
+      pageShown = false
       // The map's own camera, so it takes over exactly where the globe stops.
       const { clientWidth, clientHeight } = map.getContainer()
-      const camera = mercatorCamera(countryBounds(shape.geometry), clientWidth, clientHeight, FRAME_PADDING_PX)
+      const camera = mercatorCamera(
+        countryFrame(code, shape.geometry, inset),
+        clientWidth,
+        clientHeight,
+        FRAME_PADDING_PX,
+      )
       flying = true
-      flyIn(map, camera, code, overflowZoom(map.getContainer()), GLOBE_TRANSITION_MS, landed)
+      flyIn(map, camera, code, globeOverflow(map.getContainer()), GLOBE_TRANSITION_MS, landed)
     }
 
     function landed() {
@@ -409,30 +494,30 @@ export function useGlobe(
 
     openPickedRef.current = () => {
       if (!flying && pickedCode !== null && hasMap(pickedCode)) {
-        open(pickedCode)
+        open(pickedCode, pickedInset)
       }
     }
 
     closePickedRef.current = unpick
 
-    selectCountryRef.current = (code, bottomInsetPx) => {
+    selectCountryRef.current = (code, territory, bottomInsetPx) => {
       const shape = shapes.get(code)
       if (flying || shape === undefined) {
         return
       }
+      const inset = findInset(code, territory)
       if (canHover) {
         dim(null)
         apply({ type: 'click', code })
-        pickedCode = code
-        setPicked(code)
+        setPickedPlace(code, inset)
       } else {
-        pick(code)
+        pick(code, inset)
       }
       showHint(null)
-      setSearched(code)
+      setSearched(code, inset)
       map.stop()
       map.easeTo({
-        center: countryAnchor(shape.geometry),
+        center: inset !== null ? inset.anchor : countryAnchor(shape.geometry),
         offset: [0, -bottomInsetPx / 2],
         duration: SELECT_TURN_MS,
       })
@@ -444,7 +529,78 @@ export function useGlobe(
       // Escape during the flight in: ends it first, as its end (moveend) marks the globe as landed.
       map.stop()
       flying = true
-      flyBack(map, viewBeforeOpening, overflowZoom(map.getContainer()), GLOBE_RETURN_MS, landed)
+      const { camera, code } = returnView()
+      flewIn = false
+      flyBack(map, camera, code, globeOverflow(map.getContainer()), GLOBE_RETURN_MS, landed)
+    }
+
+    // The place's framed view at the globe's size, or null while the shapes load.
+    function placeFrame(place: OpenPlace | null): { place: OpenPlace; frame: Camera; center: LngLat } | null {
+      const shape = place === null ? undefined : shapes.get(place.code)
+      if (place === null || shape === undefined) {
+        return null
+      }
+      const inset = findInset(place.code, place.territory)
+      const { clientWidth, clientHeight } = map.getContainer()
+      const area = countryFrame(place.code, shape.geometry, inset)
+      return {
+        place,
+        frame: mercatorCamera(area, clientWidth, clientHeight, FRAME_PADDING_PX),
+        center: inset?.anchor ?? countryAnchor(shape.geometry),
+      }
+    }
+
+    // Under the page, the globe jumps to the place it shows (an inset, or a country opened from its URL: the globe
+    // never flew there), so the way back never starts from the place the globe left (France, from Guadeloupe).
+    followRef.current = () => {
+      pageShown = true
+      const framed = placeFrame(lastPlaceRef.current)
+      if (framed !== null) {
+        map.jumpTo(framed.frame)
+      }
+    }
+
+    // And to the map's camera after each move: the globe's canvas must already show that view when the page closes, or
+    // it shows the framed view for a frame before the flight starts.
+    followMapRef.current = () => {
+      const camera = mapCameraRef.current
+      if (pageShown && camera !== null) {
+        map.jumpTo(camera)
+      }
+    }
+
+    // Starts from the map's camera: the globe, still flat, takes its place unseen, however the map was moved. Then back
+    // to where the place was clicked, when the page ended on that same place (France, after a look at Guadeloupe).
+    // Otherwise (the page ended elsewhere, on a territory or back on the mainland, or was opened from its URL): zoomed
+    // out over the place shown, still centered on it, rather than a long slide back to the place clicked. Escape during
+    // the flight in: back to where it was clicked.
+    function returnView(): { camera: Camera; code: string | null } {
+      const framed = placeFrame(lastPlaceRef.current)
+      if (framed === null) {
+        return { camera: viewBeforeOpening, code: null }
+      }
+      // Only once the page showed: during the flight in, the map loading under it already has its camera.
+      const shown = mapCameraRef.current
+      if (pageShown && shown !== null) {
+        map.jumpTo(shown)
+      }
+      const { place, frame, center } = framed
+      const samePlace = flownTo?.code === place.code && flownTo.territory === place.territory
+      if (flewIn && (!pageShown || samePlace)) {
+        return { camera: notCloser(viewBeforeOpening), code: place.code }
+      }
+      const zoom = Math.max(
+        apparentZoom(frame.zoom, frame.center[1]) - RETURN_ZOOM_OUT_LEVELS,
+        apparentZoom(initialZoom(map.getContainer()), INITIAL_CENTER[1]),
+      )
+      return { camera: { center, zoom: zoomForApparent(zoom, center[1]) }, code: place.code }
+    }
+
+    // `camera`, zoomed out if need be to RETURN_MIN_ZOOM_OUT_LEVELS further out than the globe now is.
+    function notCloser(camera: Camera): Camera {
+      const start = apparentZoom(map.getZoom(), map.getCenter().lat)
+      const zoom = Math.min(apparentZoom(camera.zoom, camera.center[1]), start - RETURN_MIN_ZOOM_OUT_LEVELS)
+      return { center: camera.center, zoom: zoomForApparent(zoom, camera.center[1]) }
     }
 
     // Mouse moves come faster than the screen refreshes: only the last one of each frame is looked up.
@@ -454,7 +610,7 @@ export function useGlobe(
         return
       }
       const code = countryCodeAt(map, pendingPoint)
-      showHint(code)
+      showHint(code, insetAtPoint(code, pendingPoint))
       map.getCanvas().style.cursor = cursorFor(code)
       const opens = code !== null && hasMap(code)
       dim(opens ? null : code)
@@ -511,17 +667,19 @@ export function useGlobe(
         if (flying) {
           return
         }
-        const outcome = clickOutcome(countryCodeAt(map, event.point), canHover)
+        const code = countryCodeAt(map, event.point)
+        const inset = insetAtPoint(code, event.point)
+        const outcome = clickOutcome(code, canHover)
         if (outcome.open !== null) {
           apply({ type: 'click', code: outcome.open })
-          open(outcome.open)
+          open(outcome.open, inset)
         } else if (canHover) {
           unpick()
         } else {
-          if (outcome.picked !== searchedCode) {
+          if (outcome.picked !== searchedCode || inset !== searchedInset) {
             setSearched(null)
           }
-          pick(outcome.picked)
+          pick(outcome.picked, inset)
         }
       })
     })
@@ -536,12 +694,13 @@ export function useGlobe(
       }
       map.remove()
     }
-  }, [containerRef, canHover])
+  }, [containerRef, canHover, mapCameraRef, followMapRef])
 
   return {
     hint,
     searchedHint,
     picked,
+    pickedTerritory,
     canHover,
     selectCountry,
     closePicked,

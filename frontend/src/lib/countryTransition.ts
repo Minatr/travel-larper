@@ -2,6 +2,7 @@
  * How the globe hands over to a country's map: the country page opens at once, invisible, and loads its map while the
  * globe flies to the country (globeFlight.ts), then fades in over it once both are done. The way back flies backwards.
  */
+import type { Camera } from './mercatorCamera.ts'
 
 /** Duration of the globe's flight to the country. */
 export const GLOBE_TRANSITION_MS = 1100
@@ -33,4 +34,6 @@ export type CountryOutletContext = {
   flying: boolean
   /** Called once the page covers the globe. */
   onCountryShown: () => void
+  /** Called with the map's camera once it is set up, and after each move: the globe flies back from there. */
+  onMapMove: (camera: Camera) => void
 }

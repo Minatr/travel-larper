@@ -45,6 +45,7 @@
 ### Globe 3D et cartes
 - Globe 3D : au survol, le pays se soulève en turquoise (couleur de sélection) ; un clic ouvre le pays (sur écran tactile, un panneau de confirmation d'abord). La recherche de pays est une alternative. Version allégée sur téléphone.
 - Au clic : zoom, puis carte 2D détaillée où vivent les lieux.
+- **Territoires lointains** (`frontend/src/lib/territories.ts`, liste décidée pays par pays) : un territoire habité à plus de 300 km du territoire principal est un **encart** (carte d'embarquement en bas de la carte du pays : silhouette du territoire, nom et distance à vol d'oiseau depuis le lieu affiché, capitale ou territoire ; un clic y fait glisser la carte, `?territory=<id>` dans l'adresse ; dans un tiroir sombre, collé au coin bas-gauche sur téléphone et flottant sur ordinateur, que son onglet « Territoires lointains » replie jusqu'à l'onglet seul ; replié par défaut sur téléphone, choix mémorisé dans le navigateur) ; un territoire inhabité ou fermé aux voyageurs est **ignoré : il n'est pas dessiné** et ne compte pas dans le cadrage. Le reste est cadré avec le pays. Les États archipels suivent la même règle : le cadre autour du groupe de la capitale, les groupes éloignés en encarts (Kiribati : îles de la Ligne et Phoenix ; Micronésie : Yap, Chuuk, Kosrae ; Fidji : Rotuma ; Tonga : Niuas). Zoomé loin, la côte du pays est soulignée de quelques pixels, pour qu'un atoll reste visible. Depuis le globe, survoler, cliquer ou chercher un territoire (« Guyane ») ouvre le pays directement sur lui. **Retour au globe** : il part de la vue actuelle de la carte, puis revient à la position du globe au moment du clic si la page a fini sur le lieu cliqué (France → Guadeloupe → France) ; sinon (page finie ailleurs, ou ouverte par son adresse), il recule au-dessus du lieu affiché.
 
 ### Fiche pays
 - Automatique : drapeau, monnaie, langue, résumé Wikivoyage.
@@ -118,7 +119,7 @@ SQLite et MongoDB ont été écartés. Le module Go sera `github.com/Minatr/trav
 | Besoin | Source |
 | --- | --- |
 | Infos pays | REST Countries, Wikivoyage |
-| Frontières (globe et cartes) | Natural Earth (GeoJSON) : 1:110m + petits pays du 1:50m pour le globe, 1:10m pays par pays pour la carte d'un pays ; frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés) |
+| Frontières (globe et cartes) | Natural Earth (GeoJSON) : 1:110m + petits pays et îles manquantes (20 km² ou plus) du 1:50m pour le globe, 1:10m pays par pays pour la carte d'un pays ; frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés) |
 | Géocodage | Photon ou Nominatim (OpenStreetMap) — Nominatim : 1 requête/s maximum |
 | Horaires | OpenStreetMap ou saisie |
 | Trajets pied/vélo/voiture | OpenRouteService |
@@ -304,6 +305,7 @@ Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche
 | Routes | `#32425e` (petites) → `#465c80` (autoroutes) |
 | Frontières de pays | `#5a6b85` (terrestres seulement, sans les eaux territoriales) |
 | Noms | `#9aa3b2`, grandes villes `#c3cad6` |
+| Vignettes des territoires lointains | terre `#376396` (la nuance de pays la plus claire du globe) sur la mer `#0a1a33` |
 
 ---
 

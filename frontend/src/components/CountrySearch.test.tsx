@@ -54,6 +54,18 @@ describe('CountrySearch', () => {
     expect(await screen.findByRole('option', { name: 'Spain' })).toBeInTheDocument()
   })
 
+  it('finds a distant territory, named after its country', async () => {
+    const { field, onSelect } = renderSearch()
+    fireEvent.change(field, { target: { value: 'guiana' } })
+
+    const option = await screen.findByRole('option', { name: /French Guiana/ })
+    expect(option).toHaveTextContent('French Guiana · France')
+    fireEvent.click(option)
+
+    expect(onSelect).toHaveBeenCalledWith('FR', 'french-guiana')
+    expect(field).toHaveValue('French Guiana')
+  })
+
   it('selects a country with Enter', async () => {
     const { field, onSelect } = renderSearch()
     fireEvent.change(field, { target: { value: 'fra' } })
@@ -61,7 +73,7 @@ describe('CountrySearch', () => {
 
     fireEvent.keyDown(field, { key: 'Enter' })
 
-    expect(onSelect).toHaveBeenCalledWith('FR')
+    expect(onSelect).toHaveBeenCalledWith('FR', null)
     expect(field).toHaveValue('France')
     expect(screen.queryByRole('option')).not.toBeInTheDocument()
   })
@@ -105,7 +117,7 @@ describe('CountrySearch', () => {
     fireEvent.keyDown(field, { key: 'ArrowDown' })
     fireEvent.keyDown(field, { key: 'Enter' })
 
-    expect(onSelect).toHaveBeenCalledWith('US')
+    expect(onSelect).toHaveBeenCalledWith('US', null)
   })
 
   it('finds a country by a common name', async () => {

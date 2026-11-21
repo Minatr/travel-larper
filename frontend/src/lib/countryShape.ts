@@ -6,9 +6,19 @@ import type { MultiPolygon, Polygon, Position } from 'geojson'
 
 import { type Bounds, boxOf, FULL_TURN_DEGREES, polygonsOf } from './geo.ts'
 
-/** Parts of `shape` whose box meets `area`, or null if none. */
-export function partsWithin(shape: Polygon | MultiPolygon, area: Bounds): MultiPolygon | null {
-  const kept = polygonsOf(shape).filter(([outerRing]) => meets(boxOf(outerRing), area))
+/**
+ * Parts of `shape` whose box meets one of `areas` and lies wholly inside none of `excluded` (the territories left out),
+ * or null if none.
+ */
+export function partsWithin(
+  shape: Polygon | MultiPolygon,
+  areas: Bounds[],
+  excluded: Bounds[] = [],
+): MultiPolygon | null {
+  const kept = polygonsOf(shape).filter(([outerRing]) => {
+    const box = boxOf(outerRing)
+    return areas.some((area) => meets(box, area)) && !excluded.some((area) => inside(box, area))
+  })
   return kept.length === 0 ? null : { type: 'MultiPolygon', coordinates: kept }
 }
 
@@ -53,6 +63,19 @@ function pointsOf(shape: MultiPolygon): number {
 function meets(box: Bounds, area: Bounds): boolean {
   return [0, FULL_TURN_DEGREES].some(
     (shift) => box[0] + shift <= area[2] && box[2] + shift >= area[0] && box[1] <= area[3] && box[3] >= area[1],
+  )
+}
+
+/** Parts of `shape` lying wholly inside `area`, or null if none. */
+export function partsInside(shape: Polygon | MultiPolygon, area: Bounds): MultiPolygon | null {
+  const kept = polygonsOf(shape).filter(([outerRing]) => inside(boxOf(outerRing), area))
+  return kept.length === 0 ? null : { type: 'MultiPolygon', coordinates: kept }
+}
+
+// Same turns as meets.
+function inside(box: Bounds, area: Bounds): boolean {
+  return [0, FULL_TURN_DEGREES].some(
+    (shift) => box[0] + shift >= area[0] && box[2] + shift <= area[2] && box[1] >= area[1] && box[3] <= area[3],
   )
 }
 
