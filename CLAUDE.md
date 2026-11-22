@@ -121,7 +121,7 @@ SQLite et MongoDB ont été écartés. Le module Go sera `github.com/Minatr/trav
 | Besoin | Source |
 | --- | --- |
 | Infos pays | REST Countries, Wikivoyage |
-| Frontières (globe et cartes) | Natural Earth (GeoJSON) : 1:110m + petits pays et îles manquantes (20 km² ou plus) du 1:50m pour le globe, 1:10m pays par pays pour la carte d'un pays ; frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés) |
+| Frontières (globe et cartes) | Natural Earth (GeoJSON) : 1:110m + petits pays et îles manquantes (20 km² ou plus) du 1:50m pour le globe, 1:10m pays par pays pour la carte d'un pays ; frontières alignées sur Google Maps (Sahara occidental séparé, Crimée en Ukraine, Somaliland et Chypre du Nord rattachés). Masque de la carte d'un pays : frontières d'OpenStreetMap avec les eaux territoriales (geo-maps, précises à 10 m, simplifiées à 40 m sauf pour les pays de moins d'un degré), les mêmes que les tuiles ; Natural Earth là où elles s'écartent de Google Maps (Maroc avec le Sahara occidental, Russie avec la Crimée). Micro-États (Andorre, Liechtenstein, Monaco, Saint-Marin, Vatican, `src/lib/microstates.ts`) : sur le globe, forme OpenStreetMap terre seule simplifiée en polygone d'une dizaine de points comme les pays voisins (bien placée, contrairement au 1:50m), dessinée au-dessus de leurs frontières, et cadrés de près (2 km au minimum, 20 km pour les autres pays) |
 | Géocodage | Photon ou Nominatim (OpenStreetMap) — Nominatim : 1 requête/s maximum |
 | Horaires | OpenStreetMap ou saisie |
 | Trajets pied/vélo/voiture | OpenRouteService |
@@ -154,7 +154,7 @@ travel-larper/
 │   ├── queries/              # requêtes SQL pour sqlc
 │   └── migrations/           # migrations SQL versionnées
 ├── frontend/
-│   ├── public/geo/           # formes des pays (versionnées) : countries.json pour le globe, countries/<CODE>.json détaillées pour la carte d'un pays (scripts/build-countries.mjs et build-country-shapes.mjs)
+│   ├── public/geo/           # formes des pays (versionnées) : countries.json pour le globe, countries/<CODE>.json détaillées pour la carte d'un pays, borders/<CODE>.json pour son masque (scripts/build-countries.mjs, build-country-shapes.mjs et build-country-borders.mjs)
 │   ├── scripts/              # scripts de préparation des données
 │   └── src/{pages,components,hooks,services,models,i18n}/
 └── data/{geo,reference,seeds}/   # GeoJSON (non versionné), données de référence, jeux de test
@@ -330,7 +330,7 @@ Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche
   - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
-`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go, base comprise), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`, `db-seed`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine ; `make check` enchaîne toutes les vérifications de la CI (lint, tests, failles, types et build du frontend). `make geo` régénère les formes des pays (globe et cartes) depuis Natural Earth. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go, base comprise), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`, `db-seed`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine ; `make check` enchaîne toutes les vérifications de la CI (lint, tests, failles, types et build du frontend). `make geo` régénère les formes des pays (globe et cartes) depuis Natural Earth et OpenStreetMap. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
 
 ---
 

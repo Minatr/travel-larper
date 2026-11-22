@@ -39,3 +39,15 @@ export async function fetchCountryShape(code: string, signal?: AbortSignal): Pro
   }
   return (await response.json()) as Polygon | MultiPolygon
 }
+
+/**
+ * Downloads the borders of the country `code` (upper case) from OpenStreetMap, for its map's mask, prepared by
+ * scripts/build-country-borders.mjs: null where they differ from the app's (the shape then masks).
+ */
+export async function fetchCountryBorders(code: string, signal?: AbortSignal): Promise<Polygon | MultiPolygon | null> {
+  const response = await fetch(`/geo/borders/${code}.json`, { signal })
+  if (!response.ok) {
+    throw new Error(`${code} borders failed to load (HTTP ${response.status})`)
+  }
+  return (await response.json()) as Polygon | MultiPolygon | null
+}

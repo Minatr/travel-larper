@@ -44,7 +44,9 @@ function stubCountries(code: string, otherParts: number[][][][] = []) {
           ? new Response(JSON.stringify({ type: 'MultiPolygon', coordinates: [square.coordinates, ...otherParts] }))
           : url === '/geo/countries.json'
             ? new Response(JSON.stringify(countries))
-            : new Response(null, { status: 404 }),
+            : url === `/geo/borders/${code}.json`
+              ? new Response('null')
+              : new Response(null, { status: 404 }),
       ),
     ),
   )

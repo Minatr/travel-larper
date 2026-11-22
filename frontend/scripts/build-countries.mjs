@@ -4,14 +4,19 @@
  *
  * Run by `make geo`. By hand, from frontend/:
  *   node scripts/build-countries.mjs <ne_110m_admin_0_countries.geojson> \
- *     <ne_50m_admin_0_countries.geojson>
+ *     <ne_50m_admin_0_countries.geojson> <countries-land-10m.geo.json>
  *
  * Base: the 1:110m countries, light enough for phones. Borders follow Google Maps, which the app links to, rather than
  * Natural Earth's de facto ones. The small countries missing at 1:110m come from 1:50m, and so do the islands a
- * country lacks at 1:110m (Guadeloupe, Réunion): its distant territories can then be hovered and clicked. Only the
+ * country lacks at 1:110m (Guadeloupe, Réunion): its distant territories can then be hovered and clicked. The
+ * microstates take their OpenStreetMap shape (github.com/simonepri/geo-maps, land only), as rough as the countries
+ * around: the 1:50m one lay up to a kilometer off, and the globe flies close enough to them to show it against their
+ * map. Only the
  * shape, ISO code and color group are kept: the browser names a country from its code (Intl.DisplayNames).
  */
 import { readFileSync, writeFileSync } from 'node:fs'
+
+import { simplifyByArea } from './simplify.mjs'
 
 const OUTPUT = new URL('../public/geo/countries.json', import.meta.url)
 const DECIMALS = 3
@@ -32,10 +37,18 @@ const CRIMEA = { west: 32, east: 37, south: 44, north: 47 }
 // Smallest island added from 1:50m, in km² (the same floor as the distant territories, territories.ts).
 const MIN_ISLAND_KM2 = 20
 const KM_PER_DEGREE = 111.32
+// The microstates (src/lib/microstates.ts), by OpenStreetMap code, and the rounding of their shape (about 1 m).
+const MICROSTATES = { AD: 'AND', LI: 'LIE', MC: 'MCO', SM: 'SMR', VA: 'VAT' }
+const MICROSTATE_DECIMALS = 5
+// Their shape drops the points making a triangle smaller than a square of this share of their size: under ten are left,
+// a polygon like the 1:110m countries around.
+const MICROSTATE_ROUGHNESS = 0.1
 
-const [smallScale, mediumScale] = process.argv.slice(2)
-if (smallScale === undefined || mediumScale === undefined) {
-  console.error('usage: node scripts/build-countries.mjs <ne_110m.geojson> <ne_50m.geojson>')
+const [smallScale, mediumScale, osmLand] = process.argv.slice(2)
+if (smallScale === undefined || mediumScale === undefined || osmLand === undefined) {
+  console.error(
+    'usage: node scripts/build-countries.mjs <ne_110m.geojson> <ne_50m.geojson> <countries-land-10m.geo.json>',
+  )
   process.exit(1)
 }
 
@@ -198,12 +211,32 @@ function addMissingIslands(features, mediumFeatures) {
   }
 }
 
-function round(value) {
-  return Number(value.toFixed(DECIMALS))
+function roundCoordinates(coordinates, decimals) {
+  return typeof coordinates[0] === 'number'
+    ? coordinates.map((value) => Number(value.toFixed(decimals)))
+    : coordinates.map((inner) => roundCoordinates(inner, decimals))
 }
 
-function roundCoordinates(coordinates) {
-  return typeof coordinates[0] === 'number' ? coordinates.map(round) : coordinates.map(roundCoordinates)
+// Outer ring of the largest part of each microstate's OpenStreetMap shape, simplified: holes (Andorra's lakes) and
+// slivers left out.
+function microstateShapes(path) {
+  const byCode = new Map(readFeatures(path).map(({ properties, geometry }) => [properties.A3, geometry]))
+  return new Map(
+    Object.entries(MICROSTATES).map(([code, source]) => {
+      const geometry = byCode.get(source)
+      if (geometry === undefined) {
+        throw new Error(`${code}: no OpenStreetMap shape for ${source}`)
+      }
+      const [outerRing] = polygons(geometry).reduce((largest, polygon) =>
+        areaKm2(polygon[0]) > areaKm2(largest[0]) ? polygon : largest,
+      )
+      const [west, south, east, north] = boxOf(outerRing)
+      const sizeMeters =
+        Math.max((east - west) * Math.cos((south * Math.PI) / 180), north - south) * KM_PER_DEGREE * 1000
+      const minArea = (sizeMeters * MICROSTATE_ROUGHNESS) ** 2
+      return [code, { type: 'Polygon', coordinates: [simplifyByArea(outerRing, minArea)] }]
+    }),
+  )
 }
 
 // ISO_A2 is "-99" for a few countries (France, Norway…) for historical reasons: ISO_A2_EH fixes them.
@@ -230,21 +263,27 @@ const small = mediumFeatures.filter(
   (item) => !present.has(item.properties.ADM0_A3) && COUNTRY_TYPES.has(item.properties.TYPE),
 )
 
+const microstates = microstateShapes(osmLand)
 const countries = {
   type: 'FeatureCollection',
-  features: [...features, ...small].map((feature) => ({
-    type: 'Feature',
-    properties: {
-      code: countryCode(feature.properties),
-      // 1 to 7, chosen by Natural Earth so that neighbours never share a value: the globe gives each value its own
-      // color.
-      colorGroup: feature.properties.MAPCOLOR7,
-    },
-    geometry: {
-      type: feature.geometry.type,
-      coordinates: roundCoordinates(feature.geometry.coordinates),
-    },
-  })),
+  features: [...features, ...small].map((feature) => {
+    const code = countryCode(feature.properties)
+    const microstate = microstates.get(code)
+    const geometry = microstate ?? feature.geometry
+    return {
+      type: 'Feature',
+      properties: {
+        code,
+        // 1 to 7, chosen by Natural Earth so that neighbours never share a value: the globe gives each value its own
+        // color.
+        colorGroup: feature.properties.MAPCOLOR7,
+      },
+      geometry: {
+        type: geometry.type,
+        coordinates: roundCoordinates(geometry.coordinates, microstate === undefined ? DECIMALS : MICROSTATE_DECIMALS),
+      },
+    }
+  }),
 }
 
 writeFileSync(OUTPUT, JSON.stringify(countries) + '\n')

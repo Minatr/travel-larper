@@ -9,6 +9,33 @@ async function freshFetchCountries() {
 
 const countries = { type: 'FeatureCollection', features: [] }
 
+describe('fetchCountryBorders', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('gives null for a country masked with its shape', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('null'))),
+    )
+    const { fetchCountryBorders } = await import('./countries.ts')
+
+    await expect(fetchCountryBorders('RU')).resolves.toBeNull()
+    expect(fetch).toHaveBeenCalledWith('/geo/borders/RU.json', { signal: undefined })
+  })
+
+  it('fails on a failed download', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response(null, { status: 404 }))),
+    )
+    const { fetchCountryBorders } = await import('./countries.ts')
+
+    await expect(fetchCountryBorders('VA')).rejects.toThrow('HTTP 404')
+  })
+})
+
 describe('fetchCountries', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
