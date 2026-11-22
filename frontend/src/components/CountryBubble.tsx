@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
+import { usePlaceName } from '../hooks/usePlaceName.ts'
 import { hasMap } from '../lib/countryCode.ts'
-import { countryName } from '../lib/countryName.ts'
 import { type CountryHint, EYELET_OFFSET_PX, stringPath, TAG_WIDTH_PX } from '../lib/countryTag.ts'
 import { fittedTitleSize } from '../lib/tagTitle.ts'
 import { cn } from '../lib/utils.ts'
@@ -29,13 +29,14 @@ type CountryBubbleProps = {
  * Mouse only: the hovered country's tag, or the one found by the search, tied to the country by a string.
  */
 export function CountryBubble({ hint, onClose, faded = false }: CountryBubbleProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const placeName = usePlaceName()
   if (hint === null) {
     return null
   }
 
   const { code, layout } = hint
-  const name = countryName(code, i18n.language)
+  const name = placeName(code, hint.territory)
   const closable = onClose !== undefined
   const { anchor, eyelet, side, tiltDegrees } = layout
   // Placed and tilted by its eyelet.

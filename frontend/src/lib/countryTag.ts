@@ -2,6 +2,7 @@
  * Where the hover tag goes on screen, in canvas pixels. Its string points away from the globe's center, so tags spread
  * around the globe.
  */
+import type { InsetId } from './territories.ts'
 
 /** A position on the map's canvas, in pixels. */
 export type ScreenPoint = { x: number; y: number }
@@ -25,6 +26,8 @@ export type TagLayout = {
 export type CountryHint = {
   /** ISO code of the hovered country. */
   code: string
+  /** Its distant territory under the mouse (French Guiana), or null on its mainland. */
+  territory: InsetId | null
   /** Where the tag and its string go on the globe. */
   layout: TagLayout
   /** Country found by the search: its tag tells how to open it. */

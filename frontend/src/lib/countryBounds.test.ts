@@ -1,8 +1,9 @@
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 import { describe, expect, it } from 'vitest'
 
-import { countryBounds } from './countryBounds.ts'
+import { countryBounds, countryFrame } from './countryBounds.ts'
 import type { Bounds } from './geo.ts'
+import { findInset } from './territories.ts'
 
 // Closed rectangular ring from west, south, east, north.
 function box([west, south, east, north]: Bounds): Position[] {
@@ -61,5 +62,33 @@ describe('countryBounds', () => {
 
   it.each(cases)('frames $name', ({ geometry, want }) => {
     expect(countryBounds(geometry)).toEqual(want)
+  })
+})
+
+describe('countryFrame', () => {
+  const france = multi([-5, 42, 8, 51], [-54, 2, -51, 6])
+
+  it('frames a country with distant parts on its decided frame, without them', () => {
+    const [west, , east] = countryFrame('FR', france)
+    expect(west).toBeGreaterThan(-6)
+    expect(east).toBeLessThan(10)
+  })
+
+  it('frames an inset on its own', () => {
+    const guiana = findInset('FR', 'french-guiana')
+    const [west, , east] = countryFrame('FR', france, guiana)
+    expect(west).toBeLessThan(-54)
+    expect(east).toBeGreaterThan(-52)
+  })
+
+  it('shows a tiny inset in its surroundings (San Andrés)', () => {
+    const [west, south, east, north] = countryFrame('CO', multi([-79, -4, -67, 12]), findInset('CO', 'san-andres'))
+    // 0.5° minus floating-point dust.
+    expect(east - west).toBeGreaterThan(0.499)
+    expect(north - south).toBeGreaterThan(0.499)
+  })
+
+  it('keeps the grouping rule for a country without distant parts', () => {
+    expect(countryFrame('DE', multi([6, 47, 15, 55]))).toEqual([6, 47, 15, 55])
   })
 })

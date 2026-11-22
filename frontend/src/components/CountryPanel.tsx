@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { usePlaceName } from '../hooks/usePlaceName.ts'
 import { hasMap } from '../lib/countryCode.ts'
-import { countryName } from '../lib/countryName.ts'
+import type { InsetId } from '../lib/territories.ts'
 import { fittedTitleSize } from '../lib/tagTitle.ts'
 import { cn } from '../lib/utils.ts'
 
@@ -21,6 +22,8 @@ const SHORT_TITLE_MAX_PX = 32
 type CountryPanelProps = {
   /** Country tapped, or null to hide the panel. */
   code: string | null
+  /** Its distant territory tapped, or null for its mainland. */
+  territory?: InsetId | null
   /** Opens the country's map. */
   onOpen: () => void
   /** Shows a close button, calling this. */
@@ -30,12 +33,13 @@ type CountryPanelProps = {
 /**
  * Touch screens: the tapped country's luggage tag, with a button to open its map.
  */
-export function CountryPanel({ code, onOpen, onClose }: CountryPanelProps) {
-  const { t, i18n } = useTranslation()
+export function CountryPanel({ code, territory = null, onOpen, onClose }: CountryPanelProps) {
+  const { t } = useTranslation()
+  const placeName = usePlaceName()
   if (code === null) {
     return null
   }
-  const name = countryName(code, i18n.language)
+  const name = placeName(code, territory)
 
   return (
     <section

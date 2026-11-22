@@ -1,9 +1,11 @@
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 
 import { COUNTRY_ALIASES } from '../lib/countryAliases.ts'
 import { countryName } from '../lib/countryName.ts'
 import { type CountryResult, prepareCountries, searchCountries } from '../lib/countrySearch.ts'
+import { ALL_INSETS, type InsetId } from '../lib/territories.ts'
 import { fetchCountries } from '../services/countries.ts'
 
 /** Enter this soon after a choice is a double press, not a wish to open. */
@@ -30,20 +32,21 @@ export type CountrySearch = {
 }
 
 /**
- * Search over the globe's countries. Choosing a result selects it (`onSelect`), Enter again opens it (`onOpen`). The
- * field keeps its name until another country, or none, is `selected`, then empties.
+ * Search over the globe's countries and their distant territories. Choosing a result selects it (`onSelect`), Enter
+ * again opens it (`onOpen`). The field keeps its name until another country, or none, is `selected`, then empties.
  */
 export function useCountrySearch(
-  onSelect: (code: string) => void,
+  onSelect: (code: string, territory: InsetId | null) => void,
   onOpen: () => void,
   selected: string | null,
 ): CountrySearch {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [codes, setCodes] = useState<string[] | null>(null)
   const [query, setQuery] = useState('')
   const [listOpen, setListOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [chosen, setChosen] = useState<string | null>(null)
+  const [chosenTerritory, setChosenTerritory] = useState<InsetId | null>(null)
 
   // Selection closed or changed outside the search: the name goes.
   const [seenSelected, setSeenSelected] = useState(selected)
@@ -60,7 +63,7 @@ export function useCountrySearch(
   if (i18n.language !== seenLanguage) {
     setSeenLanguage(i18n.language)
     if (chosen !== null) {
-      setQuery(countryName(chosen, i18n.language))
+      setQuery(placeLabel(chosen, chosenTerritory, i18n.language, t))
     }
   }
   const loading = useRef(false)
@@ -72,14 +75,18 @@ export function useCountrySearch(
       return []
     }
     const aliases = COUNTRY_ALIASES[i18n.resolvedLanguage ?? ''] ?? {}
-    return prepareCountries(
-      codes.map((code) => ({
-        code,
-        name: countryName(code, i18n.language),
-        aliases: aliases[code],
-      })),
-    )
-  }, [codes, i18n.language, i18n.resolvedLanguage])
+    const known = new Set(codes)
+    const territories = ALL_INSETS.filter((inset) => known.has(inset.country)).map((inset) => ({
+      code: inset.country,
+      name: t(`territories.${inset.id}`),
+      territory: inset.id,
+      country: countryName(inset.country, i18n.language),
+    }))
+    return prepareCountries([
+      ...codes.map((code) => ({ code, name: countryName(code, i18n.language), aliases: aliases[code] })),
+      ...territories,
+    ])
+  }, [codes, i18n.language, i18n.resolvedLanguage, t])
   const results = useMemo(() => searchCountries(query, countries, i18n.language), [countries, query, i18n.language])
 
   function prepare() {
@@ -106,8 +113,9 @@ export function useCountrySearch(
     setQuery(entry.name)
     setListOpen(false)
     setChosen(entry.code)
+    setChosenTerritory(entry.territory ?? null)
     chosenAt.current = Date.now()
-    onSelect(entry.code)
+    onSelect(entry.code, entry.territory ?? null)
   }
 
   function press(key: string): boolean {
@@ -157,4 +165,9 @@ export function useCountrySearch(
     press,
     closeList: () => setListOpen(false),
   }
+}
+
+// Name of a chosen country or territory, as the field shows it.
+function placeLabel(code: string, territory: InsetId | null, language: string, t: TFunction): string {
+  return territory === null ? countryName(code, language) : t(`territories.${territory}`)
 }

@@ -10,6 +10,12 @@ describe('CountryPanel', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it('names a tapped distant territory after its country', () => {
+    render(<CountryPanel code="FR" territory="reunion" onOpen={vi.fn()} />)
+
+    expect(screen.getByRole('heading', { name: 'France · Réunion' })).toBeInTheDocument()
+  })
+
   it('names the tapped country and opens it from its button', () => {
     const onOpen = vi.fn()
     render(<CountryPanel code="FR" onOpen={onOpen} />)

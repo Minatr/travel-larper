@@ -34,6 +34,18 @@ describe('searchCountries', () => {
     expect(searchCountries(query, ENTRIES, 'fr').map((entry) => entry.code)).toEqual(want)
   })
 
+  it('finds a distant territory, with its country', () => {
+    const entries = prepareCountries([
+      { code: 'FR', name: 'France' },
+      { code: 'FR', name: 'Guyane', territory: 'french-guiana', country: 'France' },
+    ])
+
+    expect(searchCountries('guy', entries, 'fr')).toEqual([
+      { code: 'FR', name: 'Guyane', territory: 'french-guiana', country: 'France' },
+    ])
+    expect(searchCountries('fra', entries, 'fr')).toEqual([{ code: 'FR', name: 'France' }])
+  })
+
   it('tells which common name matched', () => {
     expect(searchCountries('uk', ENTRIES, 'fr')).toEqual([{ code: 'GB', name: 'Royaume-Uni', alias: 'UK' }])
   })

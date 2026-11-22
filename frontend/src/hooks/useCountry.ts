@@ -51,6 +51,6 @@ async function loadCountry(code: string, signal: AbortSignal): Promise<CountrySt
   if ('error' in shapeResult) {
     throw shapeResult.error
   }
-  const map = countryMapData(country.geometry, shapeResult.shape)
+  const map = countryMapData(code, country.geometry, shapeResult.shape)
   return map === null ? { kind: 'unavailable' } : { kind: 'found', map }
 }

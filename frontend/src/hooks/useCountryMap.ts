@@ -3,9 +3,11 @@ import type { ExpressionSpecification } from 'maplibre-gl'
 import { type RefObject, useEffect, useRef } from 'react'
 
 import {
+  ABOVE_MASK_BORDER_LAYERS,
   ABOVE_MASK_LAYERS,
   COUNTRY_MAP_COLORS,
   COUNTRY_MAP_HIDDEN_LAYERS,
+  COUNTRY_LAND_COLOR,
   LAND_BORDER_LAYERS,
   OUTSIDE_LAND_COLOR,
 } from '../lib/countryMapTheme.ts'
@@ -14,7 +16,7 @@ import { FRAME_PADDING_PX, MAP_STYLE_TIMEOUT_MS } from '../lib/countryTransition
 import { lockRotation, MapLibreMap, mapPixelRatio, UPRIGHT_OPTIONS } from '../lib/maplibre.ts'
 import type { CountryMapData } from '../lib/countryMapData.ts'
 import { type Bounds, FULL_TURN_DEGREES } from '../lib/geo.ts'
-import { mercatorCamera, mercatorView } from '../lib/mercatorCamera.ts'
+import { type Camera, mercatorCamera, mercatorView } from '../lib/mercatorCamera.ts'
 
 /** OpenFreeMap: free vector tiles from OpenStreetMap, no key needed. */
 const COUNTRY_MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark'
@@ -24,6 +26,32 @@ const PLACE_PREFIX = 'place_'
 
 const MASK_SOURCE = 'outside-country'
 const MASK_LAYER = 'outside-country-land'
+/**
+ * MapLibre's compact credit (a <details> element), and its classes: MapLibre makes it compact, and opens it, on the
+ * first resize once the credits are known, then closes it at the first drag only; open, it covers the territories'
+ * drawer on a phone. Its "i" button still opens it.
+ */
+const ATTRIBUTION_SELECTOR = '.maplibregl-ctrl-attrib'
+const ATTRIBUTION_OPEN_CLASS = 'maplibregl-compact-show'
+
+const ISLANDS_SOURCE = 'country-shape'
+const ISLANDS_LAYER = 'country-islands'
+
+/**
+ * The country's coastline, outlined in its land color while zoomed out: the tiles drop small islands there, and an
+ * atoll (Kiribati, Maldives) shows as nothing; outlined, it stays a dot of a few pixels. Only the outline: a fill would
+ * hide the roads and borders. Faded out as the tiles' coastline, more precise, takes over.
+ */
+const ISLANDS_FULL_UNTIL_ZOOM = 6
+const ISLANDS_GONE_FROM_ZOOM = 9
+const ISLANDS_OUTLINE_PX = 2.5
+
+/**
+ * Glide from one area to another: faster than MapLibre's default speed (1.2), and zooming out less over the sea than
+ * its default curve (1.42; the lower, the less it zooms out).
+ */
+const GLIDE_SPEED = 4
+const GLIDE_CURVE = 1.15
 
 /** Room to pan around the framed view, as a share of its size. */
 const PAN_MARGIN_SHARE = 0.25
@@ -31,23 +59,37 @@ const PAN_MARGIN_SHARE = 0.25
 const ZOOM_OUT_LEVELS = 0.5
 
 /**
- * Mounts a country's detailed map in `containerRef`. A mask dims the other countries; the sea, land borders and the
- * country's labels stay above it. The view stays around the country. Calls `onReady` once fully drawn, or `onFailed`
- * when its style cannot load (OpenFreeMap down or unreachable).
+ * Mounts a country's detailed map in `containerRef`, framed on `view` (the mainland or an inset). A mask dims the other
+ * countries; the sea, land borders and the country's labels stay above it. The view stays around `view`; when it
+ * changes, the map glides there. Calls `onReady` once fully drawn, or `onFailed` when its style cannot load
+ * (OpenFreeMap down or unreachable), and `onMove` with its camera once set up and after each move.
  */
 export function useCountryMap(
   containerRef: RefObject<HTMLElement | null>,
-  { shape, labelArea, bounds }: CountryMapData,
+  { shape, labelArea }: CountryMapData,
+  view: Bounds,
   onReady: () => void,
   onFailed: () => void,
+  onMove: (camera: Camera) => void,
 ): void {
   // Latest callbacks without re-creating the map when they change.
   const onReadyRef = useRef(onReady)
   const onFailedRef = useRef(onFailed)
+  const onMoveRef = useRef(onMove)
   useEffect(() => {
     onReadyRef.current = onReady
     onFailedRef.current = onFailed
+    onMoveRef.current = onMove
   })
+  // The view the map frames, and how to glide to another one: set once the map exists.
+  const viewRef = useRef(view)
+  const glideRef = useRef<() => void>(() => {})
+  useEffect(() => {
+    if (viewRef.current !== view) {
+      viewRef.current = view
+      glideRef.current()
+    }
+  }, [view])
 
   useEffect(() => {
     const container = containerRef.current
@@ -59,7 +101,7 @@ export function useCountryMap(
       container,
       style: COUNTRY_MAP_STYLE,
       // Same camera as the end of the globe's flight.
-      ...mercatorCamera(bounds, container.clientWidth, container.clientHeight, FRAME_PADDING_PX),
+      ...mercatorCamera(viewRef.current, container.clientWidth, container.clientHeight, FRAME_PADDING_PX),
       // OpenStreetMap's licence requires the credit, behind an "i" button.
       attributionControl: { compact: true },
       pixelRatio: mapPixelRatio(),
@@ -95,7 +137,7 @@ export function useCountryMap(
       if (clientWidth <= 2 * FRAME_PADDING_PX || clientHeight <= 2 * FRAME_PADDING_PX) {
         return
       }
-      const camera = mercatorCamera(bounds, clientWidth, clientHeight, FRAME_PADDING_PX)
+      const camera = mercatorCamera(viewRef.current, clientWidth, clientHeight, FRAME_PADDING_PX)
       const framed = mercatorView(camera, clientWidth, clientHeight)
       const shown = map.getBounds()
       map.setMaxBounds(
@@ -107,6 +149,22 @@ export function useCountryMap(
         ]),
       )
       map.setMinZoom(Math.min(camera.zoom - ZOOM_OUT_LEVELS, map.getZoom()))
+    }
+
+    // Another view: limits lifted for the glide (it crosses the sea between them), set again on arrival. MapLibre jumps
+    // instead of gliding for those who reduce motion.
+    glideRef.current = () => {
+      const { clientWidth, clientHeight } = map.getContainer()
+      map.setMaxBounds(null)
+      map.setMinZoom(null)
+      map.stop()
+      // Before the glide: a jump ends at once.
+      map.once('moveend', setLimits)
+      map.flyTo({
+        ...mercatorCamera(viewRef.current, clientWidth, clientHeight, FRAME_PADDING_PX),
+        speed: GLIDE_SPEED,
+        curve: GLIDE_CURVE,
+      })
     }
 
     // Set up as soon as the style is known, before any tile is drawn: "load" would wait for the whole first view, drawn
@@ -128,6 +186,8 @@ export function useCountryMap(
           map.moveLayer(layer)
         }
       }
+      addIslands(map, shape)
+      closeCreditOnceOpened(map)
       showLabelsWithin(map, labelArea)
 
       // Limits from the framed view, not the country: on a narrow phone the view is taller, and limits smaller than it
@@ -140,6 +200,9 @@ export function useCountryMap(
       })
       resizeObserver.observe(map.getContainer())
       map.once('idle', () => onReadyRef.current())
+      const moved = () => onMoveRef.current({ center: map.getCenter().toArray(), zoom: map.getZoom() })
+      moved()
+      map.on('moveend', moved)
     })
 
     return () => {
@@ -147,7 +210,7 @@ export function useCountryMap(
       resizeObserver?.disconnect()
       map.remove()
     }
-  }, [containerRef, shape, labelArea, bounds])
+  }, [containerRef, shape, labelArea])
 }
 
 function recolor(map: MapLibreMap) {
@@ -205,4 +268,55 @@ function widen([west, south, east, north]: Bounds): Bounds | null {
     east + marginX,
     Math.max(north, Math.min(north + marginY, MERCATOR_MAX_LATITUDE)),
   ]
+}
+
+// The country's coastline outlined while zoomed out, so that a tiny island stays visible (ISLANDS_* above).
+function addIslands(map: MapLibreMap, shape: MultiPolygon) {
+  const fading: ExpressionSpecification = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    ISLANDS_FULL_UNTIL_ZOOM,
+    1,
+    ISLANDS_GONE_FROM_ZOOM,
+    0,
+  ]
+  map.addSource(ISLANDS_SOURCE, { type: 'geojson', data: shape })
+  // Over the sea, under the borders (above it, it would cover them) and the names.
+  const firstBorder = ABOVE_MASK_BORDER_LAYERS.find((layer) => map.getLayer(layer) !== undefined)
+  map.addLayer(
+    {
+      id: ISLANDS_LAYER,
+      type: 'line',
+      source: ISLANDS_SOURCE,
+      maxzoom: ISLANDS_GONE_FROM_ZOOM,
+      paint: { 'line-color': COUNTRY_LAND_COLOR, 'line-width': ISLANDS_OUTLINE_PX, 'line-opacity': fading },
+    },
+    firstBorder,
+  )
+  for (const layer of map.getStyle().layers) {
+    if (layer.type === 'symbol') {
+      map.moveLayer(layer.id)
+    }
+  }
+}
+
+// Closes MapLibre's credit the first time it opens on its own (ATTRIBUTION_* above), whatever triggers it: watched
+// rather than tied to an event, as MapLibre opens it on a resize whose timing varies.
+function closeCreditOnceOpened(map: MapLibreMap) {
+  const credit = map.getContainer().querySelector(ATTRIBUTION_SELECTOR)
+  if (credit === null) {
+    return
+  }
+  const close = () => {
+    if (!credit.classList.contains(ATTRIBUTION_OPEN_CLASS)) {
+      return
+    }
+    credit.classList.remove(ATTRIBUTION_OPEN_CLASS)
+    credit.removeAttribute('open')
+    observer.disconnect()
+  }
+  const observer = new MutationObserver(close)
+  observer.observe(credit, { attributes: true, attributeFilter: ['class', 'open'] })
+  close()
 }
