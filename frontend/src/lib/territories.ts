@@ -140,7 +140,10 @@ const IGNORED_AREAS: Record<string, Bounds[]> = {
   ],
 }
 
-/** Frame of the countries with distant parts: the mainland and the territories kept with it. */
+/**
+ * Frame of the countries with distant parts: the mainland and the territories kept with it. Also of the countries whose
+ * globe shape misses land their map shows (Singapore's southern islands, inside its OpenStreetMap borders).
+ */
 const COUNTRY_FRAMES: Record<string, Bounds> = {
   AU: [112.92, -43.64, 153.63, -9.24],
   BR: [-74.02, -33.74, -34.79, 5.27],
@@ -173,6 +176,7 @@ const COUNTRY_FRAMES: Record<string, Bounds> = {
   RU: [19.61, 41.19, 191, 81.86],
   SB: [155.51, -11.85, 166.98, -6.6],
   SC: [55.22, -4.8, 55.79, -4.29],
+  SG: [103.6, 1.16, 104.09, 1.47],
   TF: [50.18, -49.72, 77.58, -37.82],
   TH: [97.35, 5.63, 105.65, 20.45],
   TO: [-176.22, -22.34, -173.91, -18.57],
@@ -213,7 +217,7 @@ export function ignoredAreasOf(code: string): Bounds[] {
   return (IGNORED_AREAS[code] ?? []).map(widen)
 }
 
-/** Frame of the country `code`, if it has distant parts. */
+/** Frame of the country `code`, if decided (see COUNTRY_FRAMES). */
 export function mainFrameOf(code: string): Bounds | undefined {
   return COUNTRY_FRAMES[code]
 }

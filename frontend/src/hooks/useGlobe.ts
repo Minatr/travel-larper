@@ -7,7 +7,7 @@ import { hasMap } from '../lib/countryCode.ts'
 import { type CountryHint, tagLayout } from '../lib/countryTag.ts'
 import { markCountry } from '../lib/searchMarker.ts'
 import { FRAME_PADDING_PX, GLOBE_RETURN_MS, GLOBE_TRANSITION_MS } from '../lib/countryTransition.ts'
-import { apparentZoom, flyBack, flyIn, type GlobeOverflow, zoomForApparent } from '../lib/globeFlight.ts'
+import { apparentZoom, flyBack, flyIn, type GlobeOverflow, returnZoom, zoomForApparent } from '../lib/globeFlight.ts'
 import { type Camera, mercatorCamera } from '../lib/mercatorCamera.ts'
 import {
   clickOutcome,
@@ -67,20 +67,6 @@ const LIFT_DELAY_MS = 80
 // Touch screens have no hover: without this check, a tap would leave the country "hovered" forever, as no mouseleave
 // ever comes.
 const HOVER_QUERY = '(hover: hover)'
-
-/**
- * Zoom levels out from a place's framed view on the way back from an inset, or from a country opened from its URL (in
- * apparent size, see apparentZoom): the place then spans about a sixteenth of the screen, around it enough of the globe
- * to find one's way, a small territory still easy to spot. Not further out than the whole globe.
- */
-const RETURN_ZOOM_OUT_LEVELS = 4
-
-/**
- * Fewest zoom levels out on the way back to where a country was clicked: a large country framed far out (Russia), seen
- * from a globe zoomed in, would otherwise be flown back by zooming out and in again. Just enough for the flight to
- * round the globe out as it backs away (MIN_FLATTEN_ZOOM_LEVELS in globeFlight.ts).
- */
-const RETURN_MIN_ZOOM_OUT_LEVELS = 0.5
 
 /** Turn of the globe towards a country chosen in the search. */
 const SELECT_TURN_MS = 800
@@ -251,15 +237,12 @@ export function useGlobe(
     const shapes = new Map<string, Country>()
 
     let selection = EMPTY_SELECTION
-    // Where the globe was when a country opened, to fly back to.
+    // Where the globe was when a country opened, to fly back to while the countries load.
     let viewBeforeOpening: Camera = {
       center: INITIAL_CENTER,
       zoom: initialZoom(container),
     }
-    // Whether the globe flew to the page open (not opened from its URL), to which place, and whether that page showed
-    // since.
-    let flewIn = false
-    let flownTo: OpenPlace | null = null
+    // Whether the page open showed since the globe flew to it.
     let pageShown = false
     let shown = new Set<string>()
     let liftTimer: number | undefined
@@ -469,8 +452,6 @@ export function useGlobe(
         center: map.getCenter().toArray(),
         zoom: map.getZoom(),
       }
-      flewIn = true
-      flownTo = { code, territory: inset?.id ?? null }
       pageShown = false
       // The map's own camera, so it takes over exactly where the globe stops.
       const { clientWidth, clientHeight } = map.getContainer()
@@ -530,7 +511,6 @@ export function useGlobe(
       map.stop()
       flying = true
       const { camera, code } = returnView()
-      flewIn = false
       flyBack(map, camera, code, globeOverflow(map.getContainer()), GLOBE_RETURN_MS, landed)
     }
 
@@ -569,11 +549,10 @@ export function useGlobe(
       }
     }
 
-    // Starts from the map's camera: the globe, still flat, takes its place unseen, however the map was moved. Then back
-    // to where the place was clicked, when the page ended on that same place (France, after a look at Guadeloupe).
-    // Otherwise (the page ended elsewhere, on a territory or back on the mainland, or was opened from its URL): zoomed
-    // out over the place shown, still centered on it, rather than a long slide back to the place clicked. Escape during
-    // the flight in: back to where it was clicked.
+    // Starts from the map's camera: the globe, still flat, takes its place unseen, however the map was moved. Then
+    // backs away over the place shown (the country, or the territory the page ended on), the more as it is small
+    // (returnZoom), rather than back to where it was clicked: the page may have been opened from its URL, or from
+    // elsewhere than the globe. Escape during the flight in: backs away over the place too.
     function returnView(): { camera: Camera; code: string | null } {
       const framed = placeFrame(lastPlaceRef.current)
       if (framed === null) {
@@ -585,22 +564,11 @@ export function useGlobe(
         map.jumpTo(shown)
       }
       const { place, frame, center } = framed
-      const samePlace = flownTo?.code === place.code && flownTo.territory === place.territory
-      if (flewIn && (!pageShown || samePlace)) {
-        return { camera: notCloser(viewBeforeOpening), code: place.code }
-      }
-      const zoom = Math.max(
-        apparentZoom(frame.zoom, frame.center[1]) - RETURN_ZOOM_OUT_LEVELS,
+      const zoom = returnZoom(
+        apparentZoom(frame.zoom, frame.center[1]),
         apparentZoom(initialZoom(map.getContainer()), INITIAL_CENTER[1]),
       )
       return { camera: { center, zoom: zoomForApparent(zoom, center[1]) }, code: place.code }
-    }
-
-    // `camera`, zoomed out if need be to RETURN_MIN_ZOOM_OUT_LEVELS further out than the globe now is.
-    function notCloser(camera: Camera): Camera {
-      const start = apparentZoom(map.getZoom(), map.getCenter().lat)
-      const zoom = Math.min(apparentZoom(camera.zoom, camera.center[1]), start - RETURN_MIN_ZOOM_OUT_LEVELS)
-      return { center: camera.center, zoom: zoomForApparent(zoom, camera.center[1]) }
     }
 
     // Mouse moves come faster than the screen refreshes: only the last one of each frame is looked up.
