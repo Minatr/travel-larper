@@ -35,4 +35,20 @@ describe('outsideMask', () => {
     expect(cutOut).toEqual([mainland, island])
     expect(dimmed).toEqual([[enclave]])
   })
+
+  it('dims the territories left out, which the borders still hold (Barrow Island)', () => {
+    const [, ...dimmed] = outsideMask({ type: 'Polygon', coordinates: [mainland] }, [[3, 46, 4, 47]]).coordinates
+
+    expect(dimmed).toEqual([
+      [
+        [
+          [3, 46],
+          [4, 46],
+          [4, 47],
+          [3, 47],
+          [3, 46],
+        ],
+      ],
+    ])
+  })
 })

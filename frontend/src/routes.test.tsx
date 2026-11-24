@@ -114,12 +114,14 @@ describe('routes', () => {
     expect(await screen.findByRole('heading', { name: 'France' })).toBeInTheDocument()
   })
 
-  it('shows the not found page for an unknown country code', async () => {
+  it('shows the not found page for an unknown country code, without warning about its missing borders', async () => {
     stubCountries('FR')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     renderAt('/countries/XX')
 
     expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it('shows the not found page for a malformed country code', async () => {

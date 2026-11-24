@@ -42,11 +42,10 @@ async function loadCountry(code: string, signal: AbortSignal): Promise<CountrySt
     (shape) => ({ shape }),
     (error: unknown) => ({ error }),
   )
-  // Without its borders, the map masks with the shape, less precise: no reason to fail.
-  const bordersRequest = fetchCountryBorders(code, signal).catch((error: unknown) => {
-    console.warn('country borders failed to load', error)
-    return null
-  })
+  const bordersRequest = fetchCountryBorders(code, signal).then(
+    (borders) => ({ borders }),
+    (error: unknown) => ({ error }),
+  )
   const countries: Countries = await fetchCountries()
   const country = countries.features.find((feature) => feature.properties.code === code)
   if (country === undefined) {
@@ -56,6 +55,13 @@ async function loadCountry(code: string, signal: AbortSignal): Promise<CountrySt
   if ('error' in shapeResult) {
     throw shapeResult.error
   }
-  const map = countryMapData(code, country.geometry, shapeResult.shape, await bordersRequest)
+  // Without its borders, the map masks with the shape, less precise: no reason to fail. Warned only for a known country
+  // (an unknown code has no borders either) and a page still open (left before they loaded: nothing failed).
+  const bordersResult = await bordersRequest
+  if ('error' in bordersResult && !signal.aborted) {
+    console.warn('country borders failed to load', bordersResult.error)
+  }
+  const borders = 'borders' in bordersResult ? bordersResult.borders : null
+  const map = countryMapData(code, country.geometry, shapeResult.shape, borders)
   return map === null ? { kind: 'unavailable' } : { kind: 'found', map }
 }

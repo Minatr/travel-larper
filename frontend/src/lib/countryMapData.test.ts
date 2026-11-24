@@ -68,6 +68,14 @@ describe('distant territories', () => {
     expect(russia?.mask).toBe(russia?.shape)
   })
 
+  it('dims the territories left out, which the borders still hold (Australia: Barrow Island)', () => {
+    const barrowIsland = [115.4, -20.78]
+    const holds = ([west, south, east, north]: number[]) =>
+      barrowIsland[0] > west && barrowIsland[0] < east && barrowIsland[1] > south && barrowIsland[1] < north
+
+    expect(dataOf('AU')?.leftOut.some(holds)).toBe(true)
+  })
+
   it('cuts the enclaves out of the mask: the Vatican and San Marino out of Italy', () => {
     const [mainland] = (dataOf('IT')?.mask as MultiPolygon).coordinates
       .slice()

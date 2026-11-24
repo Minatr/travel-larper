@@ -233,6 +233,25 @@ export function ignoredAreasOf(code: string): Bounds[] {
   return (IGNORED_AREAS[code] ?? []).map(widen)
 }
 
+/**
+ * Margin around the land of a territory left out, in degrees (about 5 km): enough for OpenStreetMap's coast, which the
+ * Natural Earth boxes above may miss by a little, and too little to reach the mainland (Barrow Island lies 50 km off).
+ */
+const LEFT_OUT_LAND_MARGIN_DEGREES = 0.05
+
+/**
+ * Land of the territories left out of the country `code`'s map, to dim: its OpenStreetMap borders, which the mask
+ * follows, still hold them (Barrow Island, Sable Island).
+ */
+export function leftOutLandOf(code: string): Bounds[] {
+  return (IGNORED_AREAS[code] ?? []).map(([west, south, east, north]) => [
+    west - LEFT_OUT_LAND_MARGIN_DEGREES,
+    south - LEFT_OUT_LAND_MARGIN_DEGREES,
+    east + LEFT_OUT_LAND_MARGIN_DEGREES,
+    north + LEFT_OUT_LAND_MARGIN_DEGREES,
+  ])
+}
+
 /** Frame of the country `code`, if decided (see COUNTRY_FRAMES). */
 export function mainFrameOf(code: string): Bounds | undefined {
   return COUNTRY_FRAMES[code]

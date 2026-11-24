@@ -55,18 +55,26 @@ const LARGE_COUNTRY_CLOSENESS = 1.5
 const TINY_COUNTRY_CLOSENESS = 8
 
 /**
+ * Fewest zoom levels the way back backs away from where the globe is: Escape early in the flight in, while the globe is
+ * still far out, would otherwise zoom in. Enough for the globe to round out as it backs away (MIN_FLATTEN_ZOOM_LEVELS).
+ */
+const RETURN_MIN_BACKING_LEVELS = 0.5
+
+/**
  * Apparent zoom the globe backs away to from a place framed at apparent zoom `frame`, never further out than
  * `wholeGlobe` (the globe filling the screen). Zooms out the more as the place is small, linearly from large to tiny
- * countries: Russia ends 0.8 levels out, France 2, Belgium 3.6, the tiniest (Malta, Monaco) 6.
+ * countries: Russia ends 0.8 levels out, France 2, Belgium 3.6, the tiniest (Malta, Monaco) 6. Always at least
+ * RETURN_MIN_BACKING_LEVELS further out than `current`, the globe's apparent zoom when it starts back, even past the
+ * whole globe.
  */
-export function returnZoom(frame: number, wholeGlobe: number): number {
+export function returnZoom(frame: number, wholeGlobe: number, current: number): number {
   const closeness = frame - wholeGlobe
   const share = Math.min(
     Math.max((closeness - LARGE_COUNTRY_CLOSENESS) / (TINY_COUNTRY_CLOSENESS - LARGE_COUNTRY_CLOSENESS), 0),
     1,
   )
   const zoomOut = RETURN_MIN_ZOOM_OUT_LEVELS + share * (RETURN_MAX_ZOOM_OUT_LEVELS - RETURN_MIN_ZOOM_OUT_LEVELS)
-  return Math.max(frame - zoomOut, wholeGlobe)
+  return Math.min(Math.max(frame - zoomOut, wholeGlobe), current - RETURN_MIN_BACKING_LEVELS)
 }
 
 /** Share of the zoom range the globe stays round, before flattening. */

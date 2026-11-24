@@ -237,11 +237,6 @@ export function useGlobe(
     const shapes = new Map<string, Country>()
 
     let selection = EMPTY_SELECTION
-    // Where the globe was when a country opened, to fly back to while the countries load.
-    let viewBeforeOpening: Camera = {
-      center: INITIAL_CENTER,
-      zoom: initialZoom(container),
-    }
     // Whether the page open showed since the globe flew to it.
     let pageShown = false
     let shown = new Set<string>()
@@ -448,10 +443,6 @@ export function useGlobe(
       showHint(null)
       setSearched(null)
       setPickedPlace(null, null)
-      viewBeforeOpening = {
-        center: map.getCenter().toArray(),
-        zoom: map.getZoom(),
-      }
       pageShown = false
       // The map's own camera, so it takes over exactly where the globe stops.
       const { clientWidth, clientHeight } = map.getContainer()
@@ -552,11 +543,12 @@ export function useGlobe(
     // Starts from the map's camera: the globe, still flat, takes its place unseen, however the map was moved. Then
     // backs away over the place shown (the country, or the territory the page ended on), the more as it is small
     // (returnZoom), rather than back to where it was clicked: the page may have been opened from its URL, or from
-    // elsewhere than the globe. Escape during the flight in: backs away over the place too.
+    // elsewhere than the globe. Escape during the flight in: backs away over the place too. A page opened from its URL
+    // and closed before the countries load (no place to frame): back to the initial view.
     function returnView(): { camera: Camera; code: string | null } {
       const framed = placeFrame(lastPlaceRef.current)
       if (framed === null) {
-        return { camera: viewBeforeOpening, code: null }
+        return { camera: { center: INITIAL_CENTER, zoom: initialZoom(map.getContainer()) }, code: null }
       }
       // Only once the page showed: during the flight in, the map loading under it already has its camera.
       const shown = mapCameraRef.current
@@ -567,6 +559,7 @@ export function useGlobe(
       const zoom = returnZoom(
         apparentZoom(frame.zoom, frame.center[1]),
         apparentZoom(initialZoom(map.getContainer()), INITIAL_CENTER[1]),
+        apparentZoom(map.getZoom(), map.getCenter().lat),
       )
       return { camera: { center, zoom: zoomForApparent(zoom, center[1]) }, code: place.code }
     }

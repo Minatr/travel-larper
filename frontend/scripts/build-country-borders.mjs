@@ -10,6 +10,7 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
+import { boxOf, extent, readFeatures, ringsOf, roundCoordinates, WITHOUT_MAP } from './geo.mjs'
 import { simplify } from './simplify.mjs'
 
 const COUNTRIES = new URL('../public/geo/countries.json', import.meta.url)
@@ -23,8 +24,6 @@ const SMALL_COUNTRY_DEGREES = 1
 const SMALL_COUNTRY_DECIMALS = 5
 const DECIMALS = 4
 const TOLERANCE_M = 40
-// Countries without a map (src/lib/countryCode.ts): Antarctica.
-const WITHOUT_MAP = new Set(['AQ'])
 /** OpenStreetMap's borders, as of the source (2018), unlike Google Maps': Western Sahara in Morocco, Crimea in Russia. */
 const KEEP_NATURAL_EARTH = new Set(['MA', 'RU'])
 /** OpenStreetMap's countries in the app's country, besides its own: the parts Natural Earth draws within it. */
@@ -42,14 +41,6 @@ const [bordersPath, naturalEarthPath] = process.argv.slice(2)
 if (bordersPath === undefined || naturalEarthPath === undefined) {
   console.error('usage: node scripts/build-country-borders.mjs <countries-maritime-10m.geo.json> <ne_10m.geojson>')
   process.exit(1)
-}
-
-function readFeatures(path) {
-  return JSON.parse(readFileSync(path, 'utf8')).features
-}
-
-function ringsOf({ type, coordinates }) {
-  return (type === 'Polygon' ? [coordinates] : coordinates).flat()
 }
 
 // Area of a ring in square degrees, enough to sort rings by size.
@@ -71,12 +62,6 @@ function contains(ring, [x, y]) {
     }
   }
   return inside
-}
-
-function boxOf(ring) {
-  const longitudes = ring.map(([longitude]) => longitude)
-  const latitudes = ring.map(([, latitude]) => latitude)
-  return [Math.min(...longitudes), Math.min(...latitudes), Math.max(...longitudes), Math.max(...latitudes)]
 }
 
 // Points to test whether a ring lies in another: a few of its vertices, as one may sit on a shared border.
@@ -153,21 +138,6 @@ function pointInside(ring) {
   return null
 }
 
-function round(coordinates, decimals) {
-  return typeof coordinates[0] === 'number'
-    ? coordinates.map((value) => Number(value.toFixed(decimals)))
-    : coordinates.map((inner) => round(inner, decimals))
-}
-
-// Widest span of the boxes, in degrees.
-function extent(boxes) {
-  const west = Math.min(...boxes.map(([west]) => west))
-  const south = Math.min(...boxes.map(([, south]) => south))
-  const east = Math.max(...boxes.map(([, , east]) => east))
-  const north = Math.max(...boxes.map(([, , , north]) => north))
-  return Math.max(east - west, north - south)
-}
-
 function overlaps([west, south, east, north], [otherWest, otherSouth, otherEast, otherNorth]) {
   return west <= otherEast && otherWest <= east && south <= otherNorth && otherSouth <= north
 }
@@ -205,7 +175,7 @@ for (const code of codes) {
       }
       return small ? ringsOf(geometry) : ringsOf(geometry).map((ring) => simplify(ring, TOLERANCE_M))
     })
-    const polygons = round(
+    const polygons = roundCoordinates(
       polygonsOf(
         countries,
         allRings.filter((ring) => !sources.includes(ring.source)),

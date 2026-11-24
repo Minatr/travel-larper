@@ -16,6 +16,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 
+import { boxOf, MICROSTATES, readFeatures, roundCoordinates } from './geo.mjs'
 import { simplifyByArea } from './simplify.mjs'
 
 const OUTPUT = new URL('../public/geo/countries.json', import.meta.url)
@@ -37,8 +38,7 @@ const CRIMEA = { west: 32, east: 37, south: 44, north: 47 }
 // Smallest island added from 1:50m, in km² (the same floor as the distant territories, territories.ts).
 const MIN_ISLAND_KM2 = 20
 const KM_PER_DEGREE = 111.32
-// The microstates (src/lib/microstates.ts), by OpenStreetMap code, and the rounding of their shape (about 1 m).
-const MICROSTATES = { AD: 'AND', LI: 'LIE', MC: 'MCO', SM: 'SMR', VA: 'VAT' }
+// Rounding of the microstates' shape (about 1 m).
 const MICROSTATE_DECIMALS = 5
 // Their shape drops the points making a triangle smaller than a square of this share of their size: under ten are left,
 // a polygon like the 1:110m countries around.
@@ -50,10 +50,6 @@ if (smallScale === undefined || mediumScale === undefined || osmLand === undefin
     'usage: node scripts/build-countries.mjs <ne_110m.geojson> <ne_50m.geojson> <countries-land-10m.geo.json>',
   )
   process.exit(1)
-}
-
-function readFeatures(path) {
-  return JSON.parse(readFileSync(path, 'utf8')).features
 }
 
 // Outer rings of a polygon or multipolygon (the countries used here have no holes).
@@ -162,12 +158,6 @@ function moveCrimeaToUkraine(features) {
   setPolygons(ukraine, [[mergeRings(onlyRing(ukraine), crimea[0])]])
 }
 
-function boxOf(ring) {
-  const longitudes = ring.map(([longitude]) => longitude)
-  const latitudes = ring.map(([, latitude]) => latitude)
-  return [Math.min(...longitudes), Math.min(...latitudes), Math.max(...longitudes), Math.max(...latitudes)]
-}
-
 function boxesMeet(first, second) {
   return first[0] <= second[2] && first[2] >= second[0] && first[1] <= second[3] && first[3] >= second[1]
 }
@@ -211,18 +201,13 @@ function addMissingIslands(features, mediumFeatures) {
   }
 }
 
-function roundCoordinates(coordinates, decimals) {
-  return typeof coordinates[0] === 'number'
-    ? coordinates.map((value) => Number(value.toFixed(decimals)))
-    : coordinates.map((inner) => roundCoordinates(inner, decimals))
-}
-
 // Outer ring of the largest part of each microstate's OpenStreetMap shape, simplified: holes (Andorra's lakes) and
-// slivers left out.
-function microstateShapes(path) {
+// slivers left out. OpenStreetMap's shapes go by three-letter code, taken from Natural Earth's `naturalEarth`.
+function microstateShapes(path, naturalEarth) {
   const byCode = new Map(readFeatures(path).map(({ properties, geometry }) => [properties.A3, geometry]))
   return new Map(
-    Object.entries(MICROSTATES).map(([code, source]) => {
+    MICROSTATES.map((code) => {
+      const source = naturalEarth.find(({ properties }) => properties.ISO_A2_EH === code)?.properties.ISO_A3_EH
       const geometry = byCode.get(source)
       if (geometry === undefined) {
         throw new Error(`${code}: no OpenStreetMap shape for ${source}`)
@@ -263,7 +248,7 @@ const small = mediumFeatures.filter(
   (item) => !present.has(item.properties.ADM0_A3) && COUNTRY_TYPES.has(item.properties.TYPE),
 )
 
-const microstates = microstateShapes(osmLand)
+const microstates = microstateShapes(osmLand, mediumFeatures)
 const countries = {
   type: 'FeatureCollection',
   features: [...features, ...small].map((feature) => {

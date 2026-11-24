@@ -3,7 +3,7 @@ import type { MultiPolygon, Polygon } from 'geojson'
 import { countryFrame } from './countryBounds.ts'
 import type { Bounds } from './geo.ts'
 import { partsInside, partsWithin, simplifyToBudget } from './countryShape.ts'
-import { ignoredAreasOf, type Inset, insetArea, insetsOf } from './territories.ts'
+import { ignoredAreasOf, type Inset, insetArea, insetsOf, leftOutLandOf } from './territories.ts'
 
 /** A distant territory on its country's map: where to frame it, and its own parts (for its thumbnail). */
 export type InsetMap = { inset: Inset; bounds: Bounds; shape: MultiPolygon }
@@ -22,6 +22,8 @@ export type CountryMapData = {
    * labels: no Beausoleil, in France, on Monaco's map.
    */
   labelArea: MultiPolygon
+  /** Land of the territories left out, dimmed over the mask: the borders still hold it (Barrow Island). */
+  leftOut: Bounds[]
   /** Area to frame, the same as the globe's flight. */
   bounds: Bounds
   /** Parts of the mainland, for its thumbnail once on an inset. */
@@ -78,7 +80,7 @@ export function countryMapData(
       simplifyToBudget(inset.shape, labelAreaTolerance(inset.bounds), MAX_INSET_LABEL_AREA_POINTS),
     ),
   ])
-  return { shape, mask: borders ?? shape, labelArea, bounds, mainShape, insets }
+  return { shape, mask: borders ?? shape, labelArea, leftOut: leftOutLandOf(code), bounds, mainShape, insets }
 }
 
 // Each part once: an inset near the mainland (Ogasawara) is also in the mainland's margin, and a part twice would punch

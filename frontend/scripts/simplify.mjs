@@ -1,22 +1,19 @@
 /**
- * Douglas-Peucker simplification of a ring, shared by the map data scripts (build-countries.mjs,
- * build-country-borders.mjs).
+ * Simplifications of a ring, shared by the map data scripts (build-countries.mjs, build-country-borders.mjs).
+ * Distances are measured with the longitudes shrunk by the cosine of each point's own latitude: with the first point's
+ * alone, a ring running from the Arctic down to the south of Canada counted its east-west gaps 2.5 times too short.
  */
 const METERS_PER_DEGREE = 111_320
 
 /**
- * The ring with only the points straying more than `toleranceMeters` from a straight line, distances measured with the
- * longitudes shrunk by the cosine of the latitude: O(n log n) on average, O(n²) at worst.
+ * The ring with only the points straying more than `toleranceMeters` from a straight line (Douglas-Peucker): O(n log n)
+ * on average, O(n²) at worst.
  */
 export function simplify(ring, toleranceMeters) {
   if (ring.length <= 4) {
     return ring
   }
-  const cosine = Math.cos((ring[0][1] * Math.PI) / 180)
-  const points = ring.map(([longitude, latitude]) => [
-    longitude * cosine * METERS_PER_DEGREE,
-    latitude * METERS_PER_DEGREE,
-  ])
+  const points = ring.map(inMeters)
   const keep = new Uint8Array(ring.length)
   keep[0] = 1
   keep[ring.length - 1] = 1
@@ -42,17 +39,23 @@ export function simplify(ring, toleranceMeters) {
   return kept.length >= 4 ? kept : ring
 }
 
-// Point between `first` and `last` farthest from the line through them, and its distance.
+// [x, y, cosine]: the point in meters before shrinking the longitude, and the cosine of its latitude to shrink it by.
+function inMeters([longitude, latitude]) {
+  return [longitude * METERS_PER_DEGREE, latitude * METERS_PER_DEGREE, Math.cos((latitude * Math.PI) / 180)]
+}
+
+// Point between `first` and `last` farthest from the line through them, and its distance, measured at its latitude.
 function farthest(points, first, last) {
   const [ax, ay] = points[first]
   const [bx, by] = points[last]
-  const dx = bx - ax
   const dy = by - ay
-  const length = Math.hypot(dx, dy)
   let best = { index: first + 1, distance: -1 }
   for (let index = first + 1; index < last; index++) {
-    const [px, py] = points[index]
-    const distance = length === 0 ? Math.hypot(px - ax, py - ay) : Math.abs(dy * (px - ax) - dx * (py - ay)) / length
+    const [px, py, cosine] = points[index]
+    const dx = (bx - ax) * cosine
+    const offsetX = (px - ax) * cosine
+    const length = Math.hypot(dx, dy)
+    const distance = length === 0 ? Math.hypot(offsetX, py - ay) : Math.abs(dy * offsetX - dx * (py - ay)) / length
     if (distance > best.distance) {
       best = { index, distance }
     }
@@ -65,11 +68,8 @@ function farthest(points, first, last) {
  * (Visvalingam): unlike Douglas-Peucker, it also drops thin spikes, such as a harbor's jetties. O(n²), for small rings.
  */
 export function simplifyByArea(ring, minAreaSquareMeters) {
-  const cosine = Math.cos((ring[0][1] * Math.PI) / 180)
-  // Open ring of [point, x, y], x and y in meters.
-  const points = ring
-    .slice(0, -1)
-    .map((point) => [point, point[0] * cosine * METERS_PER_DEGREE, point[1] * METERS_PER_DEGREE])
+  // Open ring of [point, x, y, cosine] (see inMeters).
+  const points = ring.slice(0, -1).map((point) => [point, ...inMeters(point)])
   const MIN_POINTS = 3
   while (points.length > MIN_POINTS) {
     let smallest = { index: -1, area: Infinity }
@@ -92,6 +92,7 @@ export function simplifyByArea(ring, minAreaSquareMeters) {
   return [...kept, kept[0]]
 }
 
-function triangleArea([, ax, ay], [, bx, by], [, cx, cy]) {
-  return Math.abs((bx - ax) * (cy - ay) - (cx - ax) * (by - ay)) / 2
+// Area of the triangle, its longitudes shrunk at the latitude of its middle point `b`.
+function triangleArea([, ax, ay], [, bx, by, cosine], [, cx, cy]) {
+  return Math.abs((bx - ax) * cosine * (cy - ay) - (cx - ax) * cosine * (by - ay)) / 2
 }

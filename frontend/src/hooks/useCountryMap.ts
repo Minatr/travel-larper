@@ -72,7 +72,7 @@ const ZOOM_OUT_LEVELS = 0.5
  */
 export function useCountryMap(
   containerRef: RefObject<HTMLElement | null>,
-  { shape, mask, labelArea }: CountryMapData,
+  { shape, mask, labelArea, leftOut }: CountryMapData,
   view: Bounds,
   onReady: () => void,
   onFailed: () => void,
@@ -181,7 +181,7 @@ export function useCountryMap(
       window.clearTimeout(styleTimer)
       recolor(map)
       // Added last, so above all; the sea and borders are then moved above it.
-      map.addSource(MASK_SOURCE, { type: 'geojson', data: outsideMask(mask) })
+      map.addSource(MASK_SOURCE, { type: 'geojson', data: outsideMask(mask, leftOut) })
       map.addLayer({
         id: MASK_LAYER,
         type: 'fill',
@@ -217,7 +217,7 @@ export function useCountryMap(
       resizeObserver?.disconnect()
       map.remove()
     }
-  }, [containerRef, shape, mask, labelArea])
+  }, [containerRef, shape, mask, labelArea, leftOut])
 }
 
 function recolor(map: MapLibreMap) {
