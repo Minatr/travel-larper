@@ -36,13 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: 'authenticated', user })
   }
 
+  // Anonymous even when the logout fails: the server clears the cookie
   async function signOut() {
     try {
       await logout()
-      setState({ status: 'anonymous' })
     } catch (error: unknown) {
       console.error('logout failed', error)
     }
+    setState({ status: 'anonymous' })
   }
 
   return (

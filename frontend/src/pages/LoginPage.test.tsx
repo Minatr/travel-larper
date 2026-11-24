@@ -68,7 +68,7 @@ describe('LoginPage', () => {
 
   it.each([
     ['invalid_credentials', 401, 'The email or the password is incorrect.'],
-    ['rate_limited', 429, 'Too many attempts. Please try again in a minute.'],
+    ['rate_limited', 429, 'Too many attempts. Please try again later.'],
     ['internal_error', 500, 'Something went wrong. Please try again.'],
   ])('shows the message for %s', async (code, status, message) => {
     stubFetch(Response.json({ code, message: '' }, { status }))
@@ -120,5 +120,20 @@ describe('header account action', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/auth/logout', {
       method: 'POST',
     })
+  })
+
+  it('logs a user out even when the server fails', async () => {
+    stubFetch(
+      Response.json({ code: 'internal_error', message: '' }, { status: 500 }),
+      user,
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    renderAt('/status')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
+
+    expect(
+      await screen.findByRole('link', { name: 'Log in' }),
+    ).toBeInTheDocument()
   })
 })

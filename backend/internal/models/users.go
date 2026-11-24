@@ -22,6 +22,8 @@ func (q *Queries) InsertUser(ctx context.Context, email, passwordHash string) (b
 	return true, nil
 }
 
+// FindUserByEmail returns the user with this email, whatever its case, and
+// false when there is none.
 func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, bool, error) {
 	user, err := q.GetUserByEmail(ctx, email)
 	if errors.Is(err, pgx.ErrNoRows) {

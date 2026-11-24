@@ -75,7 +75,7 @@
     "registerLink": "S'inscrire",
     "errors": {
       "invalidCredentials": "L'e-mail ou le mot de passe est incorrect.",
-      "rateLimited": "Trop de tentatives. Réessayez dans une minute.",
+      "rateLimited": "Trop de tentatives. Réessayez plus tard.",
       "unreachable": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
       "generic": "Une erreur s'est produite. Réessayez."
     }

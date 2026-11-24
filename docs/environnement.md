@@ -76,6 +76,7 @@ Un volume créé par l'ancienne image `postgis/postgis` n'est pas compatible ave
 | `RATE_LIMIT_PER_MINUTE`, `MAX_BODY_BYTES` | backend | limite de requêtes par IP (défaut 100/min) et taille max d'un corps (défaut 1 Mo) ; vides = défaut |
 | `REGISTER_RATE_LIMIT_PER_HOUR` | backend | limite d'inscriptions par IP, plus stricte car chaque inscription calcule un hash argon2id coûteux (défaut 10/h) ; vide = défaut |
 | `LOGIN_RATE_LIMIT_PER_MINUTE` | backend | limite de tentatives de connexion par IP, contre les essais de mots de passe en série (défaut 5/min) ; vide = défaut |
+| `LOGIN_FAILURES_PER_ACCOUNT_PER_HOUR` | backend | échecs de connexion tolérés par compte en une heure, toutes IP confondues ; au-delà, le compte est bloqué jusqu'à la fin de l'heure, contre les essais depuis de nombreuses IP (défaut 10) ; vide = défaut |
 | `SESSION_IDLE_TIMEOUT_HOURS` | backend | une session expire après cette durée sans activité ; elle est prolongée à chaque utilisation (défaut 336 h, soit 14 jours) ; vide = défaut |
 
 ## 4. Vers la production

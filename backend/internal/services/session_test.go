@@ -77,8 +77,14 @@ func (v *fakeVerifier) SimulateVerify(context.Context, string) error {
 	return v.err
 }
 
+const testMaxLoginFailures = 3
+
 func newTestSessionService(store SessionStore, verifier PasswordVerifier) *SessionService {
-	service := NewSessionService(store, verifier, testIdleTimeout)
+	return newTestSessionServiceWith(store, verifier, NewLoginAttempts(testMaxLoginFailures, time.Hour, 100))
+}
+
+func newTestSessionServiceWith(store SessionStore, verifier PasswordVerifier, attempts *LoginAttempts) *SessionService {
+	service := NewSessionService(store, verifier, attempts, testIdleTimeout)
 	service.now = func() time.Time { return testNow }
 	return service
 }
@@ -89,13 +95,16 @@ func TestSessionServiceLogin(t *testing.T) {
 
 	tests := []struct {
 		name          string
+		previousToken string
 		store         fakeSessionStore
 		verifier      fakeVerifier
 		wantErr       error
 		wantSimulated bool
 	}{
 		{name: "right password", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: true}},
+		{name: "right password, previous session closed", previousToken: "previous", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: true}},
 		{name: "wrong password", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: false}, wantErr: ErrInvalidCredentials},
+		{name: "wrong password, previous session kept", previousToken: "previous", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: false}, wantErr: ErrInvalidCredentials},
 		{name: "unknown email", store: fakeSessionStore{}, wantErr: ErrInvalidCredentials, wantSimulated: true},
 		{name: "database failure", store: fakeSessionStore{err: errDatabase}, wantErr: errDatabase},
 		{name: "malformed stored hash", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{err: ErrMalformedPasswordHash}, wantErr: ErrMalformedPasswordHash},
@@ -106,7 +115,7 @@ func TestSessionServiceLogin(t *testing.T) {
 			store, verifier := tt.store, tt.verifier
 			service := newTestSessionService(&store, &verifier)
 
-			session, err := service.Login(context.Background(), "  bob@example.com ", "password")
+			session, err := service.Login(context.Background(), "  bob@example.com ", "password", tt.previousToken)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Fatalf("Login() error = %v, want %v", err, tt.wantErr)
@@ -118,9 +127,15 @@ func TestSessionServiceLogin(t *testing.T) {
 				if store.created != nil {
 					t.Fatal("a session was created despite the error")
 				}
+				if store.deleteCalls != 0 {
+					t.Fatal("a failed login closed the previous session")
+				}
 				return
 			}
 			assertOpenedSession(t, &store, session, user)
+			if tt.previousToken != "" && !bytes.Equal(store.deleted, hashSessionToken(tt.previousToken)) {
+				t.Fatal("the previous session was not closed")
+			}
 		})
 	}
 }
@@ -151,15 +166,67 @@ func assertOpenedSession(t *testing.T, store *fakeSessionStore, session Session,
 	}
 }
 
+func TestSessionServiceLoginBlocksAnAccountAfterTooManyFailures(t *testing.T) {
+	user := models.User{ID: uuid.New(), Email: "bob@example.com", PasswordHash: "hash"}
+
+	tests := []struct {
+		name  string
+		store fakeSessionStore
+	}{
+		{name: "existing account", store: fakeSessionStore{user: user, userFound: true}},
+		{name: "unknown email, blocked the same way", store: fakeSessionStore{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			store := tt.store
+			service := newTestSessionService(&store, &fakeVerifier{matches: false})
+			for range testMaxLoginFailures {
+				if _, err := service.Login(context.Background(), "bob@example.com", "wrong", ""); !errors.Is(err, ErrInvalidCredentials) {
+					t.Fatalf("Login() error = %v, want %v", err, ErrInvalidCredentials)
+				}
+			}
+
+			// Another case and the right password: still blocked, without a hash.
+			verifier := fakeVerifier{matches: true}
+			service.passwords = &verifier
+			store.searched = ""
+			_, err := service.Login(context.Background(), " BOB@example.com", "right", "")
+
+			if !errors.Is(err, ErrTooManyLoginFailures) {
+				t.Fatalf("Login() error = %v, want %v", err, ErrTooManyLoginFailures)
+			}
+			if store.searched != "" || verifier.verified || verifier.simulated {
+				t.Fatal("a blocked login still read the database or hashed the password")
+			}
+		})
+	}
+}
+
+func TestSessionServiceLoginForgetsFailuresOnSuccess(t *testing.T) {
+	store := fakeSessionStore{user: models.User{ID: uuid.New()}, userFound: true}
+	verifier := fakeVerifier{}
+	service := newTestSessionService(&store, &verifier)
+
+	for attempt := range 2 * testMaxLoginFailures {
+		// One success in the middle: the failures before it no longer count.
+		verifier.matches = attempt == testMaxLoginFailures-1
+		_, err := service.Login(context.Background(), "bob@example.com", "password", "")
+		if errors.Is(err, ErrTooManyLoginFailures) {
+			t.Fatalf("attempt %d blocked, want the failures reset by the success", attempt)
+		}
+	}
+}
+
 func TestSessionServiceLoginGivesDifferentTokens(t *testing.T) {
 	store := fakeSessionStore{user: models.User{ID: uuid.New()}, userFound: true}
 	service := newTestSessionService(&store, &fakeVerifier{matches: true})
 
-	first, err := service.Login(context.Background(), "bob@example.com", "password")
+	first, err := service.Login(context.Background(), "bob@example.com", "password", "")
 	if err != nil {
 		t.Fatalf("first login: %v", err)
 	}
-	second, err := service.Login(context.Background(), "bob@example.com", "password")
+	second, err := service.Login(context.Background(), "bob@example.com", "password", "")
 	if err != nil {
 		t.Fatalf("second login: %v", err)
 	}

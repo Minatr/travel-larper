@@ -75,7 +75,7 @@
     "registerLink": "Sign up",
     "errors": {
       "invalidCredentials": "The email or the password is incorrect.",
-      "rateLimited": "Too many attempts. Please try again in a minute.",
+      "rateLimited": "Too many attempts. Please try again later.",
       "unreachable": "The server cannot be reached. Check your connection and try again.",
       "generic": "Something went wrong. Please try again."
     }

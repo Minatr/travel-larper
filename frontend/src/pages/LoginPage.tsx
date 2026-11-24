@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import { PageContainer } from '../components/PageContainer.tsx'
 import { Button } from '../components/ui/button.tsx'
@@ -13,6 +13,8 @@ import { type LoginFailure, useLogin } from '../hooks/useLogin.ts'
 export function LoginPage() {
   const { t } = useTranslation()
   const { state, submit } = useLogin()
+  // Kept on the sign-up link, so ?redirect= survives a detour to sign up.
+  const { search } = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const submitting = state.kind === 'submitting'
@@ -65,7 +67,10 @@ export function LoginPage() {
         </form>
         <p className="mt-6 text-sm text-muted-foreground">
           {t('login.noAccount')}{' '}
-          <Link to="/register" className="font-medium underline">
+          <Link
+            to={{ pathname: '/register', search }}
+            className="font-medium underline"
+          >
             {t('login.registerLink')}
           </Link>
         </p>

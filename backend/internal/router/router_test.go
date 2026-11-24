@@ -30,7 +30,7 @@ func (rejectingAuthenticator) Authenticate(context.Context, string) (services.Se
 
 type rejectingSessionManager struct{}
 
-func (rejectingSessionManager) Login(context.Context, string, string) (services.Session, error) {
+func (rejectingSessionManager) Login(context.Context, string, string, string) (services.Session, error) {
 	return services.Session{}, services.ErrInvalidCredentials
 }
 

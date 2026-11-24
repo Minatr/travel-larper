@@ -36,8 +36,12 @@ type Config struct {
 	RegisterRateLimitPerHour int
 	// LoginRateLimitPerMinute to slow down attacks
 	LoginRateLimitPerMinute int
-	SessionIdleTimeout      time.Duration
-	Argon2                  Argon2Params
+	// LoginFailuresPerAccountPerHour blocks an account, whatever the IP, after
+	// that many failed logins within LoginFailureWindow.
+	LoginFailuresPerAccountPerHour int
+	MaxTrackedLoginAccounts        int
+	SessionIdleTimeout             time.Duration
+	Argon2                         Argon2Params
 	// MaxConcurrentPasswordHashes caps the argon2id hashes running at once.
 	MaxConcurrentPasswordHashes int
 	ReadHeaderTimeout           time.Duration
@@ -74,6 +78,10 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	loginFailuresPerAccount, err := positiveInt("LOGIN_FAILURES_PER_ACCOUNT_PER_HOUR", defaultLoginFailuresPerAccountPerHour)
+	if err != nil {
+		return Config{}, err
+	}
 	sessionIdleTimeoutHours, err := positiveInt("SESSION_IDLE_TIMEOUT_HOURS", defaultSessionIdleTimeoutHours)
 	if err != nil {
 		return Config{}, err
@@ -84,20 +92,22 @@ func Load() (Config, error) {
 	}
 
 	return Config{
-		DatabaseURL:                 databaseURL,
-		APIPort:                     apiPort,
-		Production:                  production,
-		RateLimitPerMinute:          rateLimit,
-		MaxBodyBytes:                int64(maxBodyBytes),
-		RegisterRateLimitPerHour:    registerRateLimit,
-		LoginRateLimitPerMinute:     loginRateLimit,
-		SessionIdleTimeout:          time.Duration(sessionIdleTimeoutHours) * time.Hour,
-		Argon2:                      defaultArgon2Params(),
-		MaxConcurrentPasswordHashes: maxConcurrentPasswordHashes,
-		ReadHeaderTimeout:           readHeaderTimeout,
-		WriteTimeout:                writeTimeout,
-		IdleTimeout:                 idleTimeout,
-		ShutdownTimeout:             shutdownTimeout,
+		DatabaseURL:                    databaseURL,
+		APIPort:                        apiPort,
+		Production:                     production,
+		RateLimitPerMinute:             rateLimit,
+		MaxBodyBytes:                   int64(maxBodyBytes),
+		RegisterRateLimitPerHour:       registerRateLimit,
+		LoginRateLimitPerMinute:        loginRateLimit,
+		LoginFailuresPerAccountPerHour: loginFailuresPerAccount,
+		MaxTrackedLoginAccounts:        maxTrackedLoginAccounts,
+		SessionIdleTimeout:             time.Duration(sessionIdleTimeoutHours) * time.Hour,
+		Argon2:                         defaultArgon2Params(),
+		MaxConcurrentPasswordHashes:    maxConcurrentPasswordHashes,
+		ReadHeaderTimeout:              readHeaderTimeout,
+		WriteTimeout:                   writeTimeout,
+		IdleTimeout:                    idleTimeout,
+		ShutdownTimeout:                shutdownTimeout,
 	}, nil
 }
 

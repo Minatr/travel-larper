@@ -17,8 +17,12 @@ var (
 )
 
 // ErrInvalidCredentials is returned for an unknown email or a wrong
-// password alike, so the response does not reveal which accounts exist.
+// password
 var ErrInvalidCredentials = errors.New("invalid credentials")
+
+// ErrTooManyLoginFailures is returned while an account is blocked after too
+// many failed logins.
+var ErrTooManyLoginFailures = errors.New("too many login failures")
 
 // ErrInvalidSession is returned for a missing, unknown or expired session.
 var ErrInvalidSession = errors.New("invalid session")

@@ -14,7 +14,7 @@ import (
 
 // SessionManager opens and closes sessions.
 type SessionManager interface {
-	Login(ctx context.Context, email, password string) (services.Session, error)
+	Login(ctx context.Context, email, password, previousToken string) (services.Session, error)
 	Logout(ctx context.Context, token string) error
 }
 
@@ -38,9 +38,14 @@ func (c *SessionController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := c.sessions.Login(r.Context(), body.Email, body.Password)
+	session, err := c.sessions.Login(r.Context(), body.Email, body.Password, middleware.SessionToken(r))
 	if errors.Is(err, services.ErrInvalidCredentials) {
 		views.WriteError(w, c.logger, api.ErrorCodeInvalidCredentials)
+		return
+	}
+	if errors.Is(err, services.ErrTooManyLoginFailures) {
+		c.logger.Warn("login blocked: too many failures on one account")
+		views.WriteError(w, c.logger, api.ErrorCodeRateLimited)
 		return
 	}
 	if err != nil {
@@ -52,14 +57,16 @@ func (c *SessionController) Login(w http.ResponseWriter, r *http.Request) {
 	views.WriteJSON(w, c.logger, http.StatusOK, views.NewCurrentUser(session.User.ID, session.User.Email, session.User.Status))
 }
 
-// Logout closes the current session, if any, and clears its cookie.
+// Logout closes the current session, if any, and clears its cookie, even
+// when the session cannot be deleted: the user asked to leave.
 func (c *SessionController) Logout(w http.ResponseWriter, r *http.Request) {
-	if err := c.sessions.Logout(r.Context(), middleware.SessionToken(r)); err != nil {
+	err := c.sessions.Logout(r.Context(), middleware.SessionToken(r))
+	views.ClearSessionCookie(w, c.secureCookies)
+	if err != nil {
 		c.logger.Error("logout", "error", err)
 		views.WriteError(w, c.logger, api.ErrorCodeInternalError)
 		return
 	}
-	views.ClearSessionCookie(w, c.secureCookies)
 	w.WriteHeader(http.StatusNoContent)
 }
 

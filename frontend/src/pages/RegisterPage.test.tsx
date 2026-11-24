@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -39,6 +39,20 @@ describe('RegisterPage', () => {
     expect(
       await screen.findByRole('link', { name: 'Sign up' }),
     ).toHaveAttribute('href', '/register')
+  })
+
+  it('keeps the page asked at login through the sign-up', async () => {
+    stubFetch(new Response(null, { status: 201 }))
+    renderAt('/login?redirect=/countries/FR')
+
+    fireEvent.click(await screen.findByRole('link', { name: 'Sign up' }))
+    fillAndSubmit('bob@example.com', '12345678')
+    await screen.findByRole('heading', { name: 'Account created' })
+
+    // The header has its own "Log in" link: the one under test is the page's.
+    expect(
+      within(screen.getByRole('main')).getByRole('link', { name: 'Log in' }),
+    ).toHaveAttribute('href', '/login?redirect=/countries/FR')
   })
 
   it('creates the account and shows the confirmation', async () => {

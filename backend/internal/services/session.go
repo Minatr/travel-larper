@@ -55,18 +55,27 @@ type Session struct {
 type SessionService struct {
 	store       SessionStore
 	passwords   PasswordVerifier
+	attempts    *LoginAttempts
 	idleTimeout time.Duration
 	now         func() time.Time
 }
 
 // NewSessionService creates a SessionService.
-func NewSessionService(store SessionStore, passwords PasswordVerifier, idleTimeout time.Duration) *SessionService {
-	return &SessionService{store: store, passwords: passwords, idleTimeout: idleTimeout, now: time.Now}
+func NewSessionService(
+	store SessionStore, passwords PasswordVerifier, attempts *LoginAttempts, idleTimeout time.Duration,
+) *SessionService {
+	return &SessionService{store: store, passwords: passwords, attempts: attempts, idleTimeout: idleTimeout, now: time.Now}
 }
 
 // Login checks the credentials and opens a session, whatever the account
-// status.
-func (s *SessionService) Login(ctx context.Context, email, password string) (Session, error) {
+// status. The browser's previous session, if any, is closed so it does not
+// linger until it expires; a failed login leaves it open.
+func (s *SessionService) Login(ctx context.Context, email, password, previousToken string) (Session, error) {
+	// Checked before any hash, and counted for unknown emails too, so a block
+	// does not tell which accounts exist.
+	if s.attempts.Blocked(email) {
+		return Session{}, ErrTooManyLoginFailures
+	}
 	user, found, err := s.store.FindUserByEmail(ctx, strings.TrimSpace(email))
 	if err != nil {
 		return Session{}, fmt.Errorf("login: %w", err)
@@ -75,6 +84,7 @@ func (s *SessionService) Login(ctx context.Context, email, password string) (Ses
 		if err := s.passwords.SimulateVerify(ctx, password); err != nil {
 			return Session{}, fmt.Errorf("login: %w", err)
 		}
+		s.attempts.RecordFailure(email)
 		return Session{}, ErrInvalidCredentials
 	}
 	matches, err := s.passwords.Verify(ctx, password, user.PasswordHash)
@@ -82,10 +92,15 @@ func (s *SessionService) Login(ctx context.Context, email, password string) (Ses
 		return Session{}, fmt.Errorf("login: %w", err)
 	}
 	if !matches {
+		s.attempts.RecordFailure(email)
 		return Session{}, ErrInvalidCredentials
 	}
+	s.attempts.Reset(email)
 
 	if err := s.store.DeleteExpiredSessions(ctx); err != nil {
+		return Session{}, fmt.Errorf("login: %w", err)
+	}
+	if err := s.Logout(ctx, previousToken); err != nil {
 		return Session{}, fmt.Errorf("login: %w", err)
 	}
 	token, tokenHash, err := newSessionToken()

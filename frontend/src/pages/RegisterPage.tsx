@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import { PageContainer } from '../components/PageContainer.tsx'
 import { Button } from '../components/ui/button.tsx'
@@ -37,6 +37,8 @@ export function RegisterPage() {
 
 function RegisterSuccess() {
   const { t } = useTranslation()
+  // ?redirect= from the login page, handed back to it.
+  const { search } = useLocation()
 
   return (
     <>
@@ -46,7 +48,10 @@ function RegisterSuccess() {
       <p className="mb-4 text-muted-foreground">
         {t('register.success.message')}
       </p>
-      <Link to="/login" className="text-sm font-medium underline">
+      <Link
+        to={{ pathname: '/login', search }}
+        className="text-sm font-medium underline"
+      >
         {t('register.success.login')}
       </Link>
     </>

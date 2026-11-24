@@ -27,11 +27,12 @@ type fakeSessionManager struct {
 	logoutErr      error
 	email          string
 	password       string
+	previousToken  string
 	loggedOutToken string
 }
 
-func (m *fakeSessionManager) Login(_ context.Context, email, password string) (services.Session, error) {
-	m.email, m.password = email, password
+func (m *fakeSessionManager) Login(_ context.Context, email, password, previousToken string) (services.Session, error) {
+	m.email, m.password, m.previousToken = email, password, previousToken
 	if m.loginErr != nil {
 		return services.Session{}, m.loginErr
 	}
@@ -59,6 +60,7 @@ func TestSessionControllerLogin(t *testing.T) {
 	}{
 		{name: "logged in", body: validBody, wantStatus: http.StatusOK},
 		{name: "invalid credentials", body: validBody, loginErr: services.ErrInvalidCredentials, wantStatus: http.StatusUnauthorized, wantCode: api.ErrorCodeInvalidCredentials},
+		{name: "too many failures on the account", body: validBody, loginErr: services.ErrTooManyLoginFailures, wantStatus: http.StatusTooManyRequests, wantCode: api.ErrorCodeRateLimited},
 		{name: "unexpected error", body: validBody, loginErr: errors.New("connection reset"), wantStatus: http.StatusInternalServerError, wantCode: api.ErrorCodeInternalError},
 		{name: "malformed JSON", body: `{"email":`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
 	}
@@ -66,9 +68,11 @@ func TestSessionControllerLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			manager := &fakeSessionManager{loginErr: tt.loginErr}
+			request := httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(tt.body))
+			request.Header.Set("Cookie", "session=previous-token")
 			recorder := httptest.NewRecorder()
 
-			newTestSessionController(manager).Login(recorder, httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(tt.body)))
+			newTestSessionController(manager).Login(recorder, request)
 
 			if recorder.Code != tt.wantStatus {
 				t.Fatalf("status = %d, want %d", recorder.Code, tt.wantStatus)
@@ -82,6 +86,9 @@ func TestSessionControllerLogin(t *testing.T) {
 			}
 			if manager.email != "bob@example.com" || manager.password != "12345678" {
 				t.Fatalf("service received %q / %q, want the request credentials", manager.email, manager.password)
+			}
+			if manager.previousToken != "previous-token" {
+				t.Fatalf("previous token = %q, want the request cookie", manager.previousToken)
 			}
 			assertSessionCookie(t, recorder, "new-token")
 			assertCurrentUser(t, recorder)
@@ -118,8 +125,8 @@ func TestSessionControllerLogout(t *testing.T) {
 			if manager.loggedOutToken != tt.cookie {
 				t.Fatalf("closed session %q, want %q", manager.loggedOutToken, tt.cookie)
 			}
-			if cleared := strings.Contains(recorder.Header().Get("Set-Cookie"), "Max-Age=0"); cleared != (tt.logoutErr == nil) {
-				t.Fatalf("cookie cleared = %v, want %v", cleared, tt.logoutErr == nil)
+			if !strings.Contains(recorder.Header().Get("Set-Cookie"), "Max-Age=0") {
+				t.Fatal("cookie not cleared")
 			}
 		})
 	}

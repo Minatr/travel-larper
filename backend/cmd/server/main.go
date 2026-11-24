@@ -104,7 +104,10 @@ func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) ht
 	registrationService := services.NewRegistrationService(queries, passwordHasher)
 	registrationController := controllers.NewRegistrationController(registrationService, logger)
 
-	sessionService := services.NewSessionService(queries, passwordHasher, cfg.SessionIdleTimeout)
+	loginAttempts := services.NewLoginAttempts(
+		cfg.LoginFailuresPerAccountPerHour, config.LoginFailureWindow, cfg.MaxTrackedLoginAccounts,
+	)
+	sessionService := services.NewSessionService(queries, passwordHasher, loginAttempts, cfg.SessionIdleTimeout)
 	sessionController := controllers.NewSessionController(sessionService, cfg.Production, logger)
 
 	handlers := router.Controllers{
