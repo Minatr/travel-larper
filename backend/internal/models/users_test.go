@@ -32,7 +32,10 @@ func newMigratedPool(t *testing.T) *pgxpool.Pool {
 func TestCreateUser(t *testing.T) {
 	queries := newQueries(t)
 
-	user, err := queries.CreateUser(context.Background(), models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash"})
+	user, err := queries.CreateUser(
+		context.Background(),
+		models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash"},
+	)
 	if err != nil {
 		t.Fatalf("create user: %v", err)
 	}
@@ -93,7 +96,10 @@ func TestGetUserByEmail(t *testing.T) {
 func TestFindUserByEmail(t *testing.T) {
 	queries := newQueries(t)
 	ctx := context.Background()
-	if _, err := queries.CreateUser(ctx, models.CreateUserParams{Email: "Bob@Example.com", PasswordHash: "hash"}); err != nil {
+	if _, err := queries.CreateUser(
+		ctx,
+		models.CreateUserParams{Email: "Bob@Example.com", PasswordHash: "hash"},
+	); err != nil {
 		t.Fatalf("create user: %v", err)
 	}
 

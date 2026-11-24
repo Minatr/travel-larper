@@ -42,10 +42,7 @@ export function Layout() {
             )}
           >
             <span className="tag-label-left tag-title flex min-h-8 items-center gap-2 bg-card pr-3 pl-3.5 text-sm tracking-wide text-card-foreground sm:min-h-11 sm:gap-2.5 sm:pr-3.5 sm:pl-4 sm:text-lg">
-              <span
-                aria-hidden
-                className="size-2 rounded-full bg-background ring-2 ring-ink"
-              />
+              <span aria-hidden className="size-2 rounded-full bg-background ring-2 ring-ink" />
               {t('app.name')}
             </span>
           </Link>
@@ -78,11 +75,7 @@ function AccountAction() {
       )
     case 'authenticated':
       return (
-        <button
-          type="button"
-          onClick={() => void signOut()}
-          className={headerLabelClass}
-        >
+        <button type="button" onClick={() => void signOut()} className={headerLabelClass}>
           <AccountLabel icon={<LogOut />} text={t('nav.logout')} />
         </button>
       )

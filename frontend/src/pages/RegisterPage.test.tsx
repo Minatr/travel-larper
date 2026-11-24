@@ -36,9 +36,7 @@ describe('RegisterPage', () => {
     stubFetch(new Response(null, { status: 204 }))
     renderAt('/login')
 
-    expect(
-      await screen.findByRole('link', { name: 'Sign up' }),
-    ).toHaveAttribute('href', '/register')
+    expect(await screen.findByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register')
   })
 
   it('keeps the page asked at login through the sign-up', async () => {
@@ -50,9 +48,10 @@ describe('RegisterPage', () => {
     await screen.findByRole('heading', { name: 'Account created' })
 
     // The header has its own "Log in" link: the one under test is the page's.
-    expect(
-      within(screen.getByRole('main')).getByRole('link', { name: 'Log in' }),
-    ).toHaveAttribute('href', '/login?redirect=/countries/FR')
+    expect(within(screen.getByRole('main')).getByRole('link', { name: 'Log in' })).toHaveAttribute(
+      'href',
+      '/login?redirect=/countries/FR',
+    )
   })
 
   it('creates the account and shows the confirmation', async () => {
@@ -61,9 +60,7 @@ describe('RegisterPage', () => {
 
     fillAndSubmit('bob@example.com', '12345678')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Account created' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Account created' })).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith(
       REGISTER_URL,
       expect.objectContaining({
@@ -82,9 +79,7 @@ describe('RegisterPage', () => {
 
     fillAndSubmit('bob@example.com', '1234567')
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'The password must be at least 8 characters long.',
-    )
+    expect(await screen.findByRole('alert')).toHaveTextContent('The password must be at least 8 characters long.')
     expect(fetchMock).not.toHaveBeenCalledWith(REGISTER_URL, expect.anything())
   })
 

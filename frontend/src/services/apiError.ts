@@ -24,12 +24,7 @@ function isApiErrorCode(value: unknown): value is ApiErrorCode {
 /** Reads the code of an error response, `internal_error` if it has none. */
 export async function readErrorCode(response: Response): Promise<ApiErrorCode> {
   const body: unknown = await response.json().catch(() => null)
-  if (
-    typeof body === 'object' &&
-    body !== null &&
-    'code' in body &&
-    isApiErrorCode(body.code)
-  ) {
+  if (typeof body === 'object' && body !== null && 'code' in body && isApiErrorCode(body.code)) {
     return body.code
   }
   return 'internal_error'

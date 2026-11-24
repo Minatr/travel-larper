@@ -64,7 +64,13 @@ type SessionService struct {
 func NewSessionService(
 	store SessionStore, passwords PasswordVerifier, attempts *LoginAttempts, idleTimeout time.Duration,
 ) *SessionService {
-	return &SessionService{store: store, passwords: passwords, attempts: attempts, idleTimeout: idleTimeout, now: time.Now}
+	return &SessionService{
+		store:       store,
+		passwords:   passwords,
+		attempts:    attempts,
+		idleTimeout: idleTimeout,
+		now:         time.Now,
+	}
 }
 
 // Login checks the credentials and opens a session, whatever the account
@@ -108,7 +114,10 @@ func (s *SessionService) Login(ctx context.Context, email, password, previousTok
 		return Session{}, fmt.Errorf("login: %w", err)
 	}
 	expiresAt := s.now().Add(s.idleTimeout)
-	if err := s.store.CreateSession(ctx, models.CreateSessionParams{UserID: user.ID, TokenHash: tokenHash, ExpiresAt: expiresAt}); err != nil {
+	if err := s.store.CreateSession(
+		ctx,
+		models.CreateSessionParams{UserID: user.ID, TokenHash: tokenHash, ExpiresAt: expiresAt},
+	); err != nil {
 		return Session{}, fmt.Errorf("login: %w", err)
 	}
 	return Session{
@@ -143,7 +152,10 @@ func (s *SessionService) Authenticate(ctx context.Context, token string) (Sessio
 	}
 	session.ExpiresAt = now.Add(s.idleTimeout)
 	session.Renewed = true
-	if err := s.store.ExtendSession(ctx, models.ExtendSessionParams{ID: row.SessionID, ExpiresAt: session.ExpiresAt}); err != nil {
+	if err := s.store.ExtendSession(
+		ctx,
+		models.ExtendSessionParams{ID: row.SessionID, ExpiresAt: session.ExpiresAt},
+	); err != nil {
 		return Session{}, fmt.Errorf("authenticate: %w", err)
 	}
 	return session, nil

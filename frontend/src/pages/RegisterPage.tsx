@@ -7,16 +7,8 @@ import { PageContainer } from '../components/PageContainer.tsx'
 import { Button } from '../components/ui/button.tsx'
 import { Input } from '../components/ui/input.tsx'
 import { Label } from '../components/ui/label.tsx'
-import {
-  type RegisterFailure,
-  type RegisterState,
-  useRegister,
-} from '../hooks/useRegister.ts'
-import {
-  PASSWORD_MAX_LENGTH,
-  PASSWORD_MIN_LENGTH,
-  type RegisterRequest,
-} from '../models/auth.ts'
+import { type RegisterFailure, type RegisterState, useRegister } from '../hooks/useRegister.ts'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, type RegisterRequest } from '../models/auth.ts'
 
 /** Sign-up page: the form, then a confirmation once the account is created. */
 export function RegisterPage() {
@@ -25,11 +17,7 @@ export function RegisterPage() {
   return (
     <PageContainer>
       <section className="mx-auto max-w-sm rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
-        {state.kind === 'registered' ? (
-          <RegisterSuccess />
-        ) : (
-          <RegisterForm state={state} onSubmit={submit} />
-        )}
+        {state.kind === 'registered' ? <RegisterSuccess /> : <RegisterForm state={state} onSubmit={submit} />}
       </section>
     </PageContainer>
   )
@@ -42,16 +30,9 @@ function RegisterSuccess() {
 
   return (
     <>
-      <h1 className="mb-2 text-xl font-semibold">
-        {t('register.success.title')}
-      </h1>
-      <p className="mb-4 text-muted-foreground">
-        {t('register.success.message')}
-      </p>
-      <Link
-        to={{ pathname: '/login', search }}
-        className="text-sm font-medium underline"
-      >
+      <h1 className="mb-2 text-xl font-semibold">{t('register.success.title')}</h1>
+      <p className="mb-4 text-muted-foreground">{t('register.success.message')}</p>
+      <Link to={{ pathname: '/login', search }} className="text-sm font-medium underline">
         {t('register.success.login')}
       </Link>
     </>
@@ -78,9 +59,7 @@ function RegisterForm({
   return (
     <>
       <h1 className="mb-1 text-xl font-semibold">{t('register.title')}</h1>
-      <p className="mb-6 text-sm text-muted-foreground">
-        {t('register.intro')}
-      </p>
+      <p className="mb-6 text-sm text-muted-foreground">{t('register.intro')}</p>
       {/* noValidate: the browser's messages would ignore the app language. */}
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
@@ -105,10 +84,7 @@ function RegisterForm({
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-          <p
-            id="register-password-hint"
-            className="text-sm text-muted-foreground"
-          >
+          <p id="register-password-hint" className="text-sm text-muted-foreground">
             {t('register.passwordHint', { min: PASSWORD_MIN_LENGTH })}
           </p>
         </div>

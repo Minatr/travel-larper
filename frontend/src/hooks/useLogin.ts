@@ -11,10 +11,7 @@ import { useAuth } from './useAuth.ts'
 export type LoginFailure = ApiErrorCode | 'unreachable'
 
 /** State of the login form. */
-export type LoginState =
-  | { kind: 'idle' }
-  | { kind: 'submitting' }
-  | { kind: 'failed'; reason: LoginFailure }
+export type LoginState = { kind: 'idle' } | { kind: 'submitting' } | { kind: 'failed'; reason: LoginFailure }
 
 /** Logs in, then opens the page given by `?redirect=` (home by default). */
 export function useLogin() {

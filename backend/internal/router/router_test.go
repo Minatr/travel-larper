@@ -50,7 +50,12 @@ func (healthyChecker) Check(context.Context) error {
 
 const contractPath = "../../../api/openapi.yaml"
 
-var testOptions = Options{RateLimitPerMinute: 1000, MaxBodyBytes: 1 << 20, RegisterRateLimitPerHour: 1000, LoginRateLimitPerMinute: 1000}
+var testOptions = Options{
+	RateLimitPerMinute:       1000,
+	MaxBodyBytes:             1 << 20,
+	RegisterRateLimitPerHour: 1000,
+	LoginRateLimitPerMinute:  1000,
+}
 
 func discardLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -69,12 +74,46 @@ func TestRoutes(t *testing.T) {
 		wantStatus    int
 		wantErrorCode api.ErrorCode
 	}{
-		{name: "health route under the base path", method: http.MethodGet, path: "/api/health", wantStatus: http.StatusOK},
-		{name: "route outside the base path", method: http.MethodGet, path: "/health", wantStatus: http.StatusNotFound, wantErrorCode: api.ErrorCodeNotFound},
-		{name: "unknown route", method: http.MethodGet, path: "/api/unknown", wantStatus: http.StatusNotFound, wantErrorCode: api.ErrorCodeNotFound},
-		{name: "wrong method", method: http.MethodPost, path: "/api/health", wantStatus: http.StatusMethodNotAllowed, wantErrorCode: api.ErrorCodeMethodNotAllowed},
-		{name: "protected route without a session", method: http.MethodGet, path: "/api/auth/me", wantStatus: http.StatusUnauthorized, wantErrorCode: api.ErrorCodeUnauthorized},
-		{name: "logout without a session", method: http.MethodPost, path: "/api/auth/logout", wantStatus: http.StatusNoContent},
+		{
+			name:       "health route under the base path",
+			method:     http.MethodGet,
+			path:       "/api/health",
+			wantStatus: http.StatusOK,
+		},
+		{
+			name:          "route outside the base path",
+			method:        http.MethodGet,
+			path:          "/health",
+			wantStatus:    http.StatusNotFound,
+			wantErrorCode: api.ErrorCodeNotFound,
+		},
+		{
+			name:          "unknown route",
+			method:        http.MethodGet,
+			path:          "/api/unknown",
+			wantStatus:    http.StatusNotFound,
+			wantErrorCode: api.ErrorCodeNotFound,
+		},
+		{
+			name:          "wrong method",
+			method:        http.MethodPost,
+			path:          "/api/health",
+			wantStatus:    http.StatusMethodNotAllowed,
+			wantErrorCode: api.ErrorCodeMethodNotAllowed,
+		},
+		{
+			name:          "protected route without a session",
+			method:        http.MethodGet,
+			path:          "/api/auth/me",
+			wantStatus:    http.StatusUnauthorized,
+			wantErrorCode: api.ErrorCodeUnauthorized,
+		},
+		{
+			name:       "logout without a session",
+			method:     http.MethodPost,
+			path:       "/api/auth/logout",
+			wantStatus: http.StatusNoContent,
+		},
 	}
 
 	for _, tt := range tests {
@@ -139,7 +178,14 @@ func TestRoutesLimitLogin(t *testing.T) {
 	}, rejectingAuthenticator{}, discardLogger(), options)
 	login := func() *httptest.ResponseRecorder {
 		recorder := httptest.NewRecorder()
-		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(`{"email":"bob@example.com","password":"guess"}`)))
+		handler.ServeHTTP(
+			recorder,
+			httptest.NewRequest(
+				http.MethodPost,
+				"/api/auth/login",
+				strings.NewReader(`{"email":"bob@example.com","password":"guess"}`),
+			),
+		)
 		return recorder
 	}
 
@@ -192,7 +238,13 @@ func TestInvalidParameterHandlerHidesTheError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	internalDetail := "strconv.ParseInt: parsing \"abc\""
 
-	invalidParameterHandler(discardLogger())(recorder, httptest.NewRequest(http.MethodGet, "/api/health", nil), errors.New(internalDetail))
+	invalidParameterHandler(
+		discardLogger(),
+	)(
+		recorder,
+		httptest.NewRequest(http.MethodGet, "/api/health", nil),
+		errors.New(internalDetail),
+	)
 
 	if recorder.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusBadRequest)

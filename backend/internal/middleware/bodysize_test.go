@@ -33,8 +33,17 @@ func TestMaxBodySize(t *testing.T) {
 		wantStatus    int
 	}{
 		{name: "small body", body: "small", wantStatus: http.StatusOK},
-		{name: "declared length too large", body: strings.Repeat("x", maxBytes+1), wantStatus: http.StatusRequestEntityTooLarge},
-		{name: "undeclared length too large", body: strings.Repeat("x", maxBytes+1), unknownLength: true, wantStatus: http.StatusRequestEntityTooLarge},
+		{
+			name:       "declared length too large",
+			body:       strings.Repeat("x", maxBytes+1),
+			wantStatus: http.StatusRequestEntityTooLarge,
+		},
+		{
+			name:          "undeclared length too large",
+			body:          strings.Repeat("x", maxBytes+1),
+			unknownLength: true,
+			wantStatus:    http.StatusRequestEntityTooLarge,
+		},
 	}
 
 	for _, tt := range tests {
@@ -56,7 +65,12 @@ func TestMaxBodySize(t *testing.T) {
 	t.Run("declared length too large answers in the Error format", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
 
-		MaxBodySize(maxBytes, discardLogger())(okHandler).ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/", strings.NewReader(strings.Repeat("x", maxBytes+1))))
+		MaxBodySize(
+			maxBytes,
+			discardLogger(),
+		)(
+			okHandler,
+		).ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/", strings.NewReader(strings.Repeat("x", maxBytes+1))))
 
 		assertError(t, recorder, http.StatusRequestEntityTooLarge, api.ErrorCodeRequestTooLarge)
 	})

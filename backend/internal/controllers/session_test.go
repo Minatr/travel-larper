@@ -59,10 +59,33 @@ func TestSessionControllerLogin(t *testing.T) {
 		wantCode   api.ErrorCode
 	}{
 		{name: "logged in", body: validBody, wantStatus: http.StatusOK},
-		{name: "invalid credentials", body: validBody, loginErr: services.ErrInvalidCredentials, wantStatus: http.StatusUnauthorized, wantCode: api.ErrorCodeInvalidCredentials},
-		{name: "too many failures on the account", body: validBody, loginErr: services.ErrTooManyLoginFailures, wantStatus: http.StatusTooManyRequests, wantCode: api.ErrorCodeRateLimited},
-		{name: "unexpected error", body: validBody, loginErr: errors.New("connection reset"), wantStatus: http.StatusInternalServerError, wantCode: api.ErrorCodeInternalError},
-		{name: "malformed JSON", body: `{"email":`, wantStatus: http.StatusBadRequest, wantCode: api.ErrorCodeInvalidBody},
+		{
+			name:       "invalid credentials",
+			body:       validBody,
+			loginErr:   services.ErrInvalidCredentials,
+			wantStatus: http.StatusUnauthorized,
+			wantCode:   api.ErrorCodeInvalidCredentials,
+		},
+		{
+			name:       "too many failures on the account",
+			body:       validBody,
+			loginErr:   services.ErrTooManyLoginFailures,
+			wantStatus: http.StatusTooManyRequests,
+			wantCode:   api.ErrorCodeRateLimited,
+		},
+		{
+			name:       "unexpected error",
+			body:       validBody,
+			loginErr:   errors.New("connection reset"),
+			wantStatus: http.StatusInternalServerError,
+			wantCode:   api.ErrorCodeInternalError,
+		},
+		{
+			name:       "malformed JSON",
+			body:       `{"email":`,
+			wantStatus: http.StatusBadRequest,
+			wantCode:   api.ErrorCodeInvalidBody,
+		},
 	}
 
 	for _, tt := range tests {
@@ -105,7 +128,12 @@ func TestSessionControllerLogout(t *testing.T) {
 	}{
 		{name: "with a session", cookie: "token", wantStatus: http.StatusNoContent},
 		{name: "without a session", cookie: "", wantStatus: http.StatusNoContent},
-		{name: "unexpected error", cookie: "token", logoutErr: errors.New("connection reset"), wantStatus: http.StatusInternalServerError},
+		{
+			name:       "unexpected error",
+			cookie:     "token",
+			logoutErr:  errors.New("connection reset"),
+			wantStatus: http.StatusInternalServerError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -134,7 +162,8 @@ func TestSessionControllerLogout(t *testing.T) {
 
 func TestSessionControllerGetMe(t *testing.T) {
 	router := chi.NewRouter()
-	router.With(middleware.RequireSession(nil, stubAuthenticator{}, true, slog.New(slog.NewTextHandler(io.Discard, nil)))).
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	router.With(middleware.RequireSession(nil, stubAuthenticator{}, true, logger)).
 		Get("/api/auth/me", newTestSessionController(&fakeSessionManager{}).GetMe)
 	request := httptest.NewRequest(http.MethodGet, "/api/auth/me", nil)
 	request.Header.Set("Cookie", "session=token")
@@ -151,7 +180,9 @@ func TestSessionControllerGetMe(t *testing.T) {
 func TestSessionControllerGetMeWithoutMiddleware(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	newTestSessionController(&fakeSessionManager{}).GetMe(recorder, httptest.NewRequest(http.MethodGet, "/api/auth/me", nil))
+	newTestSessionController(
+		&fakeSessionManager{},
+	).GetMe(recorder, httptest.NewRequest(http.MethodGet, "/api/auth/me", nil))
 
 	if recorder.Code != http.StatusInternalServerError {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusInternalServerError)
@@ -171,7 +202,9 @@ func assertSessionCookie(t *testing.T, recorder *httptest.ResponseRecorder, want
 		t.Fatalf("cookies = %v, want one session cookie", cookies)
 	}
 	cookie := cookies[0]
-	if cookie.Name != "session" || cookie.Value != wantToken || !cookie.HttpOnly || !cookie.Secure || cookie.SameSite != http.SameSiteLaxMode || cookie.MaxAge <= 0 {
+	if cookie.Name != "session" || cookie.Value != wantToken || !cookie.HttpOnly || !cookie.Secure ||
+		cookie.SameSite != http.SameSiteLaxMode ||
+		cookie.MaxAge <= 0 {
 		t.Fatalf("cookie = %+v, want an HttpOnly, Secure, SameSite=Lax session cookie", cookie)
 	}
 }
@@ -184,7 +217,11 @@ func assertCurrentUser(t *testing.T, recorder *httptest.ResponseRecorder) {
 	if err := json.NewDecoder(recorder.Body).Decode(&fields); err != nil {
 		t.Fatalf("decode body: %v", err)
 	}
-	want := map[string]any{"id": testSessionUser.ID.String(), "email": testSessionUser.Email, "status": testSessionUser.Status}
+	want := map[string]any{
+		"id":     testSessionUser.ID.String(),
+		"email":  testSessionUser.Email,
+		"status": testSessionUser.Status,
+	}
 	if len(fields) != len(want) {
 		t.Fatalf("body = %v, want exactly %v", fields, want)
 	}

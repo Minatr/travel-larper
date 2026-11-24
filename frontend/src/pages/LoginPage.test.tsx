@@ -40,9 +40,7 @@ describe('LoginPage', () => {
 
     await fillAndSubmit('bob@example.com', '12345678')
 
-    expect(
-      await screen.findByRole('button', { name: 'Log out' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Log out' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/status')
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/auth/login',
@@ -102,10 +100,7 @@ describe('header account action', () => {
     stubFetch(new Response(null, { status: 204 }))
     renderAt('/status')
 
-    expect(await screen.findByRole('link', { name: 'Log in' })).toHaveAttribute(
-      'href',
-      '/login',
-    )
+    expect(await screen.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
   })
 
   it('logs a user out', async () => {
@@ -114,26 +109,19 @@ describe('header account action', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
 
-    expect(
-      await screen.findByRole('link', { name: 'Log in' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Log in' })).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith('/api/auth/logout', {
       method: 'POST',
     })
   })
 
   it('logs a user out even when the server fails', async () => {
-    stubFetch(
-      Response.json({ code: 'internal_error', message: '' }, { status: 500 }),
-      user,
-    )
+    stubFetch(Response.json({ code: 'internal_error', message: '' }, { status: 500 }), user)
     vi.spyOn(console, 'error').mockImplementation(() => {})
     renderAt('/status')
 
     fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
 
-    expect(
-      await screen.findByRole('link', { name: 'Log in' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Log in' })).toBeInTheDocument()
   })
 })

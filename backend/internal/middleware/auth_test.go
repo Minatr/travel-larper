@@ -74,9 +74,26 @@ func TestRequireSessionRefusesWithoutValidSession(t *testing.T) {
 		wantStatus int
 		wantCode   api.ErrorCode
 	}{
-		{name: "no cookie", err: services.ErrInvalidSession, wantStatus: http.StatusUnauthorized, wantCode: api.ErrorCodeUnauthorized},
-		{name: "unknown or expired token", token: "stale", err: services.ErrInvalidSession, wantStatus: http.StatusUnauthorized, wantCode: api.ErrorCodeUnauthorized},
-		{name: "database failure", token: "token", err: errors.New("connection reset"), wantStatus: http.StatusInternalServerError, wantCode: api.ErrorCodeInternalError},
+		{
+			name:       "no cookie",
+			err:        services.ErrInvalidSession,
+			wantStatus: http.StatusUnauthorized,
+			wantCode:   api.ErrorCodeUnauthorized,
+		},
+		{
+			name:       "unknown or expired token",
+			token:      "stale",
+			err:        services.ErrInvalidSession,
+			wantStatus: http.StatusUnauthorized,
+			wantCode:   api.ErrorCodeUnauthorized,
+		},
+		{
+			name:       "database failure",
+			token:      "token",
+			err:        errors.New("connection reset"),
+			wantStatus: http.StatusInternalServerError,
+			wantCode:   api.ErrorCodeInternalError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -88,7 +105,8 @@ func TestRequireSessionRefusesWithoutValidSession(t *testing.T) {
 			if authenticator.gotToken != tt.token {
 				t.Fatalf("authenticated token %q, want %q", authenticator.gotToken, tt.token)
 			}
-			if tt.wantCode == api.ErrorCodeUnauthorized && !strings.Contains(recorder.Header().Get("Set-Cookie"), "Max-Age=0") {
+			if tt.wantCode == api.ErrorCodeUnauthorized &&
+				!strings.Contains(recorder.Header().Get("Set-Cookie"), "Max-Age=0") {
 				t.Fatalf("stale cookie not cleared: %q", recorder.Header().Get("Set-Cookie"))
 			}
 			assertError(t, recorder, tt.wantStatus, tt.wantCode)
@@ -118,7 +136,11 @@ func TestRequireSessionPassesTheUser(t *testing.T) {
 			recorder := send(newAuthRouter(authenticator), "/private", "token")
 
 			if recorder.Code != http.StatusOK || recorder.Header().Get(userHeader) != "bob@example.com" {
-				t.Fatalf("response = %d %q, want 200 with the session user", recorder.Code, recorder.Header().Get(userHeader))
+				t.Fatalf(
+					"response = %d %q, want 200 with the session user",
+					recorder.Code,
+					recorder.Header().Get(userHeader),
+				)
 			}
 			if gotCookie := recorder.Header().Get("Set-Cookie") != ""; gotCookie != tt.wantCookie {
 				t.Fatalf("cookie sent = %v, want %v", gotCookie, tt.wantCookie)

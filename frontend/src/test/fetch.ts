@@ -12,24 +12,14 @@ const ME_URL = '/api/auth/me'
  * Replaces fetch: GET /api/auth/me answers `me` (a visitor when null), any
  * other call `answer` (an Error means the API is unreachable).
  */
-export function stubFetch(
-  answer: Response | Error,
-  me: CurrentUser | null = null,
-) {
+export function stubFetch(answer: Response | Error, me: CurrentUser | null = null) {
   const fetchMock = vi.fn((url: string) => {
     if (url === ME_URL) {
       return Promise.resolve(
-        me === null
-          ? Response.json(
-              { code: 'unauthorized', message: '' },
-              { status: 401 },
-            )
-          : Response.json(me),
+        me === null ? Response.json({ code: 'unauthorized', message: '' }, { status: 401 }) : Response.json(me),
       )
     }
-    return answer instanceof Error
-      ? Promise.reject(answer)
-      : Promise.resolve(answer.clone())
+    return answer instanceof Error ? Promise.reject(answer) : Promise.resolve(answer.clone())
   })
   vi.stubGlobal('fetch', fetchMock)
   return fetchMock

@@ -101,13 +101,38 @@ func TestSessionServiceLogin(t *testing.T) {
 		wantErr       error
 		wantSimulated bool
 	}{
-		{name: "right password", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: true}},
-		{name: "right password, previous session closed", previousToken: "previous", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: true}},
-		{name: "wrong password", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: false}, wantErr: ErrInvalidCredentials},
-		{name: "wrong password, previous session kept", previousToken: "previous", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{matches: false}, wantErr: ErrInvalidCredentials},
+		{
+			name:     "right password",
+			store:    fakeSessionStore{user: user, userFound: true},
+			verifier: fakeVerifier{matches: true},
+		},
+		{
+			name:          "right password, previous session closed",
+			previousToken: "previous",
+			store:         fakeSessionStore{user: user, userFound: true},
+			verifier:      fakeVerifier{matches: true},
+		},
+		{
+			name:     "wrong password",
+			store:    fakeSessionStore{user: user, userFound: true},
+			verifier: fakeVerifier{matches: false},
+			wantErr:  ErrInvalidCredentials,
+		},
+		{
+			name:          "wrong password, previous session kept",
+			previousToken: "previous",
+			store:         fakeSessionStore{user: user, userFound: true},
+			verifier:      fakeVerifier{matches: false},
+			wantErr:       ErrInvalidCredentials,
+		},
 		{name: "unknown email", store: fakeSessionStore{}, wantErr: ErrInvalidCredentials, wantSimulated: true},
 		{name: "database failure", store: fakeSessionStore{err: errDatabase}, wantErr: errDatabase},
-		{name: "malformed stored hash", store: fakeSessionStore{user: user, userFound: true}, verifier: fakeVerifier{err: ErrMalformedPasswordHash}, wantErr: ErrMalformedPasswordHash},
+		{
+			name:     "malformed stored hash",
+			store:    fakeSessionStore{user: user, userFound: true},
+			verifier: fakeVerifier{err: ErrMalformedPasswordHash},
+			wantErr:  ErrMalformedPasswordHash,
+		},
 	}
 
 	for _, tt := range tests {
@@ -182,7 +207,15 @@ func TestSessionServiceLoginBlocksAnAccountAfterTooManyFailures(t *testing.T) {
 			store := tt.store
 			service := newTestSessionService(&store, &fakeVerifier{matches: false})
 			for range testMaxLoginFailures {
-				if _, err := service.Login(context.Background(), "bob@example.com", "wrong", ""); !errors.Is(err, ErrInvalidCredentials) {
+				if _, err := service.Login(
+					context.Background(),
+					"bob@example.com",
+					"wrong",
+					"",
+				); !errors.Is(
+					err,
+					ErrInvalidCredentials,
+				) {
 					t.Fatalf("Login() error = %v, want %v", err, ErrInvalidCredentials)
 				}
 			}
@@ -237,7 +270,12 @@ func TestSessionServiceLoginGivesDifferentTokens(t *testing.T) {
 }
 
 func TestSessionServiceAuthenticate(t *testing.T) {
-	row := models.GetSessionUserRow{SessionID: uuid.New(), UserID: uuid.New(), Email: "bob@example.com", Status: "active"}
+	row := models.GetSessionUserRow{
+		SessionID: uuid.New(),
+		UserID:    uuid.New(),
+		Email:     "bob@example.com",
+		Status:    "active",
+	}
 	errDatabase := errors.New("connection reset")
 
 	tests := []struct {
@@ -248,10 +286,26 @@ func TestSessionServiceAuthenticate(t *testing.T) {
 		wantErr     error
 		wantRenewed bool
 	}{
-		{name: "fresh session", token: "token", expiresIn: 10 * 24 * time.Hour, store: fakeSessionStore{sessionOK: true}},
-		{name: "session past half its life", token: "token", expiresIn: 6 * 24 * time.Hour, store: fakeSessionStore{sessionOK: true}, wantRenewed: true},
+		{
+			name:      "fresh session",
+			token:     "token",
+			expiresIn: 10 * 24 * time.Hour,
+			store:     fakeSessionStore{sessionOK: true},
+		},
+		{
+			name:        "session past half its life",
+			token:       "token",
+			expiresIn:   6 * 24 * time.Hour,
+			store:       fakeSessionStore{sessionOK: true},
+			wantRenewed: true,
+		},
 		{name: "no token", token: "", wantErr: ErrInvalidSession},
-		{name: "unknown or expired token", token: "token", store: fakeSessionStore{sessionOK: false}, wantErr: ErrInvalidSession},
+		{
+			name:    "unknown or expired token",
+			token:   "token",
+			store:   fakeSessionStore{sessionOK: false},
+			wantErr: ErrInvalidSession,
+		},
 		{name: "database failure", token: "token", store: fakeSessionStore{err: errDatabase}, wantErr: errDatabase},
 	}
 
@@ -276,7 +330,8 @@ func TestSessionServiceAuthenticate(t *testing.T) {
 			if session.Renewed != tt.wantRenewed || (store.extended != nil) != tt.wantRenewed {
 				t.Fatalf("renewed = %v, extended = %v, want %v", session.Renewed, store.extended != nil, tt.wantRenewed)
 			}
-			if tt.wantRenewed && (!session.ExpiresAt.Equal(testNow.Add(testIdleTimeout)) || store.extended.ID != row.SessionID) {
+			if tt.wantRenewed &&
+				(!session.ExpiresAt.Equal(testNow.Add(testIdleTimeout)) || store.extended.ID != row.SessionID) {
 				t.Fatalf("renewed expiry = %v for session %v", session.ExpiresAt, store.extended.ID)
 			}
 		})

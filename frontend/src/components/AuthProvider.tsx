@@ -16,9 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchCurrentUser()
       .then((user) => {
         if (!cancelled) {
-          setState(
-            user ? { status: 'authenticated', user } : { status: 'anonymous' },
-          )
+          setState(user ? { status: 'authenticated', user } : { status: 'anonymous' })
         }
       })
       .catch((error: unknown) => {
@@ -46,7 +44,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: 'anonymous' })
   }
 
-  return (
-    <AuthContext value={{ state, signedIn, signOut }}>{children}</AuthContext>
-  )
+  return <AuthContext value={{ state, signedIn, signOut }}>{children}</AuthContext>
 }

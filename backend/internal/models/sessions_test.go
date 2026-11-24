@@ -11,11 +11,17 @@ import (
 func createSession(t *testing.T, queries *models.Queries, tokenHash string, expiresAt time.Time) models.User {
 	t.Helper()
 	ctx := context.Background()
-	user, err := queries.CreateUser(ctx, models.CreateUserParams{Email: tokenHash + "@example.com", PasswordHash: "hash"})
+	user, err := queries.CreateUser(
+		ctx,
+		models.CreateUserParams{Email: tokenHash + "@example.com", PasswordHash: "hash"},
+	)
 	if err != nil {
 		t.Fatalf("create user: %v", err)
 	}
-	if err := queries.CreateSession(ctx, models.CreateSessionParams{UserID: user.ID, TokenHash: []byte(tokenHash), ExpiresAt: expiresAt}); err != nil {
+	if err := queries.CreateSession(
+		ctx,
+		models.CreateSessionParams{UserID: user.ID, TokenHash: []byte(tokenHash), ExpiresAt: expiresAt},
+	); err != nil {
 		t.Fatalf("create session: %v", err)
 	}
 	return user

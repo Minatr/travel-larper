@@ -23,7 +23,12 @@ type Authenticator interface {
 // RequireSession answers 401 on every route except publicRoutes when the
 // request has no valid session. Protected by default: a route forgotten in
 // publicRoutes is closed rather than open.
-func RequireSession(publicRoutes []string, authenticator Authenticator, secureCookies bool, logger *slog.Logger) func(http.Handler) http.Handler {
+func RequireSession(
+	publicRoutes []string,
+	authenticator Authenticator,
+	secureCookies bool,
+	logger *slog.Logger,
+) func(http.Handler) http.Handler {
 	public := make(map[string]bool, len(publicRoutes))
 	for _, route := range publicRoutes {
 		public[route] = true

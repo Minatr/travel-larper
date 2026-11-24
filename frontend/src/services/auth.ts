@@ -1,8 +1,4 @@
-import type {
-  CurrentUser,
-  LoginRequest,
-  RegisterRequest,
-} from '../models/auth.ts'
+import type { CurrentUser, LoginRequest, RegisterRequest } from '../models/auth.ts'
 import type { ApiErrorCode } from '../models/error.ts'
 import { readErrorCode } from './apiError.ts'
 
@@ -16,13 +12,10 @@ const UNAUTHORIZED = 401
 export type RegisterResult = { ok: true } | { ok: false; code: ApiErrorCode }
 
 /** Outcome of a login. */
-export type LoginResult =
-  { ok: true; user: CurrentUser } | { ok: false; code: ApiErrorCode }
+export type LoginResult = { ok: true; user: CurrentUser } | { ok: false; code: ApiErrorCode }
 
 /** Calls POST /api/auth/register; throws only if the API is unreachable. */
-export async function register(
-  request: RegisterRequest,
-): Promise<RegisterResult> {
+export async function register(request: RegisterRequest): Promise<RegisterResult> {
   const response = await postJSON(REGISTER_URL, request)
   if (response.ok) {
     return { ok: true }

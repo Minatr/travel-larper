@@ -78,7 +78,10 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	loginFailuresPerAccount, err := positiveInt("LOGIN_FAILURES_PER_ACCOUNT_PER_HOUR", defaultLoginFailuresPerAccountPerHour)
+	loginFailuresPerAccount, err := positiveInt(
+		"LOGIN_FAILURES_PER_ACCOUNT_PER_HOUR",
+		defaultLoginFailuresPerAccountPerHour,
+	)
 	if err != nil {
 		return Config{}, err
 	}

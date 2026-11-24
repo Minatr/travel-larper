@@ -5,12 +5,7 @@ const HOME = '/'
  * (`/login?redirect=https://evil.example`) cannot send the user elsewhere.
  */
 export function safeRedirect(target: string | null): string {
-  if (
-    target === null ||
-    !target.startsWith('/') ||
-    target.startsWith('//') ||
-    target.startsWith('/\\')
-  ) {
+  if (target === null || !target.startsWith('/') || target.startsWith('//') || target.startsWith('/\\')) {
     return HOME
   }
   return target

@@ -54,7 +54,12 @@ func (c *SessionController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	views.SetSessionCookie(w, session.Token, session.ExpiresAt, c.secureCookies)
-	views.WriteJSON(w, c.logger, http.StatusOK, views.NewCurrentUser(session.User.ID, session.User.Email, session.User.Status))
+	views.WriteJSON(
+		w,
+		c.logger,
+		http.StatusOK,
+		views.NewCurrentUser(session.User.ID, session.User.Email, session.User.Status),
+	)
 }
 
 // Logout closes the current session, if any, and clears its cookie, even

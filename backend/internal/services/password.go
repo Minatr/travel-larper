@@ -42,7 +42,14 @@ func (h *PasswordHasher) Hash(ctx context.Context, password string) (string, err
 	if _, err := rand.Read(salt); err != nil {
 		return "", fmt.Errorf("generate salt: %w", err)
 	}
-	key := argon2.IDKey([]byte(password), salt, h.params.Iterations, h.params.MemoryKiB, h.params.Parallelism, h.params.KeyLength)
+	key := argon2.IDKey(
+		[]byte(password),
+		salt,
+		h.params.Iterations,
+		h.params.MemoryKiB,
+		h.params.Parallelism,
+		h.params.KeyLength,
+	)
 	return fmt.Sprintf("$%s$v=%d$m=%d,t=%d,p=%d$%s$%s",
 		argon2Algorithm, argon2.Version,
 		h.params.MemoryKiB, h.params.Iterations, h.params.Parallelism,
@@ -63,7 +70,14 @@ func (h *PasswordHasher) Verify(ctx context.Context, password, encoded string) (
 	}
 	defer h.releaseSlot()
 
-	candidate := argon2.IDKey([]byte(password), salt, params.Iterations, params.MemoryKiB, params.Parallelism, params.KeyLength)
+	candidate := argon2.IDKey(
+		[]byte(password),
+		salt,
+		params.Iterations,
+		params.MemoryKiB,
+		params.Parallelism,
+		params.KeyLength,
+	)
 	// Constant time, so the response time reveals nothing about the hash.
 	return subtle.ConstantTimeCompare(candidate, key) == 1, nil
 }
@@ -76,7 +90,14 @@ func (h *PasswordHasher) SimulateVerify(ctx context.Context, password string) er
 	}
 	defer h.releaseSlot()
 
-	argon2.IDKey([]byte(password), make([]byte, h.params.SaltLength), h.params.Iterations, h.params.MemoryKiB, h.params.Parallelism, h.params.KeyLength)
+	argon2.IDKey(
+		[]byte(password),
+		make([]byte, h.params.SaltLength),
+		h.params.Iterations,
+		h.params.MemoryKiB,
+		h.params.Parallelism,
+		h.params.KeyLength,
+	)
 	return nil
 }
 
@@ -104,7 +125,13 @@ func decodePasswordHash(encoded string) (config.Argon2Params, []byte, []byte, er
 	if _, err := fmt.Sscanf(parts[2], "v=%d", &version); err != nil || version != argon2.Version {
 		return params, nil, nil, ErrMalformedPasswordHash
 	}
-	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &params.MemoryKiB, &params.Iterations, &params.Parallelism); err != nil {
+	if _, err := fmt.Sscanf(
+		parts[3],
+		"m=%d,t=%d,p=%d",
+		&params.MemoryKiB,
+		&params.Iterations,
+		&params.Parallelism,
+	); err != nil {
 		return params, nil, nil, ErrMalformedPasswordHash
 	}
 	// argon2.IDKey panics on these values instead of returning an error.

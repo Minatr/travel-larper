@@ -60,7 +60,12 @@ type Options struct {
 
 // Routes builds the HTTP handler that maps every route of openapi.yaml to
 // its controller method.
-func Routes(handlers Controllers, authenticator middleware.Authenticator, logger *slog.Logger, options Options) http.Handler {
+func Routes(
+	handlers Controllers,
+	authenticator middleware.Authenticator,
+	logger *slog.Logger,
+	options Options,
+) http.Handler {
 	router := chi.NewRouter()
 	router.Use(
 		chimiddleware.RequestID,

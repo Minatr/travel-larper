@@ -29,11 +29,7 @@ export function LoginPage() {
       <section className="mx-auto max-w-sm rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
         <h1 className="mb-6 text-xl font-semibold">{t('login.title')}</h1>
         {/* noValidate: the browser's messages would ignore the app language. */}
-        <form
-          noValidate
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4"
-        >
+        <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="login-email">{t('login.email')}</Label>
             <Input
@@ -67,10 +63,7 @@ export function LoginPage() {
         </form>
         <p className="mt-6 text-sm text-muted-foreground">
           {t('login.noAccount')}{' '}
-          <Link
-            to={{ pathname: '/register', search }}
-            className="font-medium underline"
-          >
+          <Link to={{ pathname: '/register', search }} className="font-medium underline">
             {t('login.registerLink')}
           </Link>
         </p>

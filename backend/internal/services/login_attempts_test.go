@@ -24,7 +24,13 @@ func TestLoginAttempts(t *testing.T) {
 		{name: "at the limit", failures: 3, checked: "bob@example.com", wantBlocked: true},
 		{name: "same account, other case and spaces", failures: 3, checked: " BOB@Example.com ", wantBlocked: true},
 		{name: "other account", failures: 3, checked: "alice@example.com"},
-		{name: "window not over", failures: 3, elapsed: 59 * time.Minute, checked: "bob@example.com", wantBlocked: true},
+		{
+			name:        "window not over",
+			failures:    3,
+			elapsed:     59 * time.Minute,
+			checked:     "bob@example.com",
+			wantBlocked: true,
+		},
 		{name: "window over", failures: 3, elapsed: time.Hour, checked: "bob@example.com"},
 		{name: "reset", failures: 3, reset: true, checked: "bob@example.com"},
 	}
