@@ -1,5 +1,6 @@
 /**
- * Runs before every test file (vite.config.ts, `test.setupFiles`): what all the frontend tests need, written once.
+ * Runs before every test file of the `dom` project, the ones in a simulated browser (vite.config.ts, `test.projects`):
+ * what they all need, written once. The `unit` tests, pure logic run in plain Node, go without it.
  */
 // Adds readable assertions such as toBeInTheDocument() to expect().
 import '@testing-library/jest-dom/vitest'
