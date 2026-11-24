@@ -3,6 +3,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { routes } from './routes.ts'
+import { ME_URL, stubFetch, visitorResponse } from './test/fetch.ts'
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
@@ -10,7 +11,7 @@ function renderAt(path: string) {
 }
 
 // Serves one square country with the given code: in the countries file, and as its own detailed shape (with more parts
-// if given).
+// if given). The visitor asks who they are on every page.
 function stubCountries(code: string, otherParts: number[][][][] = []) {
   const square = {
     type: 'Polygon',
@@ -40,13 +41,15 @@ function stubCountries(code: string, otherParts: number[][][][] = []) {
     'fetch',
     vi.fn((url: string) =>
       Promise.resolve(
-        url === `/geo/countries/${code}.json`
-          ? new Response(JSON.stringify({ type: 'MultiPolygon', coordinates: [square.coordinates, ...otherParts] }))
-          : url === '/geo/countries.json'
-            ? new Response(JSON.stringify(countries))
-            : url === `/geo/borders/${code}.json`
-              ? new Response('null')
-              : new Response(null, { status: 404 }),
+        url === ME_URL
+          ? visitorResponse()
+          : url === `/geo/countries/${code}.json`
+            ? new Response(JSON.stringify({ type: 'MultiPolygon', coordinates: [square.coordinates, ...otherParts] }))
+            : url === '/geo/countries.json'
+              ? new Response(JSON.stringify(countries))
+              : url === `/geo/borders/${code}.json`
+                ? new Response('null')
+                : new Response(null, { status: 404 }),
       ),
     ),
   )
@@ -59,6 +62,7 @@ describe('routes', () => {
   })
 
   it('shows the not found page for an unknown URL', () => {
+    stubFetch(new Response(null, { status: 404 }))
     renderAt('/does-not-exist')
 
     expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument()

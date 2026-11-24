@@ -10,20 +10,38 @@ import { mercatorCamera } from './mercatorCamera.ts'
 // Checks every country's real data, as a click on the globe uses it: a bad shape (or a missing one) shows here rather
 // than as a map that fails.
 const countries = countriesFile as Countries
-const shapes = import.meta.glob<Polygon | MultiPolygon>('../../public/geo/countries/*.json', {
+// Read as text and parsed here, once per file: imported as JSON, Vite turned each of these 24 MB into a module first.
+const shapeFiles = import.meta.glob<string>('../../public/geo/countries/*.json', {
   eager: true,
+  query: '?raw',
   import: 'default',
 })
-const borders = import.meta.glob<Polygon | MultiPolygon | null>('../../public/geo/borders/*.json', {
+const borderFiles = import.meta.glob<string>('../../public/geo/borders/*.json', {
   eager: true,
+  query: '?raw',
   import: 'default',
 })
+const parsed = new Map<string, unknown>()
+function shapeOf(code: string) {
+  return parse<Polygon | MultiPolygon>(shapeFiles, `../../public/geo/countries/${code}.json`)
+}
+function bordersOf(code: string) {
+  return parse<Polygon | MultiPolygon | null>(borderFiles, `../../public/geo/borders/${code}.json`)
+}
+// The same object each time, as an import gives. A missing file gives undefined, like a missing key of the glob.
+function parse<T>(files: Record<string, string>, path: string): T {
+  const text = files[path]
+  if (text !== undefined && !parsed.has(path)) {
+    parsed.set(path, JSON.parse(text))
+  }
+  return parsed.get(path) as T
+}
 const openable = countries.features.filter((country) => hasMap(country.properties.code))
 
 describe('every country of the globe', () => {
   it.each(openable.map((country) => [country.properties.code, country]))('opens %s', (code, country) => {
-    const detailed = shapes[`../../public/geo/countries/${code}.json`]
-    const countryBorders = borders[`../../public/geo/borders/${code}.json`]
+    const detailed = shapeOf(code)
+    const countryBorders = bordersOf(code)
     expect(detailed, 'detailed shape file').toBeDefined()
     expect(countryBorders, 'borders file').toBeDefined()
 
@@ -39,8 +57,8 @@ describe('every country of the globe', () => {
 describe('distant territories', () => {
   function dataOf(code: string) {
     const country = openable.find((feature) => feature.properties.code === code)
-    const detailed = shapes[`../../public/geo/countries/${code}.json`]
-    const countryBorders = borders[`../../public/geo/borders/${code}.json`]
+    const detailed = shapeOf(code)
+    const countryBorders = bordersOf(code)
     return country === undefined ? null : countryMapData(code, country.geometry, detailed, countryBorders)
   }
 
@@ -63,7 +81,7 @@ describe('distant territories', () => {
   })
 
   it('masks with the borders from OpenStreetMap, or else with the shape (Russia: Crimea in it)', () => {
-    expect(dataOf('VA')?.mask).toBe(borders['../../public/geo/borders/VA.json'])
+    expect(dataOf('VA')?.mask).toBe(bordersOf('VA'))
     const russia = dataOf('RU')
     expect(russia?.mask).toBe(russia?.shape)
   })

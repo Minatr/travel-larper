@@ -67,7 +67,7 @@ Le détail de l'environnement (rôle de chaque conteneur, variables, passage en 
 | `make help` | Liste toutes les commandes (sous Windows : depuis Git Bash) |
 | `make dev` | Lance base + backend + frontend (`Ctrl+C` pour arrêter) |
 | `make down` | Arrête tous les conteneurs (les données sont conservées) |
-| `make test` | Lance les tests du backend et du frontend |
+| `make test` | Lance les tests du backend et du frontend (Go et Node.js nécessaires ; sans Go : `make test-docker`) |
 | `make migrate-new name=…` | Crée une migration de base de données (appliquée au prochain démarrage du backend) |
 | `make lint` | Vérifie le lint et le formatage (backend + frontend) |
 | `make format` | Formate le code (backend + frontend) |

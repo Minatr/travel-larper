@@ -7,10 +7,14 @@ COMPOSE := docker compose
 
 # Valeurs par défaut si .env est absent (mêmes que docker-compose.yml).
 POSTGRES_USER ?= travel
+POSTGRES_PASSWORD ?= travel
 POSTGRES_DB ?= travel
+POSTGRES_PORT ?= 5432
+# Base des tests Go lancés sur la machine : celle du conteneur db, par son port publié.
+TEST_DATABASE_URL ?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset db-seed backend frontend test lint format audit check generate geo migrate-new
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset db-seed backend frontend test test-docker lint format audit check generate geo migrate-new
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -48,8 +52,16 @@ frontend: ## Lance la pile complète, frontend compris (il a besoin de l'API)
 	$(COMPOSE) up --build --watch frontend
 
 # Les tests d'intégration travaillent dans des schémas temporaires de la base de dev : les données locales ne sont pas
-# touchées. Le contrat est monté en lecture seule pour le test qui compare les routes publiques à openapi.yaml.
-test: ## Lance les tests du backend (Docker, avec la base) et du frontend (outils locaux)
+# touchées. Les tests Go tournent sur la machine, comme en CI, avec la base dans Docker : sans image à reconstruire et
+# avec le cache de compilation de Go, environ 3 s au lieu de 17.
+test: ## Lance les tests du backend (outils locaux, base dans Docker) et du frontend (outils locaux)
+	$(COMPOSE) up -d --build --wait db
+	cd backend && go test ./...
+	cd frontend && npm test
+
+# Secours pour une machine sans Go : les tests du backend dans le conteneur, plus lents (image vérifiée, tout recompilé).
+# Le contrat y est monté en lecture seule pour le test qui compare les routes publiques à openapi.yaml.
+test-docker: ## Lance les tests du backend dans Docker (sans Go installé), puis ceux du frontend
 	$(COMPOSE) run --rm --build --volume ./api:/api:ro backend sh -c 'TEST_DATABASE_URL="$$DATABASE_URL" go test ./...'
 	cd frontend && npm test
 

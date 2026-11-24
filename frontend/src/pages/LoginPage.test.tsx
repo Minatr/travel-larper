@@ -96,16 +96,17 @@ describe('header account action', () => {
     vi.unstubAllGlobals()
   })
 
+  // On a page that calls nothing else: the status page would also ask the API's health.
   it('offers to log in to a visitor', async () => {
     stubFetch(new Response(null, { status: 204 }))
-    renderAt('/status')
+    renderAt('/does-not-exist')
 
     expect(await screen.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
   })
 
   it('logs a user out', async () => {
     const fetchMock = stubFetch(new Response(null, { status: 204 }), user)
-    renderAt('/status')
+    renderAt('/does-not-exist')
 
     fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
 
@@ -118,7 +119,7 @@ describe('header account action', () => {
   it('logs a user out even when the server fails', async () => {
     stubFetch(Response.json({ code: 'internal_error', message: '' }, { status: 500 }), user)
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    renderAt('/status')
+    renderAt('/does-not-exist')
 
     fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
 

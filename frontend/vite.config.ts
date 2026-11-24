@@ -4,6 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
+/**
+ * Tests of pure logic, run in plain Node: a simulated browser (jsdom) costs about 5 s to set up per file, far more than
+ * they take. searchMarker.test.ts stays out: its module loads MapLibre and uses requestAnimationFrame.
+ */
+const UNIT_TESTS = ['src/lib/**/!(searchMarker).test.ts', 'src/services/**/*.test.ts']
+
 /** Where the dev server forwards `/api` calls (the backend container in Docker). */
 const apiProxyTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8080'
 
@@ -24,9 +30,26 @@ export default defineConfig({
       '/api': apiProxyTarget,
     },
   },
+  // Each project inherits the options above. The setup file stays in `dom` only: set here, it would be added to both.
   test: {
-    // A simulated browser, so React components can render in Node.
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    projects: [
+      {
+        test: {
+          name: 'unit',
+          environment: 'node',
+          include: UNIT_TESTS,
+        },
+      },
+      {
+        test: {
+          name: 'dom',
+          // A simulated browser, so React components can render in Node.
+          environment: 'jsdom',
+          include: ['src/**/*.test.{ts,tsx}'],
+          exclude: UNIT_TESTS,
+          setupFiles: ['./src/test/setup.ts'],
+        },
+      },
+    ],
   },
 })

@@ -231,7 +231,7 @@ travel-larper/
 
 ### Qualité automatisée
 - **Backend** : golangci-lint v2 (`backend/.golangci.yml`) avec revive, errorlint, gosec, lll et les formateurs gofmt/goimports/golines.
-- **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`), Prettier (`frontend/.prettierrc.json`) et tests Vitest + Testing Library (`npm test`, lancés aussi par `make test`).
+- **Frontend** : ESLint avec eslint-plugin-jsdoc (`frontend/eslint.config.js`), Prettier (`frontend/.prettierrc.json`) et tests Vitest + Testing Library (`npm test`, lancés aussi par `make test`). Deux projets Vitest (`vite.config.ts`) : `unit` sous Node pour la logique pure (`src/lib/`, `src/services/`), `dom` sous jsdom pour le reste ; un nouveau test de logique n'a besoin d'aucun navigateur simulé.
 - **Avant chaque commit** : Lefthook (`lefthook.yml`) formate et vérifie les fichiers modifiés. Les outils sont installés sur la machine (voir README), pas dans Docker, pour que le commit reste instantané.
 - **Sur chaque PR** : `.github/workflows/ci.yml` (jobs `backend` : lint, build, tests ; `frontend` : lint, formatage, types et build ; `generated` : vérifie que le code généré est à jour). Les jobs `backend` et `frontend` cherchent aussi les failles connues des dépendances (govulncheck ; `npm audit` sur les dépendances livrées, gravité élevée ou critique).
 - **Dépendances** : Dependabot (`.github/dependabot.yml`) ouvre une PR uniquement quand une dépendance a une faille connue et qu'une version corrigée existe ; pas de mise à jour de version de routine.
@@ -330,7 +330,7 @@ Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche
   - *Vérifications* : cocher ce qui passe ; pour une case non cochée, dire en quelques mots pourquoi (ex. « pas encore configuré »).
 
 ### Commandes
-`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `test` (tests Go, base comprise), `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`, `db-seed`. `make lint`, `make format`, `make generate` et `make audit` (failles connues des dépendances) utilisent les outils installés sur la machine ; `make check` enchaîne toutes les vérifications de la CI (lint, tests, failles, types et build du frontend). `make geo` régénère les formes des pays (globe et cartes) depuis Natural Earth et OpenStreetMap. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
+`make help` liste tout. L'application tourne dans Docker (Compose Watch pour le rechargement) : `make dev`, `down`, `backend`, `frontend`, `db-up`, `db-down`, `db-logs`, `db-psql`, `db-reset`, `db-seed`. `make lint`, `make format`, `make generate`, `make audit` (failles connues des dépendances) et `make test` utilisent les outils installés sur la machine ; `make test` démarre la base dans Docker et lance les tests Go sur la machine, comme la CI (`make test-docker` : tout dans le conteneur, pour une machine sans Go) ; `make check` enchaîne toutes les vérifications de la CI (lint, tests, failles, types et build du frontend). `make geo` régénère les formes des pays (globe et cartes) depuis Natural Earth et OpenStreetMap. `make migrate-new name=…` crée une migration ; les migrations s'appliquent au démarrage du backend. Détails et passage en production : `docs/environnement.md`.
 
 ---
 
