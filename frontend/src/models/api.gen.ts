@@ -94,8 +94,11 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         Error: {
-            /** @enum {string} */
-            code: "invalid_parameter" | "invalid_body" | "invalid_email" | "password_too_short" | "password_too_long" | "email_taken" | "invalid_credentials" | "unauthorized" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
+            /**
+             * @description The account_* codes (403) answer any route with `security` except GET /auth/me when the account is not active, so the app can tell why it is blocked.
+             * @enum {string}
+             */
+            code: "invalid_parameter" | "invalid_body" | "invalid_email" | "password_too_short" | "password_too_long" | "email_taken" | "invalid_credentials" | "unauthorized" | "account_pending" | "account_refused" | "account_suspended" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
             message: string;
         };
         Health: {

@@ -37,6 +37,9 @@ func (e CurrentUserStatus) Valid() bool {
 
 // Defines values for ErrorCode.
 const (
+	ErrorCodeAccountPending     ErrorCode = "account_pending"
+	ErrorCodeAccountRefused     ErrorCode = "account_refused"
+	ErrorCodeAccountSuspended   ErrorCode = "account_suspended"
 	ErrorCodeEmailTaken         ErrorCode = "email_taken"
 	ErrorCodeInternalError      ErrorCode = "internal_error"
 	ErrorCodeInvalidBody        ErrorCode = "invalid_body"
@@ -55,6 +58,12 @@ const (
 // Valid indicates whether the value is a known member of the ErrorCode enum.
 func (e ErrorCode) Valid() bool {
 	switch e {
+	case ErrorCodeAccountPending:
+		return true
+	case ErrorCodeAccountRefused:
+		return true
+	case ErrorCodeAccountSuspended:
+		return true
 	case ErrorCodeEmailTaken:
 		return true
 	case ErrorCodeInternalError:
@@ -134,11 +143,12 @@ type CurrentUserStatus string
 
 // Error defines model for Error.
 type Error struct {
+	// Code The account_* codes (403) answer any route with `security` except GET /auth/me when the account is not active, so the app can tell why it is blocked.
 	Code    ErrorCode `json:"code"`
 	Message string    `json:"message"`
 }
 
-// ErrorCode defines model for Error.Code.
+// ErrorCode The account_* codes (403) answer any route with `security` except GET /auth/me when the account is not active, so the app can tell why it is blocked.
 type ErrorCode string
 
 // Health defines model for Health.
