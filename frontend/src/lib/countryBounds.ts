@@ -1,32 +1,44 @@
 /**
- * Area to frame for a country: its main land and the land near it, not its
- * distant territories (France with Corsica, without French Guiana).
- * Parts less than GROUP_DISTANCE_KM apart are grouped (union-find), and the
- * largest group wins: O(n²) over a country's parts, a few dozen at most.
+ * Area to frame for a country: its main land and the land near it, not its distant territories (France with Corsica,
+ * without French Guiana).
+ * Parts less than GROUP_DISTANCE_KM apart are grouped (union-find), and the largest group wins: O(n²) over a country's
+ * parts, a few dozen at most.
  */
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
-import {
-  type Bounds,
-  boxOf,
-  FULL_TURN_DEGREES,
-  HALF_TURN_DEGREES,
-  polygonsOf,
-} from './geo.ts'
+import { type Bounds, boxOf, FULL_TURN_DEGREES, HALF_TURN_DEGREES, polygonsOf } from './geo.ts'
+import { type Inset, mainFrameOf } from './territories.ts'
 
 /**
- * Gap under which two parts belong together: Borneo (600 km) stays with
- * Malaysia, Alaska (670 km) leaves the United States.
+ * Gap under which two parts belong together: Borneo (600 km) stays with Malaysia, Alaska (670 km) leaves the United
+ * States.
  */
 const GROUP_DISTANCE_KM = 650
 const KM_PER_DEGREE = 111.32
 /**
- * Smallest area framed, in degrees (about 20 km): a microstate (Vatican) is
- * shown in its surroundings, not at a street's zoom.
+ * Smallest area framed, in degrees (about 20 km): a microstate (Vatican) is shown in its surroundings, not at a
+ * street's zoom.
  */
 const MIN_FRAME_DEGREES = 0.2
+/**
+ * The same for an inset (about 50 km): a tiny island (Christmas Island) shown closer would show how rough its 1:10m
+ * outline is against the map's own coast.
+ */
+const MIN_INSET_FRAME_DEGREES = 0.5
 
 type Part = { bounds: Bounds; area: number }
+
+/**
+ * Frame of the country `code`, or of its `inset`: the decided frame when it has distant parts (territories.ts),
+ * countryBounds otherwise. The globe flies to it and the map opens on it, so both see the same picture.
+ */
+export function countryFrame(code: string, geometry: Polygon | MultiPolygon, inset: Inset | null = null): Bounds {
+  if (inset !== null) {
+    return atLeastMinFrame(inset.bounds, MIN_INSET_FRAME_DEGREES)
+  }
+  const decided = mainFrameOf(code)
+  return decided === undefined ? countryBounds(geometry) : atLeastMinFrame(decided)
+}
 
 /** Bounds to frame for a country shape. */
 export function countryBounds(geometry: Polygon | MultiPolygon): Bounds {
@@ -34,15 +46,13 @@ export function countryBounds(geometry: Polygon | MultiPolygon): Bounds {
   const parts = polygonsOf(geometry).map(([outerRing]) => describe(outerRing))
   const main = largestGroup(parts)
   const reference = center(main[0].bounds)
-  const bounds = main
-    .map((part) => shiftNear(part.bounds, reference))
-    .reduce(union)
+  const bounds = main.map((part) => shiftNear(part.bounds, reference)).reduce(union)
   return atLeastMinFrame(bounds)
 }
 
-function atLeastMinFrame([west, south, east, north]: Bounds): Bounds {
-  const extraX = Math.max(0, MIN_FRAME_DEGREES - (east - west)) / 2
-  const extraY = Math.max(0, MIN_FRAME_DEGREES - (north - south)) / 2
+function atLeastMinFrame([west, south, east, north]: Bounds, minDegrees = MIN_FRAME_DEGREES): Bounds {
+  const extraX = Math.max(0, minDegrees - (east - west)) / 2
+  const extraY = Math.max(0, minDegrees - (north - south)) / 2
   return [west - extraX, south - extraY, east + extraX, north + extraY]
 }
 
@@ -50,8 +60,8 @@ function describe(ring: Position[]): Part {
   return { bounds: boxOf(ring), area: ringArea(ring) }
 }
 
-// Shoelace formula, longitudes scaled by the latitude's cosine: only used
-// to compare parts, so the unit does not matter.
+// Shoelace formula, longitudes scaled by the latitude's cosine: only used to compare parts, so the unit does not
+// matter.
 function ringArea(ring: Position[]): number {
   let doubled = 0
   for (let index = 1; index < ring.length; index++) {
@@ -86,37 +96,25 @@ function largestGroup(parts: Part[]): Part[] {
     group.push(part)
     groups.set(find(index), group)
   })
-  const totalArea = (group: Part[]) =>
-    group.reduce((sum, part) => sum + part.area, 0)
-  const largest = [...groups.values()].reduce((best, group) =>
-    totalArea(group) > totalArea(best) ? group : best,
-  )
+  const totalArea = (group: Part[]) => group.reduce((sum, part) => sum + part.area, 0)
+  const largest = [...groups.values()].reduce((best, group) => (totalArea(group) > totalArea(best) ? group : best))
   return [...largest].sort((a, b) => b.area - a.area)
 }
 
-// Gap between two boxes, 0 when they overlap, measured the short way
-// round the antimeridian.
+// Gap between two boxes, 0 when they overlap, measured the short way round the antimeridian.
 function distanceKm(first: Bounds, second: Bounds): number {
   const [west1, south1, east1, north1] = first
   const [west2, south2, east2, north2] = shiftNear(second, center(first))
   const longitudeGap = Math.max(0, west2 - east1, west1 - east2)
   const latitudeGap = Math.max(0, south2 - north1, south1 - north2)
   const latitude = (south1 + north1 + south2 + north2) / 4
-  return (
-    Math.hypot(longitudeGap * Math.cos(toRadians(latitude)), latitudeGap) *
-    KM_PER_DEGREE
-  )
+  return Math.hypot(longitudeGap * Math.cos(toRadians(latitude)), latitudeGap) * KM_PER_DEGREE
 }
 
 // Moves bounds a full turn when that brings them nearer `longitude`.
 function shiftNear(bounds: Bounds, longitude: number): Bounds {
   const offset = center(bounds) - longitude
-  const shift =
-    offset > HALF_TURN_DEGREES
-      ? -FULL_TURN_DEGREES
-      : offset < -HALF_TURN_DEGREES
-        ? FULL_TURN_DEGREES
-        : 0
+  const shift = offset > HALF_TURN_DEGREES ? -FULL_TURN_DEGREES : offset < -HALF_TURN_DEGREES ? FULL_TURN_DEGREES : 0
   const [west, south, east, north] = bounds
   return [west + shift, south, east + shift, north]
 }

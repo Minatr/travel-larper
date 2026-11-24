@@ -4,10 +4,9 @@ output: openapi.gen.go
 generate:
   # Structs and enum constants for every schema of the contract.
   models: true
-  # ServerInterface (one method per operationId) and the chi routing that
-  # calls it.
+  # ServerInterface (one method per operationId) and the chi routing that calls it.
   chi-server: true
 compatibility:
-  # HealthStatusOk rather than Ok: two schemas will sooner or later share an
-  # enum value (pending, active…) and unprefixed constants would collide.
+  # HealthStatusOk rather than Ok: two schemas will sooner or later share an enum value (pending, active…) and
+  # unprefixed constants would collide.
   always-prefix-enum-values: true

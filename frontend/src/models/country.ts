@@ -12,7 +12,4 @@ export type CountryProperties = {
 export type Country = Feature<Polygon | MultiPolygon, CountryProperties>
 
 /** The countries file: every country of the globe. */
-export type Countries = FeatureCollection<
-  Polygon | MultiPolygon,
-  CountryProperties
->
+export type Countries = FeatureCollection<Polygon | MultiPolygon, CountryProperties>

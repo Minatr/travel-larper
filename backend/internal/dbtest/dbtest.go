@@ -12,13 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// databaseURLVariable names the database used by integration tests; they are
-// skipped when it is not set.
+// databaseURLVariable names the database used by integration tests; they are skipped when it is not set.
 const databaseURLVariable = "TEST_DATABASE_URL"
 
-// NewPool returns a pool on a new, empty schema dropped at the end of the
-// test. Each test package gets its own schema, so packages run in parallel
-// without seeing each other's tables.
+// NewPool returns a pool on a new, empty schema dropped at the end of the test. Each test package gets its own schema,
+// so packages run in parallel without seeing each other's tables.
 func NewPool(t *testing.T) *pgxpool.Pool {
 	t.Helper()
 	databaseURL := os.Getenv(databaseURLVariable)

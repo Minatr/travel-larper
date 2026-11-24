@@ -10,6 +10,12 @@ describe('CountryPanel', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it('names a tapped distant territory after its country', () => {
+    render(<CountryPanel code="FR" territory="reunion" onOpen={vi.fn()} />)
+
+    expect(screen.getByRole('heading', { name: 'France · Réunion' })).toBeInTheDocument()
+  })
+
   it('names the tapped country and opens it from its button', () => {
     const onOpen = vi.fn()
     render(<CountryPanel code="FR" onOpen={onOpen} />)
@@ -17,6 +23,20 @@ describe('CountryPanel', () => {
     expect(screen.getByRole('heading', { name: 'France' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Open the map' }))
     expect(onOpen).toHaveBeenCalledOnce()
+  })
+
+  it('closes from its close button, when it has one', () => {
+    const onClose = vi.fn()
+    render(<CountryPanel code="FR" onOpen={vi.fn()} onClose={onClose} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it('has no close button by default', () => {
+    render(<CountryPanel code="FR" onOpen={vi.fn()} />)
+
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
   })
 
   it('has no button for a country without a map', () => {

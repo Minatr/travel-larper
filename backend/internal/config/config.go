@@ -31,8 +31,8 @@ type Config struct {
 	Production         bool
 	RateLimitPerMinute int
 	MaxBodyBytes       int64
-	// RegisterRateLimitPerHour is stricter than RateLimitPerMinute because
-	// each registration runs an expensive argon2id hash.
+	// RegisterRateLimitPerHour is stricter than RateLimitPerMinute because each registration runs an expensive argon2id
+	// hash.
 	RegisterRateLimitPerHour int
 	// LoginRateLimitPerMinute to slow down attacks
 	LoginRateLimitPerMinute int

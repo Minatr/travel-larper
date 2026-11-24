@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  detectLanguage,
-  readStoredLanguage,
-  storeLanguage,
-} from './languages.ts'
+import { detectLanguage, readStoredLanguage, storeLanguage } from './languages.ts'
 import en from './locales/en.json'
 import fr from './locales/fr.json'
 
@@ -12,9 +8,7 @@ import fr from './locales/fr.json'
 function flattenKeys(value: object, prefix = ''): string[] {
   return Object.entries(value).flatMap(([key, child]) => {
     const path = prefix === '' ? key : `${prefix}.${key}`
-    return typeof child === 'object' && child !== null
-      ? flattenKeys(child, path)
-      : [path]
+    return typeof child === 'object' && child !== null ? flattenKeys(child, path) : [path]
   })
 }
 

@@ -1,9 +1,8 @@
 /**
- * How the globe hands over to a country's map: the country page opens at
- * once, invisible, and loads its map while the globe flies to the country
- * (globeFlight.ts), then fades in over it once both are done. The way back
- * flies backwards.
+ * How the globe hands over to a country's map: the country page opens at once, invisible, and loads its map while the
+ * globe flies to the country (globeFlight.ts), then fades in over it once both are done. The way back flies backwards.
  */
+import type { Camera } from './mercatorCamera.ts'
 
 /** Duration of the globe's flight to the country. */
 export const GLOBE_TRANSITION_MS = 1100
@@ -15,15 +14,14 @@ export const GLOBE_RETURN_MS = 625
 export const FADE_MS = 150
 
 /**
- * Longest wait for the map before showing the page: on a slow network, the
- * map ends loading on screen, under a loading message.
+ * Longest wait for the map before showing the page: on a slow network, the map ends loading on screen, under a loading
+ * message.
  */
 export const MAP_WAIT_MS = 2500
 
 /**
- * Longest wait for the map's style (OpenFreeMap) before telling the map is
- * unavailable: a service that never answers would otherwise leave it blank.
- * Long, as the loading message shows meanwhile.
+ * Longest wait for the map's style (OpenFreeMap) before telling the map is unavailable: a service that never answers
+ * would otherwise leave it blank. Long, as the loading message shows meanwhile.
  */
 export const MAP_STYLE_TIMEOUT_MS = 20_000
 
@@ -36,4 +34,6 @@ export type CountryOutletContext = {
   flying: boolean
   /** Called once the page covers the globe. */
   onCountryShown: () => void
+  /** Called with the map's camera once it is set up, and after each move: the globe flies back from there. */
+  onMapMove: (camera: Camera) => void
 }

@@ -1,51 +1,44 @@
 /**
- * Prepares a country's detailed shape for its map: keeps the parts around
- * the framed area (no Alaska on the United States' map), and makes a light
- * copy to tell which labels belong to the country.
+ * Prepares a country's detailed shape for its map: keeps the parts around the framed area (no Alaska on the United
+ * States' map), and makes a light copy to tell which labels belong to the country.
  */
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
 import { type Bounds, boxOf, FULL_TURN_DEGREES, polygonsOf } from './geo.ts'
 
-/** Parts of `shape` whose box meets `area`, or null if none. */
+/**
+ * Parts of `shape` whose box meets one of `areas` and lies wholly inside none of `excluded` (the territories left out),
+ * or null if none.
+ */
 export function partsWithin(
   shape: Polygon | MultiPolygon,
-  area: Bounds,
+  areas: Bounds[],
+  excluded: Bounds[] = [],
 ): MultiPolygon | null {
-  const kept = polygonsOf(shape).filter(([outerRing]) =>
-    meets(boxOf(outerRing), area),
-  )
+  const kept = polygonsOf(shape).filter(([outerRing]) => {
+    const box = boxOf(outerRing)
+    return areas.some((area) => meets(box, area)) && !excluded.some((area) => inside(box, area))
+  })
   return kept.length === 0 ? null : { type: 'MultiPolygon', coordinates: kept }
 }
 
 /**
- * Light copy of `shape`: each ring keeps the points straying more than
- * `toleranceDegrees` from a straight line (Douglas-Peucker, O(n log n) on
- * average). Rings left too small are dropped.
+ * Light copy of `shape`: each ring keeps the points straying more than `toleranceDegrees` from a straight line
+ * (Douglas-Peucker, O(n log n) on average). Rings left too small are dropped.
  */
-export function simplifyShape(
-  shape: MultiPolygon,
-  toleranceDegrees: number,
-): MultiPolygon {
+export function simplifyShape(shape: MultiPolygon, toleranceDegrees: number): MultiPolygon {
   const polygons = shape.coordinates.flatMap((rings) => {
-    const [outerRing, ...holes] = rings.map((ring) =>
-      simplifyRing(ring, toleranceDegrees),
-    )
+    const [outerRing, ...holes] = rings.map((ring) => simplifyRing(ring, toleranceDegrees))
     return isRing(outerRing) ? [[outerRing, ...holes.filter(isRing)]] : []
   })
   return { type: 'MultiPolygon', coordinates: polygons }
 }
 
 /**
- * Copy of `shape` with at most `maxPoints` points: the tolerance doubles
- * until it fits (Russia: 36,000 points down to 300). Never empty: a shape
- * that would vanish is kept as it was (Vatican).
+ * Copy of `shape` with at most `maxPoints` points: the tolerance doubles until it fits (Russia: 36,000 points down to
+ * 300). Never empty: a shape that would vanish is kept as it was (Vatican).
  */
-export function simplifyToBudget(
-  shape: MultiPolygon,
-  startTolerance: number,
-  maxPoints: number,
-): MultiPolygon {
+export function simplifyToBudget(shape: MultiPolygon, startTolerance: number, maxPoints: number): MultiPolygon {
   let tolerance = startTolerance
   let simplified = shape
   while (pointsOf(simplified) > maxPoints || tolerance === startTolerance) {
@@ -61,8 +54,7 @@ export function simplifyToBudget(
 
 function pointsOf(shape: MultiPolygon): number {
   return shape.coordinates.reduce(
-    (sum, polygon) =>
-      sum + polygon.reduce((ringSum, ring) => ringSum + ring.length, 0),
+    (sum, polygon) => sum + polygon.reduce((ringSum, ring) => ringSum + ring.length, 0),
     0,
   )
 }
@@ -70,11 +62,20 @@ function pointsOf(shape: MultiPolygon): number {
 // Also tried a turn east, for an area past 180° (Russia).
 function meets(box: Bounds, area: Bounds): boolean {
   return [0, FULL_TURN_DEGREES].some(
-    (shift) =>
-      box[0] + shift <= area[2] &&
-      box[2] + shift >= area[0] &&
-      box[1] <= area[3] &&
-      box[3] >= area[1],
+    (shift) => box[0] + shift <= area[2] && box[2] + shift >= area[0] && box[1] <= area[3] && box[3] >= area[1],
+  )
+}
+
+/** Parts of `shape` lying wholly inside `area`, or null if none. */
+export function partsInside(shape: Polygon | MultiPolygon, area: Bounds): MultiPolygon | null {
+  const kept = polygonsOf(shape).filter(([outerRing]) => inside(boxOf(outerRing), area))
+  return kept.length === 0 ? null : { type: 'MultiPolygon', coordinates: kept }
+}
+
+// Same turns as meets.
+function inside(box: Bounds, area: Bounds): boolean {
+  return [0, FULL_TURN_DEGREES].some(
+    (shift) => box[0] + shift >= area[0] && box[2] + shift <= area[2] && box[1] >= area[1] && box[3] <= area[3],
   )
 }
 
@@ -107,20 +108,10 @@ function simplifyRing(ring: Position[], tolerance: number): Position[] {
   return ring.filter((_, index) => keep[index])
 }
 
-function distanceToSegment(
-  [x, y]: Position,
-  [x1, y1]: Position,
-  [x2, y2]: Position,
-): number {
+function distanceToSegment([x, y]: Position, [x1, y1]: Position, [x2, y2]: Position): number {
   const dx = x2 - x1
   const dy = y2 - y1
   const lengthSquared = dx * dx + dy * dy
-  const share =
-    lengthSquared === 0
-      ? 0
-      : Math.max(
-          0,
-          Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lengthSquared),
-        )
+  const share = lengthSquared === 0 ? 0 : Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lengthSquared))
   return Math.hypot(x - (x1 + share * dx), y - (y1 + share * dy))
 }

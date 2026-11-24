@@ -19,19 +19,17 @@ const argon2Algorithm = "argon2id"
 // PasswordHasher hashes and verifies passwords with argon2id.
 type PasswordHasher struct {
 	params config.Argon2Params
-	// Each hash holds params.MemoryKiB while it runs: capping concurrent
-	// hashes server-wide bounds memory whatever the number of client IPs.
+	// Each hash holds params.MemoryKiB while it runs: capping concurrent hashes server-wide bounds memory whatever the
+	// number of client IPs.
 	slots chan struct{}
 }
 
-// NewPasswordHasher creates a PasswordHasher running at most maxConcurrent
-// hashes at a time.
+// NewPasswordHasher creates a PasswordHasher running at most maxConcurrent hashes at a time.
 func NewPasswordHasher(params config.Argon2Params, maxConcurrent int) *PasswordHasher {
 	return &PasswordHasher{params: params, slots: make(chan struct{}, maxConcurrent)}
 }
 
-// Hash returns the password hashed with a random salt, in the PHC string
-// format: $argon2id$v=19$m=…,t=…,p=…$salt$key.
+// Hash returns the password hashed with a random salt, in the PHC string format: $argon2id$v=19$m=…,t=…,p=…$salt$key.
 func (h *PasswordHasher) Hash(ctx context.Context, password string) (string, error) {
 	if err := h.acquireSlot(ctx); err != nil {
 		return "", err
@@ -58,8 +56,7 @@ func (h *PasswordHasher) Hash(ctx context.Context, password string) (string, err
 	), nil
 }
 
-// Verify reports whether password matches encoded, using the parameters
-// stored in encoded rather than the current ones.
+// Verify reports whether password matches encoded, using the parameters stored in encoded rather than the current ones.
 func (h *PasswordHasher) Verify(ctx context.Context, password, encoded string) (bool, error) {
 	params, salt, key, err := decodePasswordHash(encoded)
 	if err != nil {

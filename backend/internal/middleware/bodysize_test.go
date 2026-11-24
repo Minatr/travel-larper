@@ -65,12 +65,8 @@ func TestMaxBodySize(t *testing.T) {
 	t.Run("declared length too large answers in the Error format", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
 
-		MaxBodySize(
-			maxBytes,
-			discardLogger(),
-		)(
-			okHandler,
-		).ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/", strings.NewReader(strings.Repeat("x", maxBytes+1))))
+		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(strings.Repeat("x", maxBytes+1)))
+		MaxBodySize(maxBytes, discardLogger())(okHandler).ServeHTTP(recorder, request)
 
 		assertError(t, recorder, http.StatusRequestEntityTooLarge, api.ErrorCodeRequestTooLarge)
 	})

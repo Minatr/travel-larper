@@ -30,13 +30,26 @@
     "destination": "Destination",
     "openMap": "Open the map",
     "clickToOpen": "Click to open the map",
-    "noMap": "No map for this country"
+    "enterToOpen": "Press Enter or click the country to open its map",
+    "noMap": "No map for this country",
+    "close": "Close"
+  },
+  "search": {
+    "label": "Search for a country",
+    "placeholder": "Search for a country…",
+    "noResult": "No country found"
   },
   "country": {
     "mapLabel": "Map of {{name}}",
     "backToGlobe": "← Globe",
     "unavailable": "The map could not be loaded.",
-    "loading": "Loading the map…"
+    "loading": "Loading the map…",
+    "territories_one": "Distant territory",
+    "territories_other": "Distant territories",
+    "distanceKm": "{{distance}} km",
+    "destination": "Destination",
+    "previousTerritories": "Previous territories",
+    "nextTerritories": "Next territories"
   },
   "nav": {
     "login": "Log in",
@@ -79,5 +92,36 @@
       "unreachable": "The server cannot be reached. Check your connection and try again.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "territories": {
+    "christmas-island": "Christmas Island",
+    "easter-island": "Easter Island",
+    "juan-fernandez": "Juan Fernández Islands",
+    "san-andres": "San Andrés",
+    "galapagos": "Galápagos Islands",
+    "canary-islands": "Canary Islands",
+    "rotuma": "Rotuma",
+    "chuuk": "Chuuk",
+    "kosrae": "Kosrae",
+    "yap": "Yap",
+    "antilles": "Guadeloupe and Martinique",
+    "french-guiana": "French Guiana",
+    "mayotte": "Mayotte",
+    "reunion": "Réunion",
+    "andaman-nicobar": "Andaman and Nicobar Islands",
+    "ogasawara": "Ogasawara Islands",
+    "line-islands": "Line Islands",
+    "phoenix-islands": "Phoenix Islands",
+    "rodrigues": "Rodrigues",
+    "caribbean-netherlands": "Bonaire",
+    "saba-sint-eustatius": "Saba and Sint Eustatius",
+    "svalbard": "Svalbard",
+    "chatham-islands": "Chatham Islands",
+    "azores": "Azores",
+    "madeira": "Madeira",
+    "niuas": "Niuas",
+    "alaska": "Alaska",
+    "hawaii": "Hawaii",
+    "socotra": "Socotra"
   }
 }

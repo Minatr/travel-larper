@@ -1,9 +1,8 @@
 // Command server starts the Travel Larper API.
 //
-// Startup sequence: read the configuration, open the database pool, apply
-// the pending migrations (the server stops if they fail), wire the
-// layers together (service -> controller -> routes), then serve HTTP until
-// the process receives Ctrl+C or SIGTERM (sent by `docker compose stop`).
+// Startup sequence: read the configuration, open the database pool, apply the pending migrations (the server stops if
+// they fail), wire the layers together (service -> controller -> routes), then serve HTTP until the process receives
+// Ctrl+C or SIGTERM (sent by `docker compose stop`).
 package main
 
 import (
@@ -36,8 +35,8 @@ func main() {
 	}
 }
 
-// run starts the server and blocks until it stops. It returns an error
-// instead of exiting so that deferred cleanups (closing the pool) still run.
+// run starts the server and blocks until it stops. It returns an error instead of exiting so that deferred cleanups
+// (closing the pool) still run.
 func run(logger *slog.Logger) error {
 	// ctx is cancelled on Ctrl+C or SIGTERM, which triggers the shutdown below.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -66,9 +65,8 @@ func run(logger *slog.Logger) error {
 		IdleTimeout:       cfg.IdleTimeout,
 	}
 
-	// ListenAndServe blocks, so it runs in its own goroutine while this one
-	// waits for either a server failure or a stop signal. The channel is
-	// buffered so the goroutine never blocks if nobody reads its error.
+	// ListenAndServe blocks, so it runs in its own goroutine while this one waits for either a server failure or a stop
+	// signal. The channel is buffered so the goroutine never blocks if nobody reads its error.
 	serverErr := make(chan error, 1)
 	go func() {
 		logger.Info("server listening", "addr", server.Addr)
@@ -81,8 +79,8 @@ func run(logger *slog.Logger) error {
 	case <-ctx.Done():
 	}
 
-	// Graceful shutdown: stop accepting connections and wait for in-flight
-	// requests. A fresh context is needed because ctx is already cancelled.
+	// Graceful shutdown: stop accepting connections and wait for in-flight requests. A fresh context is needed because
+	// ctx is already cancelled.
 	logger.Info("shutting down")
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 	defer cancel()
@@ -92,9 +90,8 @@ func run(logger *slog.Logger) error {
 	return nil
 }
 
-// buildHandler wires the application layers together: each service receives
-// its dependencies, each controller its service, and the router the
-// controllers. Go has no dependency-injection container
+// buildHandler wires the application layers together: each service receives its dependencies, each controller its
+// service, and the router the controllers. Go has no dependency-injection container
 func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) http.Handler {
 	healthService := services.NewHealthService(pool)
 	healthController := controllers.NewHealthController(healthService, logger)

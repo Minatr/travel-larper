@@ -1,6 +1,5 @@
-# Development image: the code is synced by Compose Watch and recompiled by
-# `go run` at each restart. The production image will be a separate
-# multi-stage build (see docs/environnement.md).
+# Development image: the code is synced by Compose Watch and recompiled by `go run` at each restart. The production
+# image will be a separate multi-stage build (see docs/environnement.md).
 FROM golang:1.27-alpine
 
 WORKDIR /app

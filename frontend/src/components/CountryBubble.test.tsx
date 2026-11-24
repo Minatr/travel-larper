@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { TagLayout } from '../lib/countryTag.ts'
 import { CountryBubble } from './CountryBubble.tsx'
@@ -19,19 +19,48 @@ describe('CountryBubble', () => {
   })
 
   it('names the hovered country and how to open it', () => {
-    render(<CountryBubble hint={{ code: 'FR', layout: LAYOUT }} />)
+    render(<CountryBubble hint={{ code: 'FR', territory: null, layout: LAYOUT, searched: false }} />)
 
     expect(screen.getByText('France')).toBeInTheDocument()
     expect(screen.getByText('Click to open the map')).toBeInTheDocument()
-    expect(
-      screen.queryByText('No map for this country'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText('No map for this country')).not.toBeInTheDocument()
+  })
+
+  it('names a distant territory after its country', () => {
+    render(<CountryBubble hint={{ code: 'FR', territory: 'french-guiana', layout: LAYOUT, searched: false }} />)
+
+    expect(screen.getByText('France · French Guiana')).toBeInTheDocument()
+  })
+
+  it('tells how to open a country found by the search', () => {
+    render(<CountryBubble hint={{ code: 'FR', territory: null, layout: LAYOUT, searched: true }} />)
+
+    expect(screen.getByText('Press Enter or click the country to open its map')).toBeInTheDocument()
+  })
+
+  it('closes the search from its close button', () => {
+    const onClose = vi.fn()
+    render(<CountryBubble hint={{ code: 'FR', territory: null, layout: LAYOUT, searched: true }} onClose={onClose} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it('has no close button on a hover tag', () => {
+    render(<CountryBubble hint={{ code: 'FR', territory: null, layout: LAYOUT, searched: false }} />)
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
   it('tells a country has no map', () => {
     render(
       <CountryBubble
-        hint={{ code: 'AQ', layout: { ...LAYOUT, side: 'left' } }}
+        hint={{
+          code: 'AQ',
+          territory: null,
+          layout: { ...LAYOUT, side: 'left' },
+          searched: false,
+        }}
       />,
     )
 

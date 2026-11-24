@@ -1,8 +1,7 @@
 /**
- * Camera framing bounds on a flat (Mercator) map, shared by the globe and
- * the country map. MapLibre's globe and flat map each pick their own zoom,
- * which differ for countries over many latitudes (China): with this one, the
- * flight ends on the very picture the map opens on.
+ * Camera framing bounds on a flat (Mercator) map, shared by the globe and the country map. MapLibre's globe and flat
+ * map each pick their own zoom, which differ for countries over many latitudes (China): with this one, the flight ends
+ * on the very picture the map opens on.
  */
 import { type Bounds, FULL_TURN_DEGREES, HALF_TURN_DEGREES } from './geo.ts'
 
@@ -13,8 +12,8 @@ export type Camera = { center: [number, number]; zoom: number }
 const WORLD_SIZE_PX = 512
 
 /**
- * Same as MapLibre's fitBounds on a flat map: center and zoom fitting
- * `bounds`, plus `padding` on each side, in a `width` × `height` view.
+ * Same as MapLibre's fitBounds on a flat map: center and zoom fitting `bounds`, plus `padding` on each side, in a
+ * `width` × `height` view.
  */
 export function mercatorCamera(
   [west, south, east, north]: Bounds,
@@ -31,23 +30,16 @@ export function mercatorCamera(
     (height - 2 * padding) / ((bottom - top) * WORLD_SIZE_PX),
   )
   return {
-    center: [
-      wrapLongitude(longitudeOf((left + right) / 2)),
-      latitudeOf((top + bottom) / 2),
-    ],
+    center: [wrapLongitude(longitudeOf((left + right) / 2)), latitudeOf((top + bottom) / 2)],
     zoom: Math.log2(scale),
   }
 }
 
 /**
- * The area a `width` × `height` view shows with `camera`, the reverse of
- * mercatorCamera (without padding). Latitudes stop at the map's edges.
+ * The area a `width` × `height` view shows with `camera`, the reverse of mercatorCamera (without padding). Latitudes
+ * stop at the map's edges.
  */
-export function mercatorView(
-  { center: [longitude, latitude], zoom }: Camera,
-  width: number,
-  height: number,
-): Bounds {
+export function mercatorView({ center: [longitude, latitude], zoom }: Camera, width: number, height: number): Bounds {
   const worldPx = WORLD_SIZE_PX * 2 ** zoom
   const x = mercatorX(longitude)
   const y = mercatorY(latitude)
@@ -82,7 +74,5 @@ function latitudeOf(y: number): number {
 }
 
 function wrapLongitude(longitude: number): number {
-  return longitude > HALF_TURN_DEGREES
-    ? longitude - FULL_TURN_DEGREES
-    : longitude
+  return longitude > HALF_TURN_DEGREES ? longitude - FULL_TURN_DEGREES : longitude
 }

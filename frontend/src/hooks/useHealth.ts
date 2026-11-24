@@ -4,10 +4,7 @@ import type { Health } from '../models/health.ts'
 import { fetchHealth } from '../services/health.ts'
 
 /** State of the health request: still loading, answered, or API unreachable. */
-export type HealthState =
-  | { kind: 'loading' }
-  | { kind: 'loaded'; health: Health }
-  | { kind: 'unreachable' }
+export type HealthState = { kind: 'loading' } | { kind: 'loaded'; health: Health } | { kind: 'unreachable' }
 
 /** Loads the API health once, when the component mounts. */
 export function useHealth(): HealthState {

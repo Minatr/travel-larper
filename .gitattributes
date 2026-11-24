@@ -1,5 +1,5 @@
-# Fins de ligne Unix (LF) pour tous les fichiers texte, quel que soit le système.
-# Indispensable pour le Makefile et les scripts, et pour travailler entre Mac et Windows.
+# Fins de ligne Unix (LF) pour tous les fichiers texte, quel que soit le système. Indispensable pour le Makefile et les
+# scripts, et pour travailler entre Mac et Windows.
 * text=auto eol=lf
 
 # Fichiers binaires : jamais modifiés par Git

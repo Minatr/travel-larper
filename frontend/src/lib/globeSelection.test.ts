@@ -55,15 +55,11 @@ describe('reduceSelection', () => {
 
 describe('raisedCountries', () => {
   it('raises the hovered and the selected country', () => {
-    expect(raisedCountries({ hovered: 'FR', selected: 'JP' })).toEqual(
-      new Set(['FR', 'JP']),
-    )
+    expect(raisedCountries({ hovered: 'FR', selected: 'JP' })).toEqual(new Set(['FR', 'JP']))
   })
 
   it('raises a country once when it is both hovered and selected', () => {
-    expect(raisedCountries({ hovered: 'FR', selected: 'FR' })).toEqual(
-      new Set(['FR']),
-    )
+    expect(raisedCountries({ hovered: 'FR', selected: 'FR' })).toEqual(new Set(['FR']))
   })
 
   it('raises nothing by default', () => {

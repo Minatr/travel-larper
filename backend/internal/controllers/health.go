@@ -1,5 +1,4 @@
-// Package controllers handles HTTP requests: it reads the request, calls a
-// service and renders a view.
+// Package controllers handles HTTP requests: it reads the request, calls a service and renders a view.
 package controllers
 
 import (
@@ -26,8 +25,8 @@ func NewHealthController(checker HealthChecker, logger *slog.Logger) *HealthCont
 	return &HealthController{checker: checker, logger: logger}
 }
 
-// GetHealth answers 200 when everything is up, 503 when the database is
-// down. Its name is the operationId of the route in openapi.yaml.
+// GetHealth answers 200 when everything is up, 503 when the database is down. Its name is the operationId of the route
+// in openapi.yaml.
 func (c *HealthController) GetHealth(w http.ResponseWriter, r *http.Request) {
 	if err := c.checker.Check(r.Context()); err != nil {
 		c.logger.Warn("health check failed", "error", err)
