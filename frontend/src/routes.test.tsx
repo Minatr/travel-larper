@@ -44,7 +44,9 @@ function stubCountries(code: string, otherParts: number[][][][] = []) {
           ? new Response(JSON.stringify({ type: 'MultiPolygon', coordinates: [square.coordinates, ...otherParts] }))
           : url === '/geo/countries.json'
             ? new Response(JSON.stringify(countries))
-            : new Response(null, { status: 404 }),
+            : url === `/geo/borders/${code}.json`
+              ? new Response('null')
+              : new Response(null, { status: 404 }),
       ),
     ),
   )
@@ -112,12 +114,14 @@ describe('routes', () => {
     expect(await screen.findByRole('heading', { name: 'France' })).toBeInTheDocument()
   })
 
-  it('shows the not found page for an unknown country code', async () => {
+  it('shows the not found page for an unknown country code, without warning about its missing borders', async () => {
     stubCountries('FR')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     renderAt('/countries/XX')
 
     expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it('shows the not found page for a malformed country code', async () => {

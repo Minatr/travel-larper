@@ -76,12 +76,14 @@ generate: ## Génère le code depuis api/openapi.yaml et les requêtes SQL (outi
 	cd backend && go generate ./... && go tool sqlc generate
 	cd frontend && npm run generate
 
-# Les sources Natural Earth (environ 30 Mo) sont téléchargées une seule fois dans data/geo/ (non versionné), à la
-# version qui a produit les fichiers versionnés de frontend/public/geo/ : la commande redonne exactement les mêmes.
-geo: ## Régénère les formes des pays du globe et des cartes (télécharge ~30 Mo la première fois)
-	cd frontend && node scripts/download-natural-earth.mjs
-	cd frontend && node scripts/build-countries.mjs ../data/geo/ne_110m_admin_0_countries.geojson ../data/geo/ne_50m_admin_0_countries.geojson
+# Les sources (Natural Earth, environ 30 Mo, et les frontières d'OpenStreetMap, 200 Mo) sont téléchargées une seule fois
+# dans data/geo/ (non versionné), à la version qui a produit les fichiers versionnés de frontend/public/geo/ : la
+# commande redonne exactement les mêmes.
+geo: ## Régénère les formes des pays du globe et des cartes (télécharge ~250 Mo la première fois)
+	cd frontend && node scripts/download-geo-sources.mjs
+	cd frontend && node scripts/build-countries.mjs ../data/geo/ne_110m_admin_0_countries.geojson ../data/geo/ne_50m_admin_0_countries.geojson ../data/geo/countries-land-10m.geo.json
 	cd frontend && node scripts/build-country-shapes.mjs ../data/geo/ne_10m_admin_0_countries.geojson ../data/geo/ne_10m_admin_0_countries_gbr.geojson
+	cd frontend && node scripts/build-country-borders.mjs ../data/geo/countries-maritime-10m.geo.json ../data/geo/ne_10m_admin_0_countries.geojson
 
 # Les migrations s'appliquent au démarrage du backend : cette cible crée seulement le fichier, numéroté à la suite du
 # dernier.

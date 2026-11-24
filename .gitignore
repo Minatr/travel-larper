@@ -17,7 +17,8 @@ frontend/dist/
 npm-debug.log*
 
 # Données téléchargées (make geo)
-data/geo/*.geojson
+data/geo/*
+!data/geo/.gitkeep
 
 # Éditeurs et système
 .idea/

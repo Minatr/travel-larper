@@ -140,25 +140,42 @@ const IGNORED_AREAS: Record<string, Bounds[]> = {
   ],
 }
 
-/** Frame of the countries with distant parts: the mainland and the territories kept with it. */
+/**
+ * Frame of the countries with distant parts: the mainland and the territories kept with it. Also of the countries whose
+ * rough globe shape misses land their map shows, inside their OpenStreetMap borders: inhabited islands (Singapore's
+ * southern islands, Bahrain's Hawar Islands, Alderney, Carriacou, Lampedusa…) or part of the coast (Luxembourg,
+ * Ireland). Found by checking every country's OpenStreetMap land against the view it opens on, desktop and phone.
+ */
 const COUNTRY_FRAMES: Record<string, Bounds> = {
   AU: [112.92, -43.64, 153.63, -9.24],
+  AX: [19.31, 59.83, 21.12, 60.66],
+  BB: [-59.66, 13.04, -59.42, 13.34],
+  BH: [50.38, 25.55, 50.83, 26.29],
   BR: [-74.02, -33.74, -34.79, 5.27],
   CA: [-141.01, 41.67, -52.62, 83.12],
   CL: [-75.71, -55.92, -66.42, -17.51],
   CO: [-79.02, -4.24, -66.88, 12.47],
+  CR: [-85.95, 8.03, -82.54, 11.22],
+  DK: [8.09, 54.55, 15.14, 57.73],
   EC: [-81.01, -5.01, -75.23, 1.43],
-  ES: [-9.29, 35.85, 4.34, 43.79],
+  ES: [-9.29, 35.26, 4.34, 43.79],
   FJ: [177.09, -20.67, 181.78, -16.12],
+  FK: [-61.35, -52.45, -57.75, -51],
   FM: [157.16, 5.77, 158.34, 6.98],
   FR: [-4.79, 41.37, 9.56, 51.09],
+  GD: [-61.81, 11.98, -61.37, 12.53],
+  GG: [-2.68, 49.36, -2.15, 49.74],
   GQ: [8.42, 0.93, 11.34, 3.77],
+  HK: [113.83, 22.15, 114.45, 22.57],
   ID: [95.01, -10.92, 140.98, 5.91],
+  IE: [-10.67, 51.42, -5.99, 55.44],
   IN: [68.14, 8.08, 97.36, 35.49],
-  IT: [6.6, 36.66, 18.52, 47.09],
+  IT: [6.6, 35.49, 18.52, 47.09],
   JP: [122.94, 24.26, 145.82, 45.52],
   KI: [172.75, -2.66, 176.85, 3.14],
+  KR: [124.61, 33.2, 130.94, 38.62],
   KZ: [46.48, 40.59, 87.32, 55.44],
+  LU: [5.67, 49.44, 6.54, 50.19],
   MH: [165.28, 4.57, 172.03, 11.71],
   MU: [57.3, -20.52, 57.8, -19.98],
   MV: [72.69, -0.69, 73.75, 7.11],
@@ -172,12 +189,15 @@ const COUNTRY_FRAMES: Record<string, Bounds> = {
   PT: [-9.5, 36.99, -6.21, 42.15],
   RU: [19.61, 41.19, 191, 81.86],
   SB: [155.51, -11.85, 166.98, -6.6],
-  SC: [55.22, -4.8, 55.79, -4.29],
+  SC: [55.2, -4.8, 55.95, -3.71],
+  SG: [103.6, 1.16, 104.09, 1.47],
   TF: [50.18, -49.72, 77.58, -37.82],
   TH: [97.35, 5.63, 105.65, 20.45],
   TO: [-176.22, -22.34, -173.91, -18.57],
   TV: [176.12, -9.42, 179.91, -5.68],
   US: [-124.73, 24.58, -66.98, 49.37],
+  VC: [-61.47, 12.53, -61.12, 13.36],
+  VU: [166.54, -20.25, 169.9, -13.07],
   YE: [42.55, 12.6, 53.09, 19],
   ZA: [16.47, -34.82, 32.89, -22.13],
 }
@@ -213,7 +233,26 @@ export function ignoredAreasOf(code: string): Bounds[] {
   return (IGNORED_AREAS[code] ?? []).map(widen)
 }
 
-/** Frame of the country `code`, if it has distant parts. */
+/**
+ * Margin around the land of a territory left out, in degrees (about 5 km): enough for OpenStreetMap's coast, which the
+ * Natural Earth boxes above may miss by a little, and too little to reach the mainland (Barrow Island lies 50 km off).
+ */
+const LEFT_OUT_LAND_MARGIN_DEGREES = 0.05
+
+/**
+ * Land of the territories left out of the country `code`'s map, to dim: its OpenStreetMap borders, which the mask
+ * follows, still hold them (Barrow Island, Sable Island).
+ */
+export function leftOutLandOf(code: string): Bounds[] {
+  return (IGNORED_AREAS[code] ?? []).map(([west, south, east, north]) => [
+    west - LEFT_OUT_LAND_MARGIN_DEGREES,
+    south - LEFT_OUT_LAND_MARGIN_DEGREES,
+    east + LEFT_OUT_LAND_MARGIN_DEGREES,
+    north + LEFT_OUT_LAND_MARGIN_DEGREES,
+  ])
+}
+
+/** Frame of the country `code`, if decided (see COUNTRY_FRAMES). */
 export function mainFrameOf(code: string): Bounds | undefined {
   return COUNTRY_FRAMES[code]
 }

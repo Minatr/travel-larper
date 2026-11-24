@@ -7,6 +7,7 @@
 import type { MultiPolygon, Polygon, Position } from 'geojson'
 
 import { type Bounds, boxOf, FULL_TURN_DEGREES, HALF_TURN_DEGREES, polygonsOf } from './geo.ts'
+import { MICROSTATES } from './microstates.ts'
 import { type Inset, mainFrameOf } from './territories.ts'
 
 /**
@@ -16,8 +17,8 @@ import { type Inset, mainFrameOf } from './territories.ts'
 const GROUP_DISTANCE_KM = 650
 const KM_PER_DEGREE = 111.32
 /**
- * Smallest area framed, in degrees (about 20 km): a microstate (Vatican) is shown in its surroundings, not at a
- * street's zoom.
+ * Smallest area framed, in degrees (about 20 km): a tiny country (Nauru) is shown in its surroundings, as its globe shape
+ * is rough.
  */
 const MIN_FRAME_DEGREES = 0.2
 /**
@@ -25,6 +26,9 @@ const MIN_FRAME_DEGREES = 0.2
  * outline is against the map's own coast.
  */
 const MIN_INSET_FRAME_DEGREES = 0.5
+
+/** The same for a microstate (about 2 km), whose shape is precise: the Vatican with St. Peter's Square. */
+const MIN_MICROSTATE_FRAME_DEGREES = 0.02
 
 type Part = { bounds: Bounds; area: number }
 
@@ -37,17 +41,20 @@ export function countryFrame(code: string, geometry: Polygon | MultiPolygon, ins
     return atLeastMinFrame(inset.bounds, MIN_INSET_FRAME_DEGREES)
   }
   const decided = mainFrameOf(code)
-  return decided === undefined ? countryBounds(geometry) : atLeastMinFrame(decided)
+  if (decided !== undefined) {
+    return atLeastMinFrame(decided)
+  }
+  return countryBounds(geometry, MICROSTATES.includes(code) ? MIN_MICROSTATE_FRAME_DEGREES : MIN_FRAME_DEGREES)
 }
 
-/** Bounds to frame for a country shape. */
-export function countryBounds(geometry: Polygon | MultiPolygon): Bounds {
+/** Bounds to frame for a country shape, at least `minDegrees` wide and high. */
+export function countryBounds(geometry: Polygon | MultiPolygon, minDegrees = MIN_FRAME_DEGREES): Bounds {
   // Holes never widen bounds: only outer rings count.
   const parts = polygonsOf(geometry).map(([outerRing]) => describe(outerRing))
   const main = largestGroup(parts)
   const reference = center(main[0].bounds)
   const bounds = main.map((part) => shiftNear(part.bounds, reference)).reduce(union)
-  return atLeastMinFrame(bounds)
+  return atLeastMinFrame(bounds, minDegrees)
 }
 
 function atLeastMinFrame([west, south, east, north]: Bounds, minDegrees = MIN_FRAME_DEGREES): Bounds {

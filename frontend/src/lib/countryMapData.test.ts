@@ -14,14 +14,20 @@ const shapes = import.meta.glob<Polygon | MultiPolygon>('../../public/geo/countr
   eager: true,
   import: 'default',
 })
+const borders = import.meta.glob<Polygon | MultiPolygon | null>('../../public/geo/borders/*.json', {
+  eager: true,
+  import: 'default',
+})
 const openable = countries.features.filter((country) => hasMap(country.properties.code))
 
 describe('every country of the globe', () => {
   it.each(openable.map((country) => [country.properties.code, country]))('opens %s', (code, country) => {
     const detailed = shapes[`../../public/geo/countries/${code}.json`]
+    const countryBorders = borders[`../../public/geo/borders/${code}.json`]
     expect(detailed, 'detailed shape file').toBeDefined()
+    expect(countryBorders, 'borders file').toBeDefined()
 
-    const data = countryMapData(code, country.geometry, detailed)
+    const data = countryMapData(code, country.geometry, detailed, countryBorders)
 
     expect(data, 'parts near the framed area').not.toBeNull()
     expect(data?.labelArea.coordinates.length).toBeGreaterThan(0)
@@ -34,7 +40,8 @@ describe('distant territories', () => {
   function dataOf(code: string) {
     const country = openable.find((feature) => feature.properties.code === code)
     const detailed = shapes[`../../public/geo/countries/${code}.json`]
-    return country === undefined ? null : countryMapData(code, country.geometry, detailed)
+    const countryBorders = borders[`../../public/geo/borders/${code}.json`]
+    return country === undefined ? null : countryMapData(code, country.geometry, detailed, countryBorders)
   }
 
   it('gives France its four insets, framed apart from the mainland', () => {
@@ -53,6 +60,28 @@ describe('distant territories', () => {
     expect(data?.insets.map(({ inset }) => inset.id)).toEqual(['svalbard'])
     // Jan Mayen is the only part of Norway west of the meridian.
     expect(Math.min(...longitudes)).toBeGreaterThan(0)
+  })
+
+  it('masks with the borders from OpenStreetMap, or else with the shape (Russia: Crimea in it)', () => {
+    expect(dataOf('VA')?.mask).toBe(borders['../../public/geo/borders/VA.json'])
+    const russia = dataOf('RU')
+    expect(russia?.mask).toBe(russia?.shape)
+  })
+
+  it('dims the territories left out, which the borders still hold (Australia: Barrow Island)', () => {
+    const barrowIsland = [115.4, -20.78]
+    const holds = ([west, south, east, north]: number[]) =>
+      barrowIsland[0] > west && barrowIsland[0] < east && barrowIsland[1] > south && barrowIsland[1] < north
+
+    expect(dataOf('AU')?.leftOut.some(holds)).toBe(true)
+  })
+
+  it('cuts the enclaves out of the mask: the Vatican and San Marino out of Italy', () => {
+    const [mainland] = (dataOf('IT')?.mask as MultiPolygon).coordinates
+      .slice()
+      .sort((first, second) => second[0].length - first[0].length)
+
+    expect(mainland.length - 1).toBeGreaterThanOrEqual(2)
   })
 
   it('keeps Alaska in one inset, Aleutians past 180° included', () => {

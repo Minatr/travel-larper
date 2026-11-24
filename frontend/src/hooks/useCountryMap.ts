@@ -53,6 +53,12 @@ const ISLANDS_OUTLINE_PX = 2.5
 const GLIDE_SPEED = 4
 const GLIDE_CURVE = 1.15
 
+/**
+ * Closest zoom, with streets still readable. MapLibre's default, 22, shows a few meters across the screen, where the
+ * mask's borders (to within 40 m, 10 m in a small country) would stray far from the tiles'.
+ */
+const MAX_ZOOM = 17
+
 /** Room to pan around the framed view, as a share of its size. */
 const PAN_MARGIN_SHARE = 0.25
 /** Zoom levels the user may zoom out past the framed view. */
@@ -66,7 +72,7 @@ const ZOOM_OUT_LEVELS = 0.5
  */
 export function useCountryMap(
   containerRef: RefObject<HTMLElement | null>,
-  { shape, labelArea }: CountryMapData,
+  { shape, mask, labelArea, leftOut }: CountryMapData,
   view: Bounds,
   onReady: () => void,
   onFailed: () => void,
@@ -104,6 +110,7 @@ export function useCountryMap(
       ...mercatorCamera(viewRef.current, container.clientWidth, container.clientHeight, FRAME_PADDING_PX),
       // OpenStreetMap's licence requires the credit, behind an "i" button.
       attributionControl: { compact: true },
+      maxZoom: MAX_ZOOM,
       pixelRatio: mapPixelRatio(),
       // Only moved and zoomed: turning it is of no use.
       ...UPRIGHT_OPTIONS,
@@ -174,7 +181,7 @@ export function useCountryMap(
       window.clearTimeout(styleTimer)
       recolor(map)
       // Added last, so above all; the sea and borders are then moved above it.
-      map.addSource(MASK_SOURCE, { type: 'geojson', data: outsideMask(shape) })
+      map.addSource(MASK_SOURCE, { type: 'geojson', data: outsideMask(mask, leftOut) })
       map.addLayer({
         id: MASK_LAYER,
         type: 'fill',
@@ -210,7 +217,7 @@ export function useCountryMap(
       resizeObserver?.disconnect()
       map.remove()
     }
-  }, [containerRef, shape, labelArea])
+  }, [containerRef, shape, mask, labelArea, leftOut])
 }
 
 function recolor(map: MapLibreMap) {

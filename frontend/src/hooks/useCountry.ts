@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { hasMap } from '../lib/countryCode.ts'
 import { type CountryMapData, countryMapData } from '../lib/countryMapData.ts'
 import type { Countries } from '../models/country.ts'
-import { fetchCountries, fetchCountryShape } from '../services/countries.ts'
+import { fetchCountries, fetchCountryBorders, fetchCountryShape } from '../services/countries.ts'
 
 /** State of a country looked up by code: loading, found, unknown or failed. */
 export type CountryState =
@@ -37,9 +37,13 @@ async function loadCountry(code: string, signal: AbortSignal): Promise<CountrySt
   if (!hasMap(code)) {
     return { kind: 'notFound' }
   }
-  // Both downloads start together; a failed shape only matters once the code is known to exist.
+  // The downloads start together; a failed shape only matters once the code is known to exist.
   const shapeRequest = fetchCountryShape(code, signal).then(
     (shape) => ({ shape }),
+    (error: unknown) => ({ error }),
+  )
+  const bordersRequest = fetchCountryBorders(code, signal).then(
+    (borders) => ({ borders }),
     (error: unknown) => ({ error }),
   )
   const countries: Countries = await fetchCountries()
@@ -51,6 +55,13 @@ async function loadCountry(code: string, signal: AbortSignal): Promise<CountrySt
   if ('error' in shapeResult) {
     throw shapeResult.error
   }
-  const map = countryMapData(code, country.geometry, shapeResult.shape)
+  // Without its borders, the map masks with the shape, less precise: no reason to fail. Warned only for a known country
+  // (an unknown code has no borders either) and a page still open (left before they loaded: nothing failed).
+  const bordersResult = await bordersRequest
+  if ('error' in bordersResult && !signal.aborted) {
+    console.warn('country borders failed to load', bordersResult.error)
+  }
+  const borders = 'borders' in bordersResult ? bordersResult.borders : null
+  const map = countryMapData(code, country.geometry, shapeResult.shape, borders)
   return map === null ? { kind: 'unavailable' } : { kind: 'found', map }
 }

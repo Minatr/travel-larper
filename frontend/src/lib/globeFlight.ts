@@ -1,7 +1,7 @@
 /**
  * Flights of the globe to a country's map and back. On the way in, the globe zooms onto the country, flattens and takes
  * the map's colors, ending on the map's own camera (mercatorCamera.ts): the map then takes over unseen. On the way
- * back, the reverse, from wherever the page left the globe (an inset, a country opened from its URL).
+ * back, the reverse, from wherever the page left the globe, to above the place it showed (returnZoom).
  * Each effect is a zoom-based expression, set once per flight (twice for an arc): no code runs on each frame.
  */
 import type {
@@ -35,6 +35,46 @@ export function apparentZoom(zoom: number, latitude: number): number {
 /** The zoom MapLibre needs at `latitude` for the apparent size `apparent`, the reverse of apparentZoom. */
 export function zoomForApparent(apparent: number, latitude: number): number {
   return apparent + Math.log2(Math.cos((latitude * Math.PI) / HALF_TURN_DEGREES))
+}
+
+/**
+ * Zoom levels out on the way back to the globe, for the largest countries and for the smallest ones. A large country
+ * is seen whole, a little space around it (at least what the globe needs to round out: see MIN_FLATTEN_ZOOM_LEVELS);
+ * a tiny one stays about a dozen pixels wide, its region around it.
+ */
+const RETURN_MIN_ZOOM_OUT_LEVELS = 0.8
+const RETURN_MAX_ZOOM_OUT_LEVELS = 6
+
+/**
+ * How many levels closer than the whole globe a country's frame is, from which it counts as large or tiny: Russia,
+ * Canada and Brazil about 1, France 3, Belgium 5, Malta 8, Monaco 12 (desktop and phone alike, within a level).
+ * Between them, the zoom out grows by less than a level per level (0.8): a smaller country then always ends closer than
+ * a larger one (at 1.2, Belgium ended further out than France).
+ */
+const LARGE_COUNTRY_CLOSENESS = 1.5
+const TINY_COUNTRY_CLOSENESS = 8
+
+/**
+ * Fewest zoom levels the way back backs away from where the globe is: Escape early in the flight in, while the globe is
+ * still far out, would otherwise zoom in. Enough for the globe to round out as it backs away (MIN_FLATTEN_ZOOM_LEVELS).
+ */
+const RETURN_MIN_BACKING_LEVELS = 0.5
+
+/**
+ * Apparent zoom the globe backs away to from a place framed at apparent zoom `frame`, never further out than
+ * `wholeGlobe` (the globe filling the screen). Zooms out the more as the place is small, linearly from large to tiny
+ * countries: Russia ends 0.8 levels out, France 2, Belgium 3.6, the tiniest (Malta, Monaco) 6. Always at least
+ * RETURN_MIN_BACKING_LEVELS further out than `current`, the globe's apparent zoom when it starts back, even past the
+ * whole globe.
+ */
+export function returnZoom(frame: number, wholeGlobe: number, current: number): number {
+  const closeness = frame - wholeGlobe
+  const share = Math.min(
+    Math.max((closeness - LARGE_COUNTRY_CLOSENESS) / (TINY_COUNTRY_CLOSENESS - LARGE_COUNTRY_CLOSENESS), 0),
+    1,
+  )
+  const zoomOut = RETURN_MIN_ZOOM_OUT_LEVELS + share * (RETURN_MAX_ZOOM_OUT_LEVELS - RETURN_MIN_ZOOM_OUT_LEVELS)
+  return Math.min(Math.max(frame - zoomOut, wholeGlobe), current - RETURN_MIN_BACKING_LEVELS)
 }
 
 /** Share of the zoom range the globe stays round, before flattening. */

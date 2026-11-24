@@ -33,6 +33,9 @@ export const COUNTRY_MAP_COLORS: [string, PaintProperty, string][] = [
   ['building', 'fill-color', '#2f3f5b'],
   ['building', 'fill-outline-color', COUNTRY_LAND_COLOR],
   ['aeroway-area', 'fill-color', '#32425e'],
+  // Runways, near black in the dark style (Porto Santo's crossed the island).
+  ['aeroway-runway', 'line-color', '#32425e'],
+  ['aeroway-taxiway', 'line-color', '#32425e'],
   ['road_area_pier', 'fill-color', '#32425e'],
   ['highway_path', 'line-color', '#32425e'],
   ['highway_minor', 'line-color', '#32425e'],

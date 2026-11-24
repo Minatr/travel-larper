@@ -8,6 +8,8 @@
  */
 import type { ExpressionSpecification, MapOptions, SkySpecification } from 'maplibre-gl'
 
+import { MICROSTATES } from './microstates.ts'
+
 // MapLibre's style type, reached through MapOptions: maplibre-gl does not export it under its own name.
 type GlobeStyle = Exclude<MapOptions['style'], string | undefined>
 
@@ -38,6 +40,9 @@ const SPOTLIGHT_FADE_MS = 300
 /** Radius of the steady ring, in pixels: big enough to find a microstate. */
 export const RING_RADIUS_PX = 16
 const BORDERS_LAYER = 'countries-borders'
+const MICROSTATES_LAYER = 'microstates-fill'
+const MICROSTATE_BORDERS_LAYER = 'microstates-borders'
+const IS_MICROSTATE: ExpressionSpecification = ['in', ['get', 'code'], ['literal', MICROSTATES]]
 const BACKGROUND_LAYER = 'background'
 
 /**
@@ -157,17 +162,35 @@ export function globeStyle(overflowZoom: number): GlobeStyle {
         },
       },
       {
+        id: BORDERS_LAYER,
+        type: 'line',
+        source: COUNTRIES_SOURCE,
+        paint: { 'line-color': COLORS.border, 'line-width': BORDER_WIDTH },
+      },
+      // The microstates again, over the borders around them.
+      {
+        id: MICROSTATES_LAYER,
+        type: 'fill',
+        source: COUNTRIES_SOURCE,
+        filter: IS_MICROSTATE,
+        paint: {
+          'fill-color': countryColor(COLORS.raised, COLORS.dimmed, COLORS.land),
+        },
+      },
+      {
+        id: MICROSTATE_BORDERS_LAYER,
+        type: 'line',
+        source: COUNTRIES_SOURCE,
+        filter: IS_MICROSTATE,
+        paint: { 'line-color': COLORS.border, 'line-width': BORDER_WIDTH },
+      },
+      // Over the borders: the globe's, rough, fade out as the flight nears the map, whose own borders take over.
+      {
         id: MAP_COLORS_LAYER,
         type: 'fill',
         source: COUNTRIES_SOURCE,
         layout: { visibility: 'none' },
         paint: { 'fill-opacity': 0 },
-      },
-      {
-        id: BORDERS_LAYER,
-        type: 'line',
-        source: COUNTRIES_SOURCE,
-        paint: { 'line-color': COLORS.border, 'line-width': BORDER_WIDTH },
       },
       {
         // Off (opacity 0) until a search; searchMarker filters out the searched country, which stays lit.

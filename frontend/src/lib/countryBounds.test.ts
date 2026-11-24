@@ -88,6 +88,19 @@ describe('countryFrame', () => {
     expect(north - south).toBeGreaterThan(0.499)
   })
 
+  it('frames a microstate close up, its shape being precise (Vatican)', () => {
+    const [west, south, east, north] = countryFrame('VA', multi([12.4457, 41.9002, 12.4584, 41.9074]))
+    // 0.02° minus floating-point dust: the Vatican with St. Peter's Square, not 20 km around.
+    expect(east - west).toBeGreaterThan(0.0199)
+    expect(east - west).toBeLessThan(0.021)
+    expect(north - south).toBeLessThan(0.021)
+  })
+
+  it('keeps a tiny country that is not a microstate in its surroundings (Nauru)', () => {
+    const [west, , east] = countryFrame('NR', multi([166.907, -0.551, 166.958, -0.489]))
+    expect(east - west).toBeGreaterThan(0.199)
+  })
+
   it('keeps the grouping rule for a country without distant parts', () => {
     expect(countryFrame('DE', multi([6, 47, 15, 55]))).toEqual([6, 47, 15, 55])
   })
