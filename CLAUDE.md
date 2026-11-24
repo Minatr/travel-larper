@@ -21,8 +21,10 @@
 ## 3. Fonctionnalités (décidées)
 
 ### Comptes et accès
-- Inscription ouverte (e-mail + mot de passe). Un nouveau compte est **en attente** : il ne peut rien faire tant qu'un admin ne l'a pas validé et voit un message l'invitant à patienter ou à contacter l'admin.
+- Inscription ouverte (e-mail + mot de passe). Un nouveau compte est **en attente** : il peut se connecter, mais ne peut rien faire tant qu'un admin ne l'a pas validé et voit un message l'invitant à patienter ou à contacter l'admin.
+- **Sans compte, on peut déjà découvrir l'appli** : globe, carte d'un pays, `/status`, inscription et connexion sont publics. La connexion n'est demandée qu'au moment où elle devient nécessaire : enregistrer des données (lieux, voyages…) ou appeler une API externe. Côté backend, **toute route exige une session sauf celles listées dans `publicRoutes`** (`router.go`) : une route oubliée est fermée plutôt qu'ouverte, et un test vérifie que cette liste correspond aux routes sans `security` d'`openapi.yaml`. Côté frontend, la page de connexion ramène à la page d'origine (`/login?redirect=…`, chemin du site uniquement) ; le garde des pages protégées (redirection ou invitation à se connecter) arrivera avec la première d'entre elles.
 - **Comptes admin et utilisateur séparés** : un compte = un seul rôle. Un compte utilisateur utilise l'appli ; un compte admin n'accède qu'au panneau d'administration. Une même personne peut avoir un compte de chaque. Les comptes admin sont créés à la main, jamais via l'inscription.
+- **Échecs de connexion par compte** : après 10 échecs en une heure sur un même e-mail, quelle que soit l'IP, la connexion est refusée (`rate_limited`) jusqu'à la fin de l'heure, sans calculer le hash. Les e-mails inconnus sont comptés de la même façon, pour ne pas révéler quels comptes existent. Compteur en mémoire (un seul serveur). Un admin pourra débloquer un compte depuis le panneau d'administration.
 - Double authentification **obligatoire** pour les admins dès le départ, avec des sessions plus courtes. Elle sera optionnelle plus tard pour les utilisateurs.
 - « Connexion avec Google » : idée pour un avenir lointain.
 
@@ -101,7 +103,7 @@
 | Couche | Choix |
 | --- | --- |
 | Frontend | React + TypeScript + Vite (SPA, installable en PWA) |
-| Style | Tailwind CSS + shadcn/ui (Radix) ; icônes Lucide ou Phosphor |
+| Style | Tailwind CSS + shadcn/ui (Radix) ; icônes Lucide (`lucide-react`) |
 | Traduction | react-i18next (anglais par défaut, français) |
 | Navigation | React Router |
 | Carte 2D | MapLibre GL + tuiles OpenFreeMap |
@@ -176,7 +178,7 @@ travel-larper/
 
 ## 6. Sécurité (non négociable)
 
-- Mots de passe hachés en **argon2id**. Sessions en cookie **httpOnly, Secure, SameSite** (protection CSRF), stockées côté serveur pour pouvoir les couper.
+- Mots de passe hachés en **argon2id**. Sessions en cookie **httpOnly, Secure, SameSite** (protection CSRF), stockées côté serveur pour pouvoir les couper : jeton aléatoire dont seul le SHA-256 est en base, session glissante (14 jours sans activité par défaut), `Secure` en production seulement (le dev local tourne en HTTP). Mauvais e-mail et mauvais mot de passe donnent la même erreur, en temps comparable.
 - **Vérifier à chaque requête que l'utilisateur est membre du voyage.** Un voyage auquel on n'appartient pas renvoie **la même erreur qu'un voyage inexistant** (404), pour ne rien révéler.
 - Limitation des requêtes par utilisateur et par IP, renforcée sur la connexion, l'inscription et les routes qui appellent des API externes. Quotas par utilisateur, cache serveur, file d'attente pour les services limités.
 - **Clés API uniquement côté serveur**, secrets en variables d'environnement. **Jamais de secret dans le code ni dans Git** (`.env` est ignoré ; `.env.example` ne contient que des valeurs factices).

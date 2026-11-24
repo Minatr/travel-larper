@@ -99,16 +99,25 @@ func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) ht
 	queries := models.New(pool)
 	passwordHasher := services.NewPasswordHasher(cfg.Argon2, cfg.MaxConcurrentPasswordHashes)
 	registrationService := services.NewRegistrationService(queries, passwordHasher)
-	authController := controllers.NewAuthController(registrationService, logger)
+	registrationController := controllers.NewRegistrationController(registrationService, logger)
 
-	return router.Routes(
-		router.Controllers{HealthController: healthController, AuthController: authController},
-		logger,
-		router.Options{
-			RateLimitPerMinute:       cfg.RateLimitPerMinute,
-			MaxBodyBytes:             cfg.MaxBodyBytes,
-			HSTS:                     cfg.Production,
-			RegisterRateLimitPerHour: cfg.RegisterRateLimitPerHour,
-		},
+	loginAttempts := services.NewLoginAttempts(
+		cfg.LoginFailuresPerAccountPerHour, config.LoginFailureWindow, cfg.MaxTrackedLoginAccounts,
 	)
+	sessionService := services.NewSessionService(queries, passwordHasher, loginAttempts, cfg.SessionIdleTimeout)
+	sessionController := controllers.NewSessionController(sessionService, cfg.Production, logger)
+
+	handlers := router.Controllers{
+		HealthController:       healthController,
+		RegistrationController: registrationController,
+		SessionController:      sessionController,
+	}
+	return router.Routes(handlers, sessionService, logger, router.Options{
+		RateLimitPerMinute:       cfg.RateLimitPerMinute,
+		MaxBodyBytes:             cfg.MaxBodyBytes,
+		HSTS:                     cfg.Production,
+		SecureCookies:            cfg.Production,
+		RegisterRateLimitPerHour: cfg.RegisterRateLimitPerHour,
+		LoginRateLimitPerMinute:  cfg.LoginRateLimitPerMinute,
+	})
 }

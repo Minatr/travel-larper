@@ -1,7 +1,16 @@
 package config
 
+import "time"
+
 const (
 	defaultRegisterRateLimitPerHour = 10
+	defaultLoginRateLimitPerMinute  = 5
+	// Per account, whatever the IP: against password guessing from many IPs.
+	defaultLoginFailuresPerAccountPerHour = 10
+	// About 1 MB of memory at most for the failed login counters.
+	maxTrackedLoginAccounts = 10_000
+	// 2 weeks
+	defaultSessionIdleTimeoutHours = 14 * 24
 	// About 76 MiB of argon2id memory at most with the parameters below.
 	maxConcurrentPasswordHashes = 4
 
@@ -12,6 +21,9 @@ const (
 	argon2SaltLength  = 16
 	argon2KeyLength   = 32
 )
+
+// LoginFailureWindow is how long the failed logins of an account count.
+const LoginFailureWindow = time.Hour
 
 // Argon2Params holds the argon2id cost settings.
 type Argon2Params struct {

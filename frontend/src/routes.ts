@@ -9,6 +9,7 @@ import { Layout } from './components/Layout.tsx'
 import { CountryPage } from './pages/CountryPage.tsx'
 import { GlobePage } from './pages/GlobePage.tsx'
 import { HealthPage } from './pages/HealthPage.tsx'
+import { LoginPage } from './pages/LoginPage.tsx'
 import { NotFoundPage } from './pages/NotFoundPage.tsx'
 import { RegisterPage } from './pages/RegisterPage.tsx'
 
@@ -28,6 +29,7 @@ export const routes: RouteObject[] = [
       },
       { path: 'status', Component: HealthPage },
       { path: 'register', Component: RegisterPage },
+      { path: 'login', Component: LoginPage },
       // `*`: any URL no other route matches.
       { path: '*', Component: NotFoundPage },
     ],

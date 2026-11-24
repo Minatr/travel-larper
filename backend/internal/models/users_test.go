@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/Minatr/travel-larper/backend/internal/db"
 	"github.com/Minatr/travel-larper/backend/internal/dbtest"
@@ -16,11 +17,16 @@ import (
 
 func newQueries(t *testing.T) *models.Queries {
 	t.Helper()
+	return models.New(newMigratedPool(t))
+}
+
+func newMigratedPool(t *testing.T) *pgxpool.Pool {
+	t.Helper()
 	pool := dbtest.NewPool(t)
 	if err := db.Migrate(context.Background(), pool, slog.New(slog.NewTextHandler(io.Discard, nil))); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
-	return models.New(pool)
+	return pool
 }
 
 func TestCreateUser(t *testing.T) {
@@ -82,6 +88,36 @@ func TestGetUserByEmail(t *testing.T) {
 			}
 			if tt.wantErr == nil && user.ID != created.ID {
 				t.Fatalf("id = %v, want %v", user.ID, created.ID)
+			}
+		})
+	}
+}
+
+func TestFindUserByEmail(t *testing.T) {
+	queries := newQueries(t)
+	ctx := context.Background()
+	if _, err := queries.CreateUser(
+		ctx,
+		models.CreateUserParams{Email: "Bob@Example.com", PasswordHash: "hash"},
+	); err != nil {
+		t.Fatalf("create user: %v", err)
+	}
+
+	tests := []struct {
+		name      string
+		email     string
+		wantFound bool
+	}{
+		{name: "other case", email: "bob@example.com", wantFound: true},
+		{name: "unknown email", email: "alice@example.com", wantFound: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, found, err := queries.FindUserByEmail(ctx, tt.email)
+
+			if err != nil || found != tt.wantFound {
+				t.Fatalf("FindUserByEmail() = %v, %v, want %v, nil", found, err, tt.wantFound)
 			}
 		})
 	}

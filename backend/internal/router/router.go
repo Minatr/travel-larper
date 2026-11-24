@@ -19,13 +19,26 @@ import (
 // `servers` in openapi.yaml.
 const basePath = "/api"
 
-// registerRoute is the chi pattern of the registration route, which gets a stricter rate limit.
-const registerRoute = basePath + "/auth/register"
+// Chi patterns of the routes that get their own rate limit.
+const (
+	registerRoute = basePath + "/auth/register"
+	loginRoute    = basePath + "/auth/login"
+)
+
+// publicRoutes are the only routes reachable without a session; every other route requires one. They are the routes
+// without `security` in openapi.yaml.
+var publicRoutes = []string{
+	basePath + "/health",
+	registerRoute,
+	loginRoute,
+	basePath + "/auth/logout",
+}
 
 // Controllers bundles the controllers into a single api.ServerInterface.
 type Controllers struct {
 	*controllers.HealthController
-	*controllers.AuthController
+	*controllers.RegistrationController
+	*controllers.SessionController
 }
 
 // Compile-time check: a route of openapi.yaml without a controller method breaks the build instead of failing at
@@ -37,12 +50,20 @@ type Options struct {
 	RateLimitPerMinute int
 	MaxBodyBytes       int64
 	HSTS               bool
+	// SecureCookies is false in local dev, which runs over HTTP.
+	SecureCookies bool
 
 	RegisterRateLimitPerHour int
+	LoginRateLimitPerMinute  int
 }
 
 // Routes builds the HTTP handler that maps every route of openapi.yaml to its controller method.
-func Routes(handlers Controllers, logger *slog.Logger, options Options) http.Handler {
+func Routes(
+	handlers Controllers,
+	authenticator middleware.Authenticator,
+	logger *slog.Logger,
+	options Options,
+) http.Handler {
 	router := chi.NewRouter()
 	router.Use(
 		chimiddleware.RequestID,
@@ -64,8 +85,11 @@ func Routes(handlers Controllers, logger *slog.Logger, options Options) http.Han
 	return api.HandlerWithOptions(handlers, api.ChiServerOptions{
 		BaseURL:    basePath,
 		BaseRouter: router,
+		// Applied in reverse order: the rate limits run before the session check.
 		Middlewares: []api.MiddlewareFunc{
+			middleware.RequireSession(publicRoutes, authenticator, options.SecureCookies, logger),
 			middleware.RouteRateLimit(registerRoute, options.RegisterRateLimitPerHour, time.Hour, logger),
+			middleware.RouteRateLimit(loginRoute, options.LoginRateLimitPerMinute, time.Minute, logger),
 		},
 		ErrorHandlerFunc: invalidParameterHandler(logger),
 	})

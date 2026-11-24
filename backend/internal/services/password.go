@@ -79,6 +79,25 @@ func (h *PasswordHasher) Verify(ctx context.Context, password, encoded string) (
 	return subtle.ConstantTimeCompare(candidate, key) == 1, nil
 }
 
+// SimulateVerify takes as long as Verify without a stored hash: answering
+// faster for an unknown email would reveal which accounts exist.
+func (h *PasswordHasher) SimulateVerify(ctx context.Context, password string) error {
+	if err := h.acquireSlot(ctx); err != nil {
+		return err
+	}
+	defer h.releaseSlot()
+
+	argon2.IDKey(
+		[]byte(password),
+		make([]byte, h.params.SaltLength),
+		h.params.Iterations,
+		h.params.MemoryKiB,
+		h.params.Parallelism,
+		h.params.KeyLength,
+	)
+	return nil
+}
+
 func (h *PasswordHasher) acquireSlot(ctx context.Context) error {
 	select {
 	case h.slots <- struct{}{}:
@@ -104,7 +123,11 @@ func decodePasswordHash(encoded string) (config.Argon2Params, []byte, []byte, er
 		return params, nil, nil, ErrMalformedPasswordHash
 	}
 	if _, err := fmt.Sscanf(
-		parts[3], "m=%d,t=%d,p=%d", &params.MemoryKiB, &params.Iterations, &params.Parallelism,
+		parts[3],
+		"m=%d,t=%d,p=%d",
+		&params.MemoryKiB,
+		&params.Iterations,
+		&params.Parallelism,
 	); err != nil {
 		return params, nil, nil, ErrMalformedPasswordHash
 	}

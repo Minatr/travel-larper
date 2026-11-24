@@ -27,7 +27,7 @@ func (r *fakeRegistrar) Register(_ context.Context, email, password string) erro
 	return r.err
 }
 
-func TestAuthControllerRegister(t *testing.T) {
+func TestRegistrationControllerRegister(t *testing.T) {
 	const validBody = `{"email":"bob@example.com","password":"12345678"}`
 
 	tests := []struct {
@@ -109,7 +109,7 @@ func TestAuthControllerRegister(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			registrar := &fakeRegistrar{err: tt.registerErr}
-			controller := NewAuthController(registrar, slog.New(slog.NewTextHandler(io.Discard, nil)))
+			controller := NewRegistrationController(registrar, slog.New(slog.NewTextHandler(io.Discard, nil)))
 			recorder := httptest.NewRecorder()
 
 			controller.Register(
@@ -146,9 +146,9 @@ func TestAuthControllerRegister(t *testing.T) {
 	}
 }
 
-func TestAuthControllerRegisterRejectsLargeBody(t *testing.T) {
+func TestRegistrationControllerRegisterRejectsLargeBody(t *testing.T) {
 	registrar := &fakeRegistrar{}
-	controller := NewAuthController(registrar, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	controller := NewRegistrationController(registrar, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(
 		http.MethodPost,
