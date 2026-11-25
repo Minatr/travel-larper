@@ -5,6 +5,7 @@ import { hasMap } from '../lib/countryCode.ts'
 import { type CountryHint, EYELET_OFFSET_PX, stringPath, TAG_WIDTH_PX } from '../lib/countryTag.ts'
 import { fittedTitleSize } from '../lib/tagTitle.ts'
 import { cn } from '../lib/utils.ts'
+import { Flag } from './Flag.tsx'
 
 /** Room for the country's name on the tag, between its paddings. */
 const TITLE_WIDTH_PX = TAG_WIDTH_PX - 56
@@ -87,7 +88,11 @@ export function CountryBubble({ hint, onClose, faded = false }: CountryBubblePro
               ×
             </button>
           )}
-          <p aria-hidden className="text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase">
+          <p
+            aria-hidden
+            className="flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase"
+          >
+            <Flag code={code} />
             {t('globe.destination')}
           </p>
           <p

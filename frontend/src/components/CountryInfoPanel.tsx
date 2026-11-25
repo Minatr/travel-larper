@@ -9,9 +9,9 @@ import { useDrawerDrag } from '../hooks/useDrawerDrag.ts'
 import { useLiftedCredit } from '../hooks/useLiftedCredit.ts'
 import { useMeasuredHeight } from '../hooks/useMeasuredHeight.ts'
 import { currencyLabel, languagesLabel } from '../lib/countryFacts.ts'
-import { flagUrl } from '../lib/flags.ts'
 import { cn } from '../lib/utils.ts'
 import type { CountryInfo } from '../models/country.ts'
+import { Flag } from './Flag.tsx'
 
 /** Small printed labels, in the ink: decoration, never clickable. */
 const PRINTED_LABEL = 'text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase'
@@ -42,7 +42,6 @@ export function CountryInfoPanel({ code, title, territories }: CountryInfoPanelP
   const [tab, setTab] = useState<'overview' | 'territories'>('overview')
   const showTerritories = open && territories !== null && tab === 'territories'
   const bodyId = useId()
-  const flag = flagUrl(code)
   const sectionRef = useRef<HTMLElement>(null)
   // The drawer spans the phone's width: the map's credit, which must stay visible, goes above it.
   useLiftedCredit(sectionRef, true)
@@ -88,13 +87,7 @@ export function CountryInfoPanel({ code, title, territories }: CountryInfoPanelP
           >
             <ChevronLeft aria-hidden className="size-5" />
           </Link>
-          {flag !== null && (
-            <img
-              src={flag}
-              alt=""
-              className="h-[27px] w-9 shrink-0 rounded-[3px] shadow-[0_0_0_1px_rgb(23_25_30/0.15)]"
-            />
-          )}
+          <Flag code={code} className="h-[27px] w-9 rounded-[3px]" />
           <h1 className="tag-title line-clamp-2 min-w-0 flex-1 text-[1.75rem] leading-[0.95]">{title}</h1>
         </div>
       </div>
