@@ -4,12 +4,35 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/oapi-codegen/runtime"
 )
+
+// Defines values for CountrySummaryStatus.
+const (
+	CountrySummaryStatusAvailable   CountrySummaryStatus = "available"
+	CountrySummaryStatusMissing     CountrySummaryStatus = "missing"
+	CountrySummaryStatusUnavailable CountrySummaryStatus = "unavailable"
+)
+
+// Valid indicates whether the value is a known member of the CountrySummaryStatus enum.
+func (e CountrySummaryStatus) Valid() bool {
+	switch e {
+	case CountrySummaryStatusAvailable:
+		return true
+	case CountrySummaryStatusMissing:
+		return true
+	case CountrySummaryStatusUnavailable:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for CurrentUserStatus.
 const (
@@ -122,6 +145,60 @@ func (e HealthStatus) Valid() bool {
 	}
 }
 
+// Defines values for GetCountryInfoParamsLang.
+const (
+	GetCountryInfoParamsLangEn GetCountryInfoParamsLang = "en"
+	GetCountryInfoParamsLangFr GetCountryInfoParamsLang = "fr"
+)
+
+// Valid indicates whether the value is a known member of the GetCountryInfoParamsLang enum.
+func (e GetCountryInfoParamsLang) Valid() bool {
+	switch e {
+	case GetCountryInfoParamsLangEn:
+		return true
+	case GetCountryInfoParamsLangFr:
+		return true
+	default:
+		return false
+	}
+}
+
+// CountryInfo defines model for CountryInfo.
+type CountryInfo struct {
+	Code string `json:"code"`
+
+	// Currencies ISO 4217 codes; the frontend shows them in the user's language.
+	Currencies []string          `json:"currencies"`
+	Languages  []CountryLanguage `json:"languages"`
+
+	// Summary The first paragraph of the country's Wikivoyage article, in the language asked for.
+	Summary CountrySummary `json:"summary"`
+}
+
+// CountryLanguage The browser names it in the user's language, or the frontend uses `name` when it does not know it.
+type CountryLanguage struct {
+	// Code BCP 47 tag (fr, pt-BR).
+	Code string `json:"code"`
+
+	// Name Name in the language asked for (Wikidata, or REST Countries' English name).
+	Name string `json:"name"`
+}
+
+// CountrySummary The first paragraph of the country's Wikivoyage article, in the language asked for.
+type CountrySummary struct {
+	// Status missing when Wikivoyage has no article in this language; unavailable when it failed.
+	Status CountrySummaryStatus `json:"status"`
+
+	// Text Plain text, set when available.
+	Text *string `json:"text,omitempty"`
+
+	// Url The article, for the source link; set when available.
+	Url *string `json:"url,omitempty"`
+}
+
+// CountrySummaryStatus missing when Wikivoyage has no article in this language; unavailable when it failed.
+type CountrySummaryStatus string
+
 // CurrentUser defines model for CurrentUser.
 type CurrentUser struct {
 	Email  string            `json:"email"`
@@ -165,6 +242,15 @@ type RegisterRequest struct {
 	Password string `json:"password"`
 }
 
+// GetCountryInfoParams defines parameters for GetCountryInfo.
+type GetCountryInfoParams struct {
+	// Lang Language of the summary.
+	Lang GetCountryInfoParamsLang `form:"lang" json:"lang"`
+}
+
+// GetCountryInfoParamsLang defines parameters for GetCountryInfo.
+type GetCountryInfoParamsLang string
+
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = LoginRequest
 
@@ -185,6 +271,9 @@ type ServerInterface interface {
 	// Register Create a user account, pending until an admin approves it.
 	// (POST /auth/register)
 	Register(w http.ResponseWriter, r *http.Request)
+	// GetCountryInfo Return a country's currencies, languages and Wikivoyage summary (cached).
+	// (GET /countries/{code})
+	GetCountryInfo(w http.ResponseWriter, r *http.Request, code string, params GetCountryInfoParams)
 	// GetHealth Report whether the API and its database are reachable.
 	// (GET /health)
 	GetHealth(w http.ResponseWriter, r *http.Request)
@@ -215,6 +304,12 @@ func (_ Unimplemented) GetMe(w http.ResponseWriter, r *http.Request) {
 // Register Create a user account, pending until an admin approves it.
 // (POST /auth/register)
 func (_ Unimplemented) Register(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetCountryInfo Return a country's currencies, languages and Wikivoyage summary (cached).
+// (GET /countries/{code})
+func (_ Unimplemented) GetCountryInfo(w http.ResponseWriter, r *http.Request, code string, params GetCountryInfoParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -280,6 +375,48 @@ func (siw *ServerInterfaceWrapper) Register(w http.ResponseWriter, r *http.Reque
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Register(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetCountryInfo operation middleware
+func (siw *ServerInterfaceWrapper) GetCountryInfo(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "code" -------------
+	var code string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "code", chi.URLParam(r, "code"), &code, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "code", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCountryInfoParams
+
+	// ------------- Required query parameter "lang" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "lang", r.URL.Query(), &params.Lang, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "lang"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lang", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCountryInfo(w, r, code, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -430,6 +567,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/auth/me", wrapper.GetMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/countries/{code}", wrapper.GetCountryInfo)
 	})
 
 	return r

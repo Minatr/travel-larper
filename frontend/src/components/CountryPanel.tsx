@@ -45,7 +45,7 @@ export function CountryPanel({ code, territory = null, onOpen, onClose }: Countr
     <section
       aria-live="polite"
       // Above the search field, at the bottom of the screen.
-      className="absolute inset-x-3 bottom-24 mx-auto max-w-sm drop-shadow-2xl"
+      className="absolute inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] mx-auto max-w-sm drop-shadow-2xl"
     >
       <div
         className={cn(

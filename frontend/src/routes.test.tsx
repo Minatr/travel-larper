@@ -40,13 +40,20 @@ function stubCountries(code: string, otherParts: number[][][][] = []) {
     'fetch',
     vi.fn((url: string) =>
       Promise.resolve(
-        url === `/geo/countries/${code}.json`
-          ? new Response(JSON.stringify({ type: 'MultiPolygon', coordinates: [square.coordinates, ...otherParts] }))
-          : url === '/geo/countries.json'
-            ? new Response(JSON.stringify(countries))
-            : url === `/geo/borders/${code}.json`
-              ? new Response('null')
-              : new Response(null, { status: 404 }),
+        url === `/api/countries/${code}?lang=en`
+          ? Response.json({
+              code,
+              currencies: ['EUR'],
+              languages: [{ code: 'fr', name: 'French' }],
+              summary: { status: 'available', text: 'A country of Western Europe.', url: 'https://w/France' },
+            })
+          : url === `/geo/countries/${code}.json`
+            ? new Response(JSON.stringify({ type: 'MultiPolygon', coordinates: [square.coordinates, ...otherParts] }))
+            : url === '/geo/countries.json'
+              ? new Response(JSON.stringify(countries))
+              : url === `/geo/borders/${code}.json`
+                ? new Response('null')
+                : new Response(null, { status: 404 }),
       ),
     ),
   )
@@ -82,7 +89,19 @@ describe('routes', () => {
 
     expect(await screen.findByRole('region', { name: 'Map of France' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'France' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '← Globe' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Back to the globe' })).toHaveAttribute('href', '/')
+  })
+
+  it("shows the country's facts and Wikivoyage summary in its panel", async () => {
+    stubCountries('FR')
+
+    renderAt('/countries/FR')
+
+    const panel = await screen.findByRole('region', { name: 'France' })
+    expect(await within(panel).findByText('A country of Western Europe.')).toBeInTheDocument()
+    expect(within(panel).getAllByText('Euro · €').length).toBeGreaterThan(0)
+    expect(within(panel).getAllByText('French').length).toBeGreaterThan(0)
+    expect(within(panel).getByRole('link', { name: 'Wikivoyage' })).toHaveAttribute('href', 'https://w/France')
   })
 
   it('opens on a distant territory with ?territory=, and leads back to the mainland', async () => {

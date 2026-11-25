@@ -1,0 +1,4921 @@
+{
+  "AD": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "ca",
+        "names": {
+          "en": "Catalan",
+          "fr": "catalan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Andorra",
+      "fr": "Andorre"
+    }
+  },
+  "AE": {
+    "currencies": [
+      "AED"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "United Arab Emirates",
+      "fr": "Émirats arabes unis"
+    }
+  },
+  "AF": {
+    "currencies": [
+      "AFN"
+    ],
+    "languages": [
+      {
+        "code": "prs",
+        "names": {
+          "en": "Dari",
+          "fr": "dari"
+        }
+      },
+      {
+        "code": "ps",
+        "names": {
+          "en": "Pashto",
+          "fr": "pachto"
+        }
+      },
+      {
+        "code": "tk",
+        "names": {
+          "en": "Turkmen",
+          "fr": "turkmène"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Afghanistan",
+      "fr": "Afghanistan"
+    }
+  },
+  "AG": {
+    "currencies": [
+      "XCD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Antigua and Barbuda",
+      "fr": "Antigua-et-Barbuda"
+    }
+  },
+  "AL": {
+    "currencies": [
+      "ALL"
+    ],
+    "languages": [
+      {
+        "code": "sq",
+        "names": {
+          "en": "Albanian",
+          "fr": "albanais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Albania",
+      "fr": "Albanie"
+    }
+  },
+  "AM": {
+    "currencies": [
+      "AMD"
+    ],
+    "languages": [
+      {
+        "code": "hy",
+        "names": {
+          "en": "Armenian",
+          "fr": "arménien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Armenia",
+      "fr": "Arménie"
+    }
+  },
+  "AO": {
+    "currencies": [
+      "AOA"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Angola",
+      "fr": "Angola"
+    }
+  },
+  "AR": {
+    "currencies": [
+      "ARS"
+    ],
+    "languages": [
+      {
+        "code": "gn",
+        "names": {
+          "en": "Guarani",
+          "fr": "guarani"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Argentina",
+      "fr": "Argentine"
+    }
+  },
+  "AT": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "de",
+        "names": {
+          "en": "German",
+          "fr": "allemand"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Austria",
+      "fr": "Autriche"
+    }
+  },
+  "AU": {
+    "currencies": [
+      "AUD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Australia",
+      "fr": "Australie"
+    }
+  },
+  "AW": {
+    "currencies": [
+      "AWG"
+    ],
+    "languages": [
+      {
+        "code": "nl",
+        "names": {
+          "en": "Dutch",
+          "fr": "néerlandais"
+        }
+      },
+      {
+        "code": "pap",
+        "names": {
+          "en": "Papiamento",
+          "fr": "papiamento"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Aruba",
+      "fr": "Aruba"
+    }
+  },
+  "AX": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "sv",
+        "names": {
+          "en": "Swedish",
+          "fr": "suédois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Åland",
+      "fr": "Åland"
+    }
+  },
+  "AZ": {
+    "currencies": [
+      "AZN"
+    ],
+    "languages": [
+      {
+        "code": "az",
+        "names": {
+          "en": "Azerbaijani",
+          "fr": "azéri"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Azerbaijan",
+      "fr": "Azerbaïdjan"
+    }
+  },
+  "BA": {
+    "currencies": [
+      "BAM"
+    ],
+    "languages": [
+      {
+        "code": "bs",
+        "names": {
+          "en": "Bosnian",
+          "fr": "bosnien"
+        }
+      },
+      {
+        "code": "hr",
+        "names": {
+          "en": "Croatian",
+          "fr": "croate"
+        }
+      },
+      {
+        "code": "sr",
+        "names": {
+          "en": "Serbian",
+          "fr": "serbe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bosnia and Herzegovina",
+      "fr": "Bosnie-Herzégovine"
+    }
+  },
+  "BB": {
+    "currencies": [
+      "BBD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Barbados",
+      "fr": "Barbade"
+    }
+  },
+  "BD": {
+    "currencies": [
+      "BDT"
+    ],
+    "languages": [
+      {
+        "code": "bn",
+        "names": {
+          "en": "Bangla",
+          "fr": "bengali"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bangladesh",
+      "fr": "Bangladesh"
+    }
+  },
+  "BE": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "de",
+        "names": {
+          "en": "German",
+          "fr": "allemand"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "nl",
+        "names": {
+          "en": "Dutch",
+          "fr": "néerlandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Belgium",
+      "fr": "Belgique"
+    }
+  },
+  "BF": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Burkina Faso",
+      "fr": "Burkina Faso"
+    }
+  },
+  "BG": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "bg",
+        "names": {
+          "en": "Bulgarian",
+          "fr": "bulgare"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bulgaria",
+      "fr": "Bulgarie"
+    }
+  },
+  "BH": {
+    "currencies": [
+      "BHD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bahrain",
+      "fr": "Bahreïn"
+    }
+  },
+  "BI": {
+    "currencies": [
+      "BIF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "rn",
+        "names": {
+          "en": "Kirundi",
+          "fr": "kirundi"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Burundi",
+      "fr": "Burundi"
+    }
+  },
+  "BJ": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Benin",
+      "fr": "Bénin"
+    }
+  },
+  "BN": {
+    "currencies": [
+      "BND",
+      "SGD"
+    ],
+    "languages": [
+      {
+        "code": "ms",
+        "names": {
+          "en": "Malay",
+          "fr": "malais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Brunei",
+      "fr": "Brunei"
+    }
+  },
+  "BO": {
+    "currencies": [
+      "BOB"
+    ],
+    "languages": [
+      {
+        "code": "ay",
+        "names": {
+          "en": "Aymara",
+          "fr": "aymara"
+        }
+      },
+      {
+        "code": "gn",
+        "names": {
+          "en": "Guarani",
+          "fr": "guarani"
+        }
+      },
+      {
+        "code": "qu",
+        "names": {
+          "en": "Quechua",
+          "fr": "quechua"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bolivia",
+      "fr": "Bolivie"
+    }
+  },
+  "BR": {
+    "currencies": [
+      "BRL"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Brazil",
+      "fr": "Brésil"
+    }
+  },
+  "BS": {
+    "currencies": [
+      "BSD",
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bahamas",
+      "fr": "Bahamas"
+    }
+  },
+  "BT": {
+    "currencies": [
+      "BTN",
+      "INR"
+    ],
+    "languages": [
+      {
+        "code": "dz",
+        "names": {
+          "en": "Dzongkha",
+          "fr": "dzongkha"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Bhutan",
+      "fr": "Bhoutan"
+    }
+  },
+  "BW": {
+    "currencies": [
+      "BWP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "tn",
+        "names": {
+          "en": "Tswana",
+          "fr": "tswana"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Botswana",
+      "fr": "Botswana"
+    }
+  },
+  "BY": {
+    "currencies": [
+      "BYN"
+    ],
+    "languages": [
+      {
+        "code": "be",
+        "names": {
+          "en": "Belarusian",
+          "fr": "biélorusse"
+        }
+      },
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Belarus",
+      "fr": "Biélorussie"
+    }
+  },
+  "BZ": {
+    "currencies": [
+      "BZD"
+    ],
+    "languages": [
+      {
+        "code": "bjz",
+        "names": {
+          "en": "Baruga",
+          "fr": "baruga"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Belize",
+      "fr": "Belize"
+    }
+  },
+  "CA": {
+    "currencies": [
+      "CAD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Canada",
+      "fr": "Canada"
+    }
+  },
+  "CD": {
+    "currencies": [
+      "CDF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "kg",
+        "names": {
+          "en": "Kongo",
+          "fr": "kikongo"
+        }
+      },
+      {
+        "code": "ln",
+        "names": {
+          "en": "Lingala",
+          "fr": "lingala"
+        }
+      },
+      {
+        "code": "lua",
+        "names": {
+          "en": "Luba-Kasai",
+          "fr": "luba-kasaï"
+        }
+      },
+      {
+        "code": "sw",
+        "names": {
+          "en": "Swahili",
+          "fr": "swahili"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Democratic Republic of the Congo",
+      "fr": "République démocratique du Congo"
+    }
+  },
+  "CF": {
+    "currencies": [
+      "XAF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "sg",
+        "names": {
+          "en": "Sango",
+          "fr": "sango"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Central African Republic",
+      "fr": "République centrafricaine"
+    }
+  },
+  "CG": {
+    "currencies": [
+      "XAF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "kg",
+        "names": {
+          "en": "Kongo",
+          "fr": "kikongo"
+        }
+      },
+      {
+        "code": "ln",
+        "names": {
+          "en": "Lingala",
+          "fr": "lingala"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Republic of the Congo",
+      "fr": "République du Congo"
+    }
+  },
+  "CH": {
+    "currencies": [
+      "CHF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "gsw",
+        "names": {
+          "en": "Alemannic",
+          "fr": "alémanique"
+        }
+      },
+      {
+        "code": "it",
+        "names": {
+          "en": "Italian",
+          "fr": "italien"
+        }
+      },
+      {
+        "code": "rm",
+        "names": {
+          "en": "Romansh",
+          "fr": "romanche"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Switzerland",
+      "fr": "Suisse"
+    }
+  },
+  "CI": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Côte d'Ivoire",
+      "fr": "Côte d'Ivoire"
+    }
+  },
+  "CL": {
+    "currencies": [
+      "CLP"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Chile",
+      "fr": "Chili"
+    }
+  },
+  "CM": {
+    "currencies": [
+      "XAF"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Cameroon",
+      "fr": "Cameroun"
+    }
+  },
+  "CN": {
+    "currencies": [
+      "CNY"
+    ],
+    "languages": [
+      {
+        "code": "zh",
+        "names": {
+          "en": "Chinese",
+          "fr": "chinois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "China",
+      "fr": "Chine"
+    }
+  },
+  "CO": {
+    "currencies": [
+      "COP"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Colombia",
+      "fr": "Colombie"
+    }
+  },
+  "CR": {
+    "currencies": [
+      "CRC"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Costa Rica",
+      "fr": "Costa Rica"
+    }
+  },
+  "CU": {
+    "currencies": [
+      "CUP"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Cuba",
+      "fr": "Cuba"
+    }
+  },
+  "CV": {
+    "currencies": [
+      "CVE"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Cape Verde",
+      "fr": "Cap-Vert"
+    }
+  },
+  "CW": {
+    "currencies": [
+      "XCG"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "nl",
+        "names": {
+          "en": "Dutch",
+          "fr": "néerlandais"
+        }
+      },
+      {
+        "code": "pap",
+        "names": {
+          "en": "Papiamento",
+          "fr": "papiamento"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Curaçao",
+      "fr": "Curaçao"
+    }
+  },
+  "CY": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "el",
+        "names": {
+          "en": "Modern Greek",
+          "fr": "grec moderne"
+        }
+      },
+      {
+        "code": "tr",
+        "names": {
+          "en": "Turkish",
+          "fr": "turc"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Cyprus",
+      "fr": "Chypre"
+    }
+  },
+  "CZ": {
+    "currencies": [
+      "CZK"
+    ],
+    "languages": [
+      {
+        "code": "cs",
+        "names": {
+          "en": "Czech",
+          "fr": "tchèque"
+        }
+      },
+      {
+        "code": "sk",
+        "names": {
+          "en": "Slovak",
+          "fr": "slovaque"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Czech Republic",
+      "fr": "Tchéquie"
+    }
+  },
+  "DE": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "de",
+        "names": {
+          "en": "German",
+          "fr": "allemand"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Germany",
+      "fr": "Allemagne"
+    }
+  },
+  "DJ": {
+    "currencies": [
+      "DJF"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Djibouti",
+      "fr": "Djibouti"
+    }
+  },
+  "DK": {
+    "currencies": [
+      "DKK"
+    ],
+    "languages": [
+      {
+        "code": "da",
+        "names": {
+          "en": "Danish",
+          "fr": "danois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Denmark",
+      "fr": "Danemark"
+    }
+  },
+  "DM": {
+    "currencies": [
+      "XCD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Dominica",
+      "fr": "Dominique"
+    }
+  },
+  "DO": {
+    "currencies": [
+      "DOP"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Dominican Republic",
+      "fr": "République dominicaine"
+    }
+  },
+  "DZ": {
+    "currencies": [
+      "DZD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Algeria",
+      "fr": "Algérie"
+    }
+  },
+  "EC": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Ecuador",
+      "fr": "Équateur"
+    }
+  },
+  "EE": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "et",
+        "names": {
+          "en": "Estonian",
+          "fr": "estonien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Estonia",
+      "fr": "Estonie"
+    }
+  },
+  "EG": {
+    "currencies": [
+      "EGP"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Egypt",
+      "fr": "Égypte"
+    }
+  },
+  "EH": {
+    "currencies": [
+      "DZD",
+      "MAD",
+      "MRU"
+    ],
+    "languages": [
+      {
+        "code": "mey",
+        "names": {
+          "en": "Hassaniya Arabic",
+          "fr": "hassanya"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Western Sahara",
+      "fr": "Sahara occidental"
+    }
+  },
+  "ER": {
+    "currencies": [
+      "ERN"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ti",
+        "names": {
+          "en": "Tigrinya",
+          "fr": "tigrigna"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Eritrea",
+      "fr": "Érythrée"
+    }
+  },
+  "ES": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      },
+      {
+        "code": "ca",
+        "names": {
+          "en": "Catalan",
+          "fr": "catalan"
+        }
+      },
+      {
+        "code": "eu",
+        "names": {
+          "en": "Basque",
+          "fr": "basque"
+        }
+      },
+      {
+        "code": "gl",
+        "names": {
+          "en": "Galician",
+          "fr": "galicien"
+        }
+      },
+      {
+        "code": "oc",
+        "names": {
+          "en": "Occitan",
+          "fr": "occitan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Spain",
+      "fr": "Espagne"
+    }
+  },
+  "ET": {
+    "currencies": [
+      "ETB"
+    ],
+    "languages": [
+      {
+        "code": "am",
+        "names": {
+          "en": "Amharic",
+          "fr": "amharique"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Ethiopia",
+      "fr": "Éthiopie"
+    }
+  },
+  "FI": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "fi",
+        "names": {
+          "en": "Finnish",
+          "fr": "finnois"
+        }
+      },
+      {
+        "code": "sv",
+        "names": {
+          "en": "Swedish",
+          "fr": "suédois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Finland",
+      "fr": "Finlande"
+    }
+  },
+  "FJ": {
+    "currencies": [
+      "FJD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fj",
+        "names": {
+          "en": "Fijian",
+          "fr": "fidjien"
+        }
+      },
+      {
+        "code": "hif",
+        "names": {
+          "en": "Fiji Hindi",
+          "fr": "hindi des Fidji"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Fiji",
+      "fr": "Fidji"
+    }
+  },
+  "FK": {
+    "currencies": [
+      "FKP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Falkland Islands",
+      "fr": "Îles Malouines"
+    }
+  },
+  "FM": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Federated States of Micronesia",
+      "fr": "États fédérés de Micronésie"
+    }
+  },
+  "FR": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "France",
+      "fr": "France"
+    }
+  },
+  "GA": {
+    "currencies": [
+      "XAF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Gabon",
+      "fr": "Gabon"
+    }
+  },
+  "GB": {
+    "currencies": [
+      "GBP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "United Kingdom",
+      "fr": "Royaume-Uni"
+    }
+  },
+  "GD": {
+    "currencies": [
+      "XCD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Grenada",
+      "fr": "Grenade"
+    }
+  },
+  "GE": {
+    "currencies": [
+      "GEL"
+    ],
+    "languages": [
+      {
+        "code": "ka",
+        "names": {
+          "en": "Georgian",
+          "fr": "géorgien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Georgia (country)",
+      "fr": "Géorgie (pays)"
+    }
+  },
+  "GG": {
+    "currencies": [
+      "GBP",
+      "GGP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "nrf",
+        "names": {
+          "en": "Norman",
+          "fr": "normand"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Guernsey",
+      "fr": "Guernesey"
+    }
+  },
+  "GH": {
+    "currencies": [
+      "GHS"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Ghana",
+      "fr": "Ghana"
+    }
+  },
+  "GL": {
+    "currencies": [
+      "DKK"
+    ],
+    "languages": [
+      {
+        "code": "kl",
+        "names": {
+          "en": "Greenlandic",
+          "fr": "groenlandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Greenland",
+      "fr": "Groenland"
+    }
+  },
+  "GM": {
+    "currencies": [
+      "GMD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Gambia",
+      "fr": "Gambie"
+    }
+  },
+  "GN": {
+    "currencies": [
+      "GNF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Guinea",
+      "fr": "Guinée"
+    }
+  },
+  "GQ": {
+    "currencies": [
+      "XAF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Equatorial Guinea",
+      "fr": "Guinée équatoriale"
+    }
+  },
+  "GR": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "el",
+        "names": {
+          "en": "Modern Greek",
+          "fr": "grec moderne"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Greece",
+      "fr": "Grèce"
+    }
+  },
+  "GT": {
+    "currencies": [
+      "GTQ"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Guatemala",
+      "fr": "Guatemala"
+    }
+  },
+  "GW": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      },
+      {
+        "code": "pov",
+        "names": {
+          "en": "Guinea-Bissau Creole",
+          "fr": "créole de Guinée-Bissau"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Guinea-Bissau",
+      "fr": "Guinée-Bissau"
+    }
+  },
+  "GY": {
+    "currencies": [
+      "GYD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Guyana",
+      "fr": "Guyana"
+    }
+  },
+  "HK": {
+    "currencies": [
+      "HKD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "zh",
+        "names": {
+          "en": "Chinese",
+          "fr": "chinois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Hong Kong",
+      "fr": "Hong Kong"
+    }
+  },
+  "HN": {
+    "currencies": [
+      "HNL"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Honduras",
+      "fr": "Honduras"
+    }
+  },
+  "HR": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "hr",
+        "names": {
+          "en": "Croatian",
+          "fr": "croate"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Croatia",
+      "fr": "Croatie"
+    }
+  },
+  "HT": {
+    "currencies": [
+      "HTG"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "ht",
+        "names": {
+          "en": "Haitian Creole",
+          "fr": "créole haïtien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Haiti",
+      "fr": "Haïti"
+    }
+  },
+  "HU": {
+    "currencies": [
+      "HUF"
+    ],
+    "languages": [
+      {
+        "code": "hu",
+        "names": {
+          "en": "Hungarian",
+          "fr": "hongrois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Hungary",
+      "fr": "Hongrie"
+    }
+  },
+  "ID": {
+    "currencies": [
+      "IDR"
+    ],
+    "languages": [
+      {
+        "code": "id",
+        "names": {
+          "en": "Indonesian",
+          "fr": "indonésien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Indonesia",
+      "fr": "Indonésie"
+    }
+  },
+  "IE": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ga",
+        "names": {
+          "en": "Irish",
+          "fr": "irlandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Ireland",
+      "fr": "République d'Irlande"
+    }
+  },
+  "IL": {
+    "currencies": [
+      "ILS"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "he",
+        "names": {
+          "en": "Hebrew",
+          "fr": "hébreu"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Israel",
+      "fr": "Israël"
+    }
+  },
+  "IM": {
+    "currencies": [
+      "GBP",
+      "IMP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "gv",
+        "names": {
+          "en": "Manx",
+          "fr": "mannois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Isle of Man",
+      "fr": "Île de Man"
+    }
+  },
+  "IN": {
+    "currencies": [
+      "INR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "hi",
+        "names": {
+          "en": "Hindi",
+          "fr": "hindi"
+        }
+      },
+      {
+        "code": "ta",
+        "names": {
+          "en": "Tamil",
+          "fr": "tamoul"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "India",
+      "fr": "Inde"
+    }
+  },
+  "IQ": {
+    "currencies": [
+      "IQD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "arc",
+        "names": {
+          "en": "Imperial Aramaic",
+          "fr": "araméen impérial"
+        }
+      },
+      {
+        "code": "ckb",
+        "names": {
+          "en": "Sorani",
+          "fr": "sorani"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Iraq",
+      "fr": "Iraq"
+    }
+  },
+  "IR": {
+    "currencies": [
+      "IRR"
+    ],
+    "languages": [
+      {
+        "code": "fa",
+        "names": {
+          "en": "Persian",
+          "fr": "persan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Iran",
+      "fr": "Iran"
+    }
+  },
+  "IS": {
+    "currencies": [
+      "ISK"
+    ],
+    "languages": [
+      {
+        "code": "is",
+        "names": {
+          "en": "Icelandic",
+          "fr": "islandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Iceland",
+      "fr": "Islande"
+    }
+  },
+  "IT": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "it",
+        "names": {
+          "en": "Italian",
+          "fr": "italien"
+        }
+      },
+      {
+        "code": "ca",
+        "names": {
+          "en": "Catalan",
+          "fr": "catalan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Italy",
+      "fr": "Italie"
+    }
+  },
+  "JE": {
+    "currencies": [
+      "GBP",
+      "JEP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "nrf",
+        "names": {
+          "en": "Norman",
+          "fr": "normand"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Jersey",
+      "fr": "Jersey"
+    }
+  },
+  "JM": {
+    "currencies": [
+      "JMD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "jam",
+        "names": {
+          "en": "Jamaican Patois",
+          "fr": "créole jamaïcain"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Jamaica",
+      "fr": "Jamaïque"
+    }
+  },
+  "JO": {
+    "currencies": [
+      "JOD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Jordan",
+      "fr": "Jordanie"
+    }
+  },
+  "JP": {
+    "currencies": [
+      "JPY"
+    ],
+    "languages": [
+      {
+        "code": "ja",
+        "names": {
+          "en": "Japanese",
+          "fr": "japonais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Japan",
+      "fr": "Japon"
+    }
+  },
+  "KE": {
+    "currencies": [
+      "KES"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "sw",
+        "names": {
+          "en": "Swahili",
+          "fr": "swahili"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Kenya",
+      "fr": "Kenya"
+    }
+  },
+  "KG": {
+    "currencies": [
+      "KGS"
+    ],
+    "languages": [
+      {
+        "code": "ky",
+        "names": {
+          "en": "Kyrgyz",
+          "fr": "kirghize"
+        }
+      },
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Kyrgyzstan",
+      "fr": "Kirghizistan"
+    }
+  },
+  "KH": {
+    "currencies": [
+      "KHR",
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "km",
+        "names": {
+          "en": "Khmer",
+          "fr": "khmer"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Cambodia",
+      "fr": "Cambodge"
+    }
+  },
+  "KI": {
+    "currencies": [
+      "AUD",
+      "KID"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "gil",
+        "names": {
+          "en": "Gilbertese",
+          "fr": "gilbertin"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Kiribati",
+      "fr": "Kiribati"
+    }
+  },
+  "KM": {
+    "currencies": [
+      "KMF"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "zdj",
+        "names": {
+          "en": "Ngazidja Comorian",
+          "fr": "grand comorien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Comoros",
+      "fr": "Comores"
+    }
+  },
+  "KN": {
+    "currencies": [
+      "XCD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Saint Kitts and Nevis",
+      "fr": "Saint-Christophe-et-Niévès"
+    }
+  },
+  "KP": {
+    "currencies": [
+      "KPW"
+    ],
+    "languages": [
+      {
+        "code": "ko",
+        "names": {
+          "en": "Korean",
+          "fr": "coréen"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "North Korea",
+      "fr": "Corée du Nord"
+    }
+  },
+  "KR": {
+    "currencies": [
+      "KRW"
+    ],
+    "languages": [
+      {
+        "code": "ko",
+        "names": {
+          "en": "Korean",
+          "fr": "coréen"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "South Korea",
+      "fr": "Corée du Sud"
+    }
+  },
+  "KW": {
+    "currencies": [
+      "KWD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Kuwait",
+      "fr": "Koweït"
+    }
+  },
+  "KZ": {
+    "currencies": [
+      "KZT"
+    ],
+    "languages": [
+      {
+        "code": "kk",
+        "names": {
+          "en": "Kazakh",
+          "fr": "kazakh"
+        }
+      },
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Kazakhstan",
+      "fr": "Kazakhstan"
+    }
+  },
+  "LA": {
+    "currencies": [
+      "LAK"
+    ],
+    "languages": [
+      {
+        "code": "lo",
+        "names": {
+          "en": "Lao",
+          "fr": "lao"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Laos",
+      "fr": "Laos"
+    }
+  },
+  "LB": {
+    "currencies": [
+      "LBP"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Lebanon",
+      "fr": "Liban"
+    }
+  },
+  "LC": {
+    "currencies": [
+      "XCD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Saint Lucia",
+      "fr": "Sainte-Lucie"
+    }
+  },
+  "LI": {
+    "currencies": [
+      "CHF"
+    ],
+    "languages": [
+      {
+        "code": "de",
+        "names": {
+          "en": "German",
+          "fr": "allemand"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Liechtenstein",
+      "fr": "Liechtenstein"
+    }
+  },
+  "LK": {
+    "currencies": [
+      "LKR"
+    ],
+    "languages": [
+      {
+        "code": "si",
+        "names": {
+          "en": "Sinhala",
+          "fr": "singhalais"
+        }
+      },
+      {
+        "code": "ta",
+        "names": {
+          "en": "Tamil",
+          "fr": "tamoul"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Sri Lanka",
+      "fr": "Sri Lanka"
+    }
+  },
+  "LR": {
+    "currencies": [
+      "LRD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Liberia",
+      "fr": "Liberia"
+    }
+  },
+  "LS": {
+    "currencies": [
+      "LSL",
+      "ZAR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "st",
+        "names": {
+          "en": "Sesotho",
+          "fr": "sotho du Sud"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Lesotho",
+      "fr": "Lesotho"
+    }
+  },
+  "LT": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "lt",
+        "names": {
+          "en": "Lithuanian",
+          "fr": "lituanien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Lithuania",
+      "fr": "Lituanie"
+    }
+  },
+  "LU": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "de",
+        "names": {
+          "en": "German",
+          "fr": "allemand"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "lb",
+        "names": {
+          "en": "Luxembourgish",
+          "fr": "luxembourgeois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Luxembourg",
+      "fr": "Luxembourg"
+    }
+  },
+  "LV": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "lv",
+        "names": {
+          "en": "Latvian",
+          "fr": "letton"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Latvia",
+      "fr": "Lettonie"
+    }
+  },
+  "LY": {
+    "currencies": [
+      "LYD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Libya",
+      "fr": "Libye"
+    }
+  },
+  "MA": {
+    "currencies": [
+      "MAD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "zgh",
+        "names": {
+          "en": "Standard Moroccan Tamazight",
+          "fr": "amazighe standard marocain"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Morocco",
+      "fr": "Maroc"
+    }
+  },
+  "MC": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Monaco",
+      "fr": "Monaco"
+    }
+  },
+  "MD": {
+    "currencies": [
+      "MDL"
+    ],
+    "languages": [
+      {
+        "code": "ro",
+        "names": {
+          "en": "Romanian",
+          "fr": "roumain"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Moldova",
+      "fr": "Moldavie"
+    }
+  },
+  "ME": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "cnr",
+        "names": {
+          "en": "Montenegrin",
+          "fr": "monténégrin"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Montenegro",
+      "fr": "Monténégro"
+    }
+  },
+  "MG": {
+    "currencies": [
+      "MGA"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "mg",
+        "names": {
+          "en": "Malagasy",
+          "fr": "malgache"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Madagascar",
+      "fr": "Madagascar"
+    }
+  },
+  "MH": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "mh",
+        "names": {
+          "en": "Marshallese",
+          "fr": "marshallais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Marshall Islands",
+      "fr": "Îles Marshall"
+    }
+  },
+  "MK": {
+    "currencies": [
+      "MKD"
+    ],
+    "languages": [
+      {
+        "code": "mk",
+        "names": {
+          "en": "Macedonian",
+          "fr": "macédonien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "North Macedonia",
+      "fr": "Macédoine du Nord"
+    }
+  },
+  "ML": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Mali",
+      "fr": "Mali"
+    }
+  },
+  "MM": {
+    "currencies": [
+      "MMK"
+    ],
+    "languages": [
+      {
+        "code": "my",
+        "names": {
+          "en": "Burmese",
+          "fr": "birman"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Myanmar",
+      "fr": "Birmanie"
+    }
+  },
+  "MN": {
+    "currencies": [
+      "MNT"
+    ],
+    "languages": [
+      {
+        "code": "mn",
+        "names": {
+          "en": "Mongolian",
+          "fr": "mongol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Mongolia",
+      "fr": "Mongolie"
+    }
+  },
+  "MO": {
+    "currencies": [
+      "MOP"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      },
+      {
+        "code": "zh",
+        "names": {
+          "en": "Chinese",
+          "fr": "chinois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Macau",
+      "fr": "Macao"
+    }
+  },
+  "MR": {
+    "currencies": [
+      "MRU"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Mauritania",
+      "fr": "Mauritanie"
+    }
+  },
+  "MT": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "mt",
+        "names": {
+          "en": "Maltese",
+          "fr": "maltais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Malta",
+      "fr": "Malte"
+    }
+  },
+  "MU": {
+    "currencies": [
+      "MUR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "mfe",
+        "names": {
+          "en": "Mauritian Creole",
+          "fr": "créole mauricien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Mauritius",
+      "fr": "Maurice"
+    }
+  },
+  "MV": {
+    "currencies": [
+      "MVR"
+    ],
+    "languages": [
+      {
+        "code": "dv",
+        "names": {
+          "en": "Maldivian",
+          "fr": "maldivien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Maldives",
+      "fr": "Maldives"
+    }
+  },
+  "MW": {
+    "currencies": [
+      "MWK"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ny",
+        "names": {
+          "en": "Chewa",
+          "fr": "chewa"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Malawi",
+      "fr": "Malawi"
+    }
+  },
+  "MX": {
+    "currencies": [
+      "MXN"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Mexico",
+      "fr": "Mexique"
+    }
+  },
+  "MY": {
+    "currencies": [
+      "MYR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ms",
+        "names": {
+          "en": "Malay",
+          "fr": "malais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Malaysia",
+      "fr": "Malaisie"
+    }
+  },
+  "MZ": {
+    "currencies": [
+      "MZN"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Mozambique",
+      "fr": "Mozambique"
+    }
+  },
+  "NA": {
+    "currencies": [
+      "NAD",
+      "ZAR"
+    ],
+    "languages": [
+      {
+        "code": "af",
+        "names": {
+          "en": "Afrikaans",
+          "fr": "afrikaans"
+        }
+      },
+      {
+        "code": "de",
+        "names": {
+          "en": "German",
+          "fr": "allemand"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "hz",
+        "names": {
+          "en": "Herero",
+          "fr": "héréro"
+        }
+      },
+      {
+        "code": "hgm",
+        "names": {
+          "en": "Haiǁom",
+          "fr": "haiǁom"
+        }
+      },
+      {
+        "code": "kwn",
+        "names": {
+          "en": "Kwangali",
+          "fr": "kwangali"
+        }
+      },
+      {
+        "code": "loz",
+        "names": {
+          "en": "Lozi",
+          "fr": "lozi"
+        }
+      },
+      {
+        "code": "ng",
+        "names": {
+          "en": "Ndonga",
+          "fr": "ndonga"
+        }
+      },
+      {
+        "code": "tn",
+        "names": {
+          "en": "Tswana",
+          "fr": "tswana"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Namibia",
+      "fr": "Namibie"
+    }
+  },
+  "NC": {
+    "currencies": [
+      "XPF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "New Caledonia",
+      "fr": "Nouvelle-Calédonie"
+    }
+  },
+  "NE": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Niger",
+      "fr": "Niger"
+    }
+  },
+  "NG": {
+    "currencies": [
+      "NGN"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Nigeria",
+      "fr": "Nigeria"
+    }
+  },
+  "NI": {
+    "currencies": [
+      "NIO"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Nicaragua",
+      "fr": "Nicaragua"
+    }
+  },
+  "NL": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "nl",
+        "names": {
+          "en": "Dutch",
+          "fr": "néerlandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Netherlands",
+      "fr": "Pays-Bas"
+    }
+  },
+  "NO": {
+    "currencies": [
+      "NOK"
+    ],
+    "languages": [
+      {
+        "code": "nn",
+        "names": {
+          "en": "Nynorsk",
+          "fr": "nynorsk"
+        }
+      },
+      {
+        "code": "nb",
+        "names": {
+          "en": "Bokmål",
+          "fr": "bokmål"
+        }
+      },
+      {
+        "code": "se",
+        "names": {
+          "en": "Northern Sami",
+          "fr": "same du Nord"
+        }
+      },
+      {
+        "code": "smj",
+        "names": {
+          "en": "Lule Sami",
+          "fr": "same de Lule"
+        }
+      },
+      {
+        "code": "sma",
+        "names": {
+          "en": "Southern Sami",
+          "fr": "same du Sud"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Norway",
+      "fr": "Norvège"
+    }
+  },
+  "NP": {
+    "currencies": [
+      "NPR"
+    ],
+    "languages": [
+      {
+        "code": "ne",
+        "names": {
+          "en": "Nepali",
+          "fr": "népalais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Nepal",
+      "fr": "Népal"
+    }
+  },
+  "NR": {
+    "currencies": [
+      "AUD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "na",
+        "names": {
+          "en": "Nauruan",
+          "fr": "nauruan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Nauru",
+      "fr": "Nauru"
+    }
+  },
+  "NZ": {
+    "currencies": [
+      "NZD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "mi",
+        "names": {
+          "en": "Māori",
+          "fr": "māori"
+        }
+      },
+      {
+        "code": "nzs",
+        "names": {
+          "en": "New Zealand Sign Language",
+          "fr": "langue des signes néo-zélandaise"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "New Zealand",
+      "fr": "Nouvelle-Zélande"
+    }
+  },
+  "OM": {
+    "currencies": [
+      "OMR"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Oman",
+      "fr": "Oman"
+    }
+  },
+  "PA": {
+    "currencies": [
+      "PAB",
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Panama",
+      "fr": "Panamá"
+    }
+  },
+  "PE": {
+    "currencies": [
+      "PEN"
+    ],
+    "languages": [
+      {
+        "code": "ay",
+        "names": {
+          "en": "Aymara",
+          "fr": "aymara"
+        }
+      },
+      {
+        "code": "qu",
+        "names": {
+          "en": "Quechua",
+          "fr": "quechua"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Peru",
+      "fr": "Pérou"
+    }
+  },
+  "PG": {
+    "currencies": [
+      "PGK"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ho",
+        "names": {
+          "en": "Hiri Motu",
+          "fr": "hiri motou"
+        }
+      },
+      {
+        "code": "tpi",
+        "names": {
+          "en": "Tok Pisin",
+          "fr": "tok pisin"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Papua New Guinea",
+      "fr": "Papouasie-Nouvelle-Guinée"
+    }
+  },
+  "PH": {
+    "currencies": [
+      "PHP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fil",
+        "names": {
+          "en": "Filipino",
+          "fr": "philippin"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Philippines",
+      "fr": "Philippines"
+    }
+  },
+  "PK": {
+    "currencies": [
+      "PKR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ur",
+        "names": {
+          "en": "Urdu",
+          "fr": "ourdou"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Pakistan",
+      "fr": "Pakistan"
+    }
+  },
+  "PL": {
+    "currencies": [
+      "PLN"
+    ],
+    "languages": [
+      {
+        "code": "pl",
+        "names": {
+          "en": "Polish",
+          "fr": "polonais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Poland",
+      "fr": "Pologne"
+    }
+  },
+  "PR": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Puerto Rico",
+      "fr": "Porto Rico"
+    }
+  },
+  "PS": {
+    "currencies": [
+      "EGP",
+      "ILS",
+      "JOD"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Palestinian territories",
+      "fr": "Palestine"
+    }
+  },
+  "PT": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Portugal",
+      "fr": "Portugal"
+    }
+  },
+  "PW": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "pau",
+        "names": {
+          "en": "Palauan",
+          "fr": "palau"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Palau",
+      "fr": "Palaos"
+    }
+  },
+  "PY": {
+    "currencies": [
+      "PYG"
+    ],
+    "languages": [
+      {
+        "code": "gn",
+        "names": {
+          "en": "Guarani",
+          "fr": "guarani"
+        }
+      },
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Paraguay",
+      "fr": "Paraguay"
+    }
+  },
+  "QA": {
+    "currencies": [
+      "QAR"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Qatar",
+      "fr": "Qatar"
+    }
+  },
+  "RO": {
+    "currencies": [
+      "RON"
+    ],
+    "languages": [
+      {
+        "code": "ro",
+        "names": {
+          "en": "Romanian",
+          "fr": "roumain"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Romania",
+      "fr": "Roumanie"
+    }
+  },
+  "RS": {
+    "currencies": [
+      "RSD"
+    ],
+    "languages": [
+      {
+        "code": "sr",
+        "names": {
+          "en": "Serbian",
+          "fr": "serbe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Serbia",
+      "fr": "Serbie"
+    }
+  },
+  "RU": {
+    "currencies": [
+      "RUB"
+    ],
+    "languages": [
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Russia",
+      "fr": "Russie"
+    }
+  },
+  "RW": {
+    "currencies": [
+      "RWF"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "rw",
+        "names": {
+          "en": "Kinyarwanda",
+          "fr": "kinyarwanda"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Rwanda",
+      "fr": "Rwanda"
+    }
+  },
+  "SA": {
+    "currencies": [
+      "SAR"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Saudi Arabia",
+      "fr": "Arabie saoudite"
+    }
+  },
+  "SB": {
+    "currencies": [
+      "SBD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Solomon Islands",
+      "fr": "Îles Salomon"
+    }
+  },
+  "SC": {
+    "currencies": [
+      "SCR"
+    ],
+    "languages": [
+      {
+        "code": "crs",
+        "names": {
+          "en": "Seychellois Creole",
+          "fr": "créole seychellois"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Seychelles",
+      "fr": "Seychelles"
+    }
+  },
+  "SD": {
+    "currencies": [
+      "SDG"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Sudan",
+      "fr": "Soudan"
+    }
+  },
+  "SE": {
+    "currencies": [
+      "SEK"
+    ],
+    "languages": [
+      {
+        "code": "sv",
+        "names": {
+          "en": "Swedish",
+          "fr": "suédois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Sweden",
+      "fr": "Suède"
+    }
+  },
+  "SG": {
+    "currencies": [
+      "SGD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "zh",
+        "names": {
+          "en": "Chinese",
+          "fr": "chinois"
+        }
+      },
+      {
+        "code": "ms",
+        "names": {
+          "en": "Malay",
+          "fr": "malais"
+        }
+      },
+      {
+        "code": "ta",
+        "names": {
+          "en": "Tamil",
+          "fr": "tamoul"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Singapore",
+      "fr": "Singapour"
+    }
+  },
+  "SI": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "sl",
+        "names": {
+          "en": "Slovene",
+          "fr": "slovène"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Slovenia",
+      "fr": "Slovénie"
+    }
+  },
+  "SK": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "sk",
+        "names": {
+          "en": "Slovak",
+          "fr": "slovaque"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Slovakia",
+      "fr": "Slovaquie"
+    }
+  },
+  "SL": {
+    "currencies": [
+      "SLE"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Sierra Leone",
+      "fr": "Sierra Leone"
+    }
+  },
+  "SM": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "it",
+        "names": {
+          "en": "Italian",
+          "fr": "italien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "San Marino",
+      "fr": "Saint-Marin"
+    }
+  },
+  "SN": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Senegal",
+      "fr": "Sénégal"
+    }
+  },
+  "SO": {
+    "currencies": [
+      "SOS"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "so",
+        "names": {
+          "en": "Somali",
+          "fr": "somali"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Somalia",
+      "fr": "Somalie"
+    }
+  },
+  "SR": {
+    "currencies": [
+      "SRD"
+    ],
+    "languages": [
+      {
+        "code": "nl",
+        "names": {
+          "en": "Dutch",
+          "fr": "néerlandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Suriname",
+      "fr": "Suriname"
+    }
+  },
+  "SS": {
+    "currencies": [
+      "SSP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "South Sudan",
+      "fr": "Soudan du Sud"
+    }
+  },
+  "ST": {
+    "currencies": [
+      "STN"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "São Tomé and Príncipe",
+      "fr": "São Tomé-et-Príncipe"
+    }
+  },
+  "SV": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "El Salvador",
+      "fr": "Salvador (pays)"
+    }
+  },
+  "SX": {
+    "currencies": [
+      "XCG"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      },
+      {
+        "code": "nl",
+        "names": {
+          "en": "Dutch",
+          "fr": "néerlandais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": null,
+      "fr": "Saint-Martin (Royaume des Pays-Bas)"
+    }
+  },
+  "SY": {
+    "currencies": [
+      "SYP"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Syria",
+      "fr": "Syrie"
+    }
+  },
+  "SZ": {
+    "currencies": [
+      "SZL",
+      "ZAR"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "ss",
+        "names": {
+          "en": "Swazi",
+          "fr": "swati"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Eswatini",
+      "fr": "Eswatini"
+    }
+  },
+  "TD": {
+    "currencies": [
+      "XAF"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Chad",
+      "fr": "Tchad"
+    }
+  },
+  "TF": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "French Southern and Antarctic Lands",
+      "fr": null
+    }
+  },
+  "TG": {
+    "currencies": [
+      "XOF"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Togo",
+      "fr": "Togo"
+    }
+  },
+  "TH": {
+    "currencies": [
+      "THB"
+    ],
+    "languages": [
+      {
+        "code": "th",
+        "names": {
+          "en": "Thai",
+          "fr": "thaï"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Thailand",
+      "fr": "Thaïlande"
+    }
+  },
+  "TJ": {
+    "currencies": [
+      "TJS"
+    ],
+    "languages": [
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      },
+      {
+        "code": "tg",
+        "names": {
+          "en": "Tajik",
+          "fr": "tadjik"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Tajikistan",
+      "fr": "Tadjikistan"
+    }
+  },
+  "TL": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "pt",
+        "names": {
+          "en": "Portuguese",
+          "fr": "portugais"
+        }
+      },
+      {
+        "code": "tet",
+        "names": {
+          "en": "Tetum",
+          "fr": "tétoum"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Timor-Leste",
+      "fr": "Timor oriental"
+    }
+  },
+  "TM": {
+    "currencies": [
+      "TMT"
+    ],
+    "languages": [
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      },
+      {
+        "code": "tk",
+        "names": {
+          "en": "Turkmen",
+          "fr": "turkmène"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Turkmenistan",
+      "fr": "Turkménistan"
+    }
+  },
+  "TN": {
+    "currencies": [
+      "TND"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Tunisia",
+      "fr": "Tunisie"
+    }
+  },
+  "TO": {
+    "currencies": [
+      "TOP"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "to",
+        "names": {
+          "en": "Tongan",
+          "fr": "tongien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Tonga",
+      "fr": "Tonga"
+    }
+  },
+  "TR": {
+    "currencies": [
+      "TRY"
+    ],
+    "languages": [
+      {
+        "code": "tr",
+        "names": {
+          "en": "Turkish",
+          "fr": "turc"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Turkey",
+      "fr": "Turquie"
+    }
+  },
+  "TT": {
+    "currencies": [
+      "TTD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Trinidad and Tobago",
+      "fr": "Trinité-et-Tobago"
+    }
+  },
+  "TV": {
+    "currencies": [
+      "AUD",
+      "TVD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "tvl",
+        "names": {
+          "en": "Tuvaluan",
+          "fr": "tuvaluan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Tuvalu",
+      "fr": "Tuvalu"
+    }
+  },
+  "TW": {
+    "currencies": [
+      "TWD"
+    ],
+    "languages": [
+      {
+        "code": "zh",
+        "names": {
+          "en": "Chinese",
+          "fr": "chinois"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Taiwan",
+      "fr": "Taïwan"
+    }
+  },
+  "TZ": {
+    "currencies": [
+      "TZS"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "sw",
+        "names": {
+          "en": "Swahili",
+          "fr": "swahili"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Tanzania",
+      "fr": "Tanzanie"
+    }
+  },
+  "UA": {
+    "currencies": [
+      "UAH"
+    ],
+    "languages": [
+      {
+        "code": "uk",
+        "names": {
+          "en": "Ukrainian",
+          "fr": "ukrainien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Ukraine",
+      "fr": "Ukraine"
+    }
+  },
+  "UG": {
+    "currencies": [
+      "UGX"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "sw",
+        "names": {
+          "en": "Swahili",
+          "fr": "swahili"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Uganda",
+      "fr": "Ouganda"
+    }
+  },
+  "US": {
+    "currencies": [
+      "USD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "United States",
+      "fr": "États-Unis"
+    }
+  },
+  "UY": {
+    "currencies": [
+      "UYU"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Uruguay",
+      "fr": "Uruguay"
+    }
+  },
+  "UZ": {
+    "currencies": [
+      "UZS"
+    ],
+    "languages": [
+      {
+        "code": "ru",
+        "names": {
+          "en": "Russian",
+          "fr": "russe"
+        }
+      },
+      {
+        "code": "uz",
+        "names": {
+          "en": "Uzbek",
+          "fr": "ouzbek"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Uzbekistan",
+      "fr": "Ouzbékistan"
+    }
+  },
+  "VA": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "it",
+        "names": {
+          "en": "Italian",
+          "fr": "italien"
+        }
+      },
+      {
+        "code": "la",
+        "names": {
+          "en": "Latin",
+          "fr": "latin"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Rome/Vatican",
+      "fr": "Vatican"
+    }
+  },
+  "VC": {
+    "currencies": [
+      "XCD"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Saint Vincent and the Grenadines",
+      "fr": "Saint-Vincent-et-les-Grenadines"
+    }
+  },
+  "VE": {
+    "currencies": [
+      "VES"
+    ],
+    "languages": [
+      {
+        "code": "es",
+        "names": {
+          "en": "Spanish",
+          "fr": "espagnol"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Venezuela",
+      "fr": "Venezuela"
+    }
+  },
+  "VN": {
+    "currencies": [
+      "VND"
+    ],
+    "languages": [
+      {
+        "code": "vi",
+        "names": {
+          "en": "Vietnamese",
+          "fr": "vietnamien"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Vietnam",
+      "fr": "Viêt Nam"
+    }
+  },
+  "VU": {
+    "currencies": [
+      "VUV"
+    ],
+    "languages": [
+      {
+        "code": "bi",
+        "names": {
+          "en": "Bislama",
+          "fr": "bichelamar"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "fr",
+        "names": {
+          "en": "French",
+          "fr": "français"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Vanuatu",
+      "fr": "Vanuatu"
+    }
+  },
+  "WS": {
+    "currencies": [
+      "WST"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "sm",
+        "names": {
+          "en": "Samoan",
+          "fr": "samoan"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Samoa",
+      "fr": "Samoa"
+    }
+  },
+  "XK": {
+    "currencies": [
+      "EUR"
+    ],
+    "languages": [
+      {
+        "code": "sq",
+        "names": {
+          "en": "Albanian",
+          "fr": "albanais"
+        }
+      },
+      {
+        "code": "sr",
+        "names": {
+          "en": "Serbian",
+          "fr": "serbe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Kosovo",
+      "fr": "Kosovo"
+    }
+  },
+  "YE": {
+    "currencies": [
+      "YER"
+    ],
+    "languages": [
+      {
+        "code": "ar",
+        "names": {
+          "en": "Arabic",
+          "fr": "arabe"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Yemen",
+      "fr": "Yémen"
+    }
+  },
+  "ZA": {
+    "currencies": [
+      "ZAR"
+    ],
+    "languages": [
+      {
+        "code": "af",
+        "names": {
+          "en": "Afrikaans",
+          "fr": "afrikaans"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "nr",
+        "names": {
+          "en": "Southern Ndebele",
+          "fr": "ndébélé du Sud"
+        }
+      },
+      {
+        "code": "nso",
+        "names": {
+          "en": "Northern Sotho",
+          "fr": "sotho du Nord"
+        }
+      },
+      {
+        "code": "st",
+        "names": {
+          "en": "Sesotho",
+          "fr": "sotho du Sud"
+        }
+      },
+      {
+        "code": "ss",
+        "names": {
+          "en": "Swazi",
+          "fr": "swati"
+        }
+      },
+      {
+        "code": "tn",
+        "names": {
+          "en": "Tswana",
+          "fr": "tswana"
+        }
+      },
+      {
+        "code": "ts",
+        "names": {
+          "en": "Tsonga",
+          "fr": "tsonga"
+        }
+      },
+      {
+        "code": "ve",
+        "names": {
+          "en": "Venda",
+          "fr": "venda"
+        }
+      },
+      {
+        "code": "xh",
+        "names": {
+          "en": "Xhosa",
+          "fr": "xhosa"
+        }
+      },
+      {
+        "code": "zu",
+        "names": {
+          "en": "Zulu",
+          "fr": "zoulou"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "South Africa",
+      "fr": "Afrique du Sud"
+    }
+  },
+  "ZM": {
+    "currencies": [
+      "ZMW"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Zambia",
+      "fr": "Zambie"
+    }
+  },
+  "ZW": {
+    "currencies": [
+      "USD",
+      "ZWG"
+    ],
+    "languages": [
+      {
+        "code": "bwg",
+        "names": {
+          "en": "Barwe",
+          "fr": "barwe"
+        }
+      },
+      {
+        "code": "en",
+        "names": {
+          "en": "English",
+          "fr": "anglais"
+        }
+      },
+      {
+        "code": "kck",
+        "names": {
+          "en": "Kalanga",
+          "fr": "kalanga"
+        }
+      },
+      {
+        "code": "khi",
+        "names": {
+          "en": "Khoisan",
+          "fr": "langues khoïsan"
+        }
+      },
+      {
+        "code": "ndc",
+        "names": {
+          "en": "Ndau",
+          "fr": "ndau"
+        }
+      },
+      {
+        "code": "nd",
+        "names": {
+          "en": "Northern Ndebele",
+          "fr": "sindebele"
+        }
+      },
+      {
+        "code": "ny",
+        "names": {
+          "en": "Chewa",
+          "fr": "chewa"
+        }
+      },
+      {
+        "code": "sn",
+        "names": {
+          "en": "Shona",
+          "fr": "shona"
+        }
+      },
+      {
+        "code": "st",
+        "names": {
+          "en": "Sesotho",
+          "fr": "sotho du Sud"
+        }
+      },
+      {
+        "code": "toi",
+        "names": {
+          "en": "Tonga",
+          "fr": "chitonga"
+        }
+      },
+      {
+        "code": "tn",
+        "names": {
+          "en": "Tswana",
+          "fr": "tswana"
+        }
+      },
+      {
+        "code": "ts",
+        "names": {
+          "en": "Tsonga",
+          "fr": "tsonga"
+        }
+      },
+      {
+        "code": "ve",
+        "names": {
+          "en": "Venda",
+          "fr": "venda"
+        }
+      },
+      {
+        "code": "xh",
+        "names": {
+          "en": "Xhosa",
+          "fr": "xhosa"
+        }
+      },
+      {
+        "code": "zib",
+        "names": {
+          "en": "Zimbabwe Sign Language",
+          "fr": "langue des signes zimbabwéenne"
+        }
+      }
+    ],
+    "wikivoyage": {
+      "en": "Zimbabwe",
+      "fr": "Zimbabwe"
+    }
+  }
+}

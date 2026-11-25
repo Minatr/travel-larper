@@ -5,5 +5,9 @@ import type { ReactNode } from 'react'
  * floating header (Layout).
  */
 export function PageContainer({ children }: { children: ReactNode }) {
-  return <div className="mx-auto w-full max-w-3xl px-4 pt-20 pb-6">{children}</div>
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 pt-[calc(5rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+      {children}
+    </div>
+  )
 }

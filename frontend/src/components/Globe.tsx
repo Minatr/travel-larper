@@ -139,10 +139,11 @@ export function Globe({
           'absolute transition duration-300 ease-out motion-reduce:transition-none',
           // Placed by its top, 1.5 rem above the bottom: the result list then opens below the field instead of pushing
           // it up.
-          phone ? 'inset-x-3 top-[calc(100%-4.5rem)]' : 'top-3 left-4 w-96',
-          // From the bottom to the header's row: the screen's height, less the field (3 rem) and its margins (1.5 rem
-          // below, 0.75 rem above).
-          searchAtTop && '-translate-y-[calc(100dvh-5.25rem)]',
+          phone ? 'inset-x-3 top-[calc(100%-4.5rem-env(safe-area-inset-bottom,0px))]' : 'top-3 left-4 w-96',
+          // From the bottom to the header's row: the screen's height, less the field (3 rem), its margins (1.5 rem
+          // below, 0.75 rem above) and the safe areas of the phone's bars.
+          searchAtTop &&
+            '-translate-y-[calc(100dvh-5.25rem-env(safe-area-inset-bottom,0px)-max(0px,env(safe-area-inset-top,0px)-0.75rem))]',
           // A country opens: up and off the screen on a computer, its hanging logo too (12 rem clears both); faded out
           // on a phone.
           countryOpen && (phone ? 'opacity-0' : '-translate-y-48'),

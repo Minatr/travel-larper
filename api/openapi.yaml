@@ -94,6 +94,36 @@ paths:
                 $ref: "#/components/schemas/CurrentUser"
         default:
           $ref: "#/components/responses/Error"
+  /countries/{code}:
+    get:
+      operationId: getCountryInfo
+      summary: Return a country's currencies, languages and Wikivoyage summary (cached).
+      description: "Public, like the globe. Unknown code: 404. The summary can be missing alone."
+      tags: [countries]
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: ISO 3166-1 alpha-2 code, upper case.
+          schema:
+            type: string
+            pattern: "^[A-Z]{2}$"
+        - name: lang
+          in: query
+          required: true
+          description: Language of the summary.
+          schema:
+            type: string
+            enum: [en, fr]
+      responses:
+        "200":
+          description: What is known of the country.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryInfo"
+        default:
+          $ref: "#/components/responses/Error"
 components:
   securitySchemes:
     cookieAuth:
@@ -162,6 +192,49 @@ components:
         email:
           type: string
         password:
+          type: string
+    CountryInfo:
+      type: object
+      required: [code, currencies, languages, summary]
+      properties:
+        code:
+          type: string
+        currencies:
+          description: ISO 4217 codes; the frontend shows them in the user's language.
+          type: array
+          items:
+            type: string
+        languages:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountryLanguage"
+        summary:
+          $ref: "#/components/schemas/CountrySummary"
+    CountryLanguage:
+      description: The browser names it in the user's language, or the frontend uses `name` when it does not know it.
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          description: BCP 47 tag (fr, pt-BR).
+          type: string
+        name:
+          description: Name in the language asked for (Wikidata, or REST Countries' English name).
+          type: string
+    CountrySummary:
+      description: The first paragraph of the country's Wikivoyage article, in the language asked for.
+      type: object
+      required: [status]
+      properties:
+        status:
+          description: missing when Wikivoyage has no article in this language; unavailable when it failed.
+          type: string
+          enum: [available, missing, unavailable]
+        text:
+          description: Plain text, set when available.
+          type: string
+        url:
+          description: The article, for the source link; set when available.
           type: string
     CurrentUser:
       type: object

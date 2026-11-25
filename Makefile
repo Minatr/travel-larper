@@ -10,7 +10,7 @@ POSTGRES_USER ?= travel
 POSTGRES_DB ?= travel
 
 .DEFAULT_GOAL := help
-.PHONY: help dev down db-up db-down db-logs db-psql db-reset db-seed backend frontend test lint format audit check generate geo migrate-new
+.PHONY: help dev down db-up db-down db-logs db-psql db-reset db-seed backend frontend test lint format audit check generate geo country-data migrate-new
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -87,6 +87,9 @@ geo: ## Régénère les formes des pays du globe et des cartes (télécharge ~25
 
 # Les migrations s'appliquent au démarrage du backend : cette cible crée seulement le fichier, numéroté à la suite du
 # dernier.
+country-data: ## Régénère les données des fiches pays : monnaies, langues, articles Wikivoyage
+	cd frontend && node scripts/build-country-data.mjs
+
 migrate-new: ## Crée une migration vide : make migrate-new name=add_role
 	@echo "$(name)" | grep -qE '^[a-z0-9_]+$$' || { echo "Usage : make migrate-new name=<minuscules_chiffres_underscores>"; exit 1; }
 	@last=$$(ls backend/migrations | grep -E '^[0-9]+_.*\.sql$$' | sort | tail -n 1 | cut -d_ -f1); \

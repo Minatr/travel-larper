@@ -41,7 +41,7 @@
   },
   "country": {
     "mapLabel": "Map of {{name}}",
-    "backToGlobe": "← Globe",
+    "backToGlobe": "Back to the globe",
     "unavailable": "The map could not be loaded.",
     "loading": "Loading the map…",
     "territories_one": "Distant territory",
@@ -50,6 +50,23 @@
     "destination": "Destination",
     "previousTerritories": "Previous territories",
     "nextTerritories": "Next territories"
+  },
+  "countryInfo": {
+    "fold": "Fold the country sheet",
+    "unfold": "Show the whole country sheet",
+    "overview": "Overview",
+    "loading": "Loading the country sheet…",
+    "currency_one": "Currency",
+    "currency_other": "Currencies",
+    "language_one": "Language",
+    "language_other": "Languages",
+    "summary": "In brief",
+    "readMore": "Read more",
+    "readLess": "Show less",
+    "source": "Wikivoyage",
+    "missing": "No summary in English for this country yet.",
+    "summaryUnavailable": "The summary is unavailable for now. Try again later.",
+    "unavailable": "This country’s information is unavailable for now. Try again later."
   },
   "nav": {
     "login": "Log in",

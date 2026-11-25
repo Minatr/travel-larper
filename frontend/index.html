@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      viewport-fit=cover: the app runs under the phone's status bar and home bar, instead of black bands; the safe areas
+      (env(safe-area-inset-*)) keep the controls clear of them.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0d0f13" />
     <title>Travel Larper</title>
   </head>
   <body>
