@@ -10,19 +10,20 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, password_hash)
-VALUES ($1, $2)
+INSERT INTO users (email, password_hash, display_name)
+VALUES ($1, $2, $3)
 ON CONFLICT ((lower(email))) DO NOTHING
-RETURNING id, email, password_hash, status, created_at, updated_at
+RETURNING id, email, password_hash, status, created_at, updated_at, display_name
 `
 
 type CreateUserParams struct {
 	Email        string
 	PasswordHash string
+	DisplayName  string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.PasswordHash, arg.DisplayName)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -31,12 +32,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DisplayName,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password_hash, status, created_at, updated_at FROM users
+SELECT id, email, password_hash, status, created_at, updated_at, display_name FROM users
 WHERE lower(email) = lower($1)
 `
 
@@ -50,6 +52,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DisplayName,
 	)
 	return i, err
 }

@@ -22,9 +22,6 @@
     "message": "This page does not exist or has been moved.",
     "backHome": "Back to home"
   },
-  "language": {
-    "label": "Language"
-  },
   "globe": {
     "label": "World globe",
     "destination": "Destination",
@@ -42,6 +39,7 @@
   "country": {
     "mapLabel": "Map of {{name}}",
     "backToGlobe": "← Globe",
+    "backToGlobeLabel": "Back to the globe",
     "unavailable": "The map could not be loaded.",
     "loading": "Loading the map…",
     "territories_one": "Distant territory",
@@ -53,39 +51,61 @@
   },
   "nav": {
     "login": "Log in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "loggedIn": "You are logged in.",
+    "loggedOut": "You are logged out.",
+    "account": "Account: {{name}}"
+  },
+  "auth": {
+    "close": "Close"
   },
   "register": {
+    "printed": "Check-in",
     "title": "Create an account",
-    "intro": "You can use the app once an admin has approved your account.",
+    "displayName": "Username",
+    "displayNameHint": "Shown to the members of your trips.",
     "email": "Email",
     "password": "Password",
     "passwordHint": "At least {{min}} characters.",
-    "submit": "Sign up",
+    "confirmPassword": "Confirm the password",
+    "submit": "Create my account",
     "submitting": "Creating your account…",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Log in",
     "success": {
       "title": "Account created",
-      "message": "Your account is waiting for an admin's approval. You can use the app as soon as it is approved.",
-      "login": "Log in"
+      "stamp": "Pending",
+      "message": "An admin must approve your account before your first trip.",
+      "signedUpWith": "Signed up with <b>{{email}}</b>.",
+      "backToGlobe": "Back to the globe",
+      "login": "Log in",
+      "wrongAddress": "Wrong address?",
+      "startOver": "Start over"
     },
     "errors": {
+      "invalidDisplayName": "Your username must be {{min}} to {{max}} characters long.",
       "invalidEmail": "This email address is invalid.",
       "passwordTooShort": "The password must be at least {{min}} characters long.",
       "passwordTooLong": "The password must be at most {{max}} characters long.",
-      "emailTaken": "An account already exists with this email address.",
+      "passwordMismatch": "The two passwords differ.",
+      "emailTaken": "You already have an account with this address.",
+      "emailTakenLink": "Log in to see where it stands.",
       "rateLimited": "Too many attempts. Please try again later.",
       "unreachable": "The server cannot be reached. Check your connection and try again.",
       "generic": "Something went wrong. Please try again."
     }
   },
   "login": {
+    "printed": "Boarding",
     "title": "Log in",
     "email": "Email",
     "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "forgotPasswordHelp": "Write to the admin to reset it.",
     "submit": "Log in",
     "submitting": "Logging in…",
     "noAccount": "No account yet?",
-    "registerLink": "Sign up",
+    "registerLink": "Create an account",
     "errors": {
       "invalidCredentials": "The email or the password is incorrect.",
       "rateLimited": "Too many attempts. Please try again later.",

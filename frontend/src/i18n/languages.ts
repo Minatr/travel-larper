@@ -13,16 +13,9 @@ export type Language = (typeof SUPPORTED_LANGUAGES)[number]
 export const DEFAULT_LANGUAGE: Language = 'en'
 
 /**
- * Name of each language written in that language, for the switcher: a French speaker looks for "Français" even when the
- * page is in English.
- * Data rather than translations, so it lives here and not in the JSON files.
+ * localStorage key holding the language chosen with the former switcher: still read, so that a choice made before keeps
+ * applying until the profile holds the language.
  */
-export const LANGUAGE_NAMES: Record<Language, string> = {
-  en: 'English',
-  fr: 'Français',
-}
-
-/** localStorage key holding the language chosen with the switcher. */
 const STORAGE_KEY = 'language'
 
 function isLanguage(value: string): value is Language {
@@ -43,9 +36,10 @@ export function detectLanguage(browserLanguages: readonly string[]): Language {
   return DEFAULT_LANGUAGE
 }
 
+// TODO(TL-25): the profile's language, which wins at login; this browser's former choice can go then.
 /**
- * Language the visitor picked earlier with the switcher, on this browser, or null if none. localStorage can be
- * unavailable (some private modes) or hold a stale value: both count as "no choice".
+ * Language picked earlier on this browser, or null if none. localStorage can be unavailable (some private modes) or
+ * hold a stale value: both count as "no choice".
  */
 export function readStoredLanguage(): Language | null {
   try {
@@ -53,17 +47,5 @@ export function readStoredLanguage(): Language | null {
     return value !== null && isLanguage(value) ? value : null
   } catch {
     return null
-  }
-}
-
-/**
- * Remembers the visitor's choice on this browser. Only called from the switcher, so that a visitor who never chose
- * keeps following the browser language.
- */
-export function storeLanguage(language: Language): void {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, language)
-  } catch {
-    // Storage unavailable: the choice only lasts until the page is closed.
   }
 }

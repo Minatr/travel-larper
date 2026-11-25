@@ -58,7 +58,7 @@ func (c *SessionController) Login(w http.ResponseWriter, r *http.Request) {
 		w,
 		c.logger,
 		http.StatusOK,
-		views.NewCurrentUser(session.User.ID, session.User.Email, session.User.Status),
+		views.NewCurrentUser(session.User),
 	)
 }
 
@@ -83,5 +83,5 @@ func (c *SessionController) GetMe(w http.ResponseWriter, r *http.Request) {
 		views.WriteError(w, c.logger, api.ErrorCodeInternalError)
 		return
 	}
-	views.WriteJSON(w, c.logger, http.StatusOK, views.NewCurrentUser(user.ID, user.Email, user.Status))
+	views.WriteJSON(w, c.logger, http.StatusOK, views.NewCurrentUser(user))
 }

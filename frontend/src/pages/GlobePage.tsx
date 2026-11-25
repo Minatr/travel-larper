@@ -8,7 +8,7 @@ import type { InsetId } from '../lib/territories.ts'
 
 /**
  * Home page: the globe, under the floating header. A country page opens above it in its outlet; the globe stays mounted
- * to fly back on return.
+ * to fly back on return. The login and sign-up tags open in the same outlet, over the globe.
  */
 export function GlobePage() {
   const navigate = useNavigate()

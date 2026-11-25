@@ -64,18 +64,20 @@ func (q *Queries) ExtendSession(ctx context.Context, arg ExtendSessionParams) er
 }
 
 const getSessionUser = `-- name: GetSessionUser :one
-SELECT sessions.id AS session_id, sessions.expires_at, users.id AS user_id, users.email, users.status
+SELECT sessions.id AS session_id, sessions.expires_at,
+  users.id AS user_id, users.email, users.display_name, users.status
 FROM sessions
 JOIN users ON users.id = sessions.user_id
 WHERE sessions.token_hash = $1 AND sessions.expires_at > now()
 `
 
 type GetSessionUserRow struct {
-	SessionID uuid.UUID
-	ExpiresAt time.Time
-	UserID    uuid.UUID
-	Email     string
-	Status    string
+	SessionID   uuid.UUID
+	ExpiresAt   time.Time
+	UserID      uuid.UUID
+	Email       string
+	DisplayName string
+	Status      string
 }
 
 func (q *Queries) GetSessionUser(ctx context.Context, tokenHash []byte) (GetSessionUserRow, error) {
@@ -86,6 +88,7 @@ func (q *Queries) GetSessionUser(ctx context.Context, tokenHash []byte) (GetSess
 		&i.ExpiresAt,
 		&i.UserID,
 		&i.Email,
+		&i.DisplayName,
 		&i.Status,
 	)
 	return i, err

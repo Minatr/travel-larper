@@ -95,7 +95,7 @@ export interface components {
     schemas: {
         Error: {
             /** @enum {string} */
-            code: "invalid_parameter" | "invalid_body" | "invalid_email" | "password_too_short" | "password_too_long" | "email_taken" | "invalid_credentials" | "unauthorized" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
+            code: "invalid_parameter" | "invalid_body" | "invalid_display_name" | "invalid_email" | "password_too_short" | "password_too_long" | "email_taken" | "invalid_credentials" | "unauthorized" | "not_found" | "method_not_allowed" | "request_too_large" | "rate_limited" | "internal_error";
             message: string;
         };
         Health: {
@@ -105,6 +105,8 @@ export interface components {
             database: "up" | "down";
         };
         RegisterRequest: {
+            /** @description First name or nickname, shown to trip members; spaces around it are trimmed. */
+            displayName: string;
             email: string;
             password: string;
         };
@@ -115,6 +117,7 @@ export interface components {
         CurrentUser: {
             /** Format: uuid */
             id: string;
+            displayName: string;
             email: string;
             /** @enum {string} */
             status: "pending" | "active" | "refused" | "suspended";

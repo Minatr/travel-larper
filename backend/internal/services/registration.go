@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"net/mail"
 	"strings"
+	"unicode"
 	"unicode/utf8"
+
+	"github.com/Minatr/travel-larper/backend/internal/models"
 )
 
 const (
@@ -14,11 +17,21 @@ const (
 	// Same bounds as RegisterRequest.password in openapi.yaml.
 	passwordMinLength = 8
 	passwordMaxLength = 128
+	// Same bounds as RegisterRequest.displayName in openapi.yaml.
+	displayNameMinLength = 2
+	displayNameMaxLength = 30
 )
+
+// NewAccount is what a visitor fills in to register.
+type NewAccount struct {
+	DisplayName string
+	Email       string
+	Password    string
+}
 
 // UserInserter stores a new pending user and reports false when the email is already taken.
 type UserInserter interface {
-	InsertUser(ctx context.Context, email, passwordHash string) (bool, error)
+	InsertUser(ctx context.Context, user models.CreateUserParams) (bool, error)
 }
 
 // Hasher turns a password into a hash safe to store.
@@ -37,21 +50,28 @@ func NewRegistrationService(users UserInserter, hasher Hasher) *RegistrationServ
 	return &RegistrationService{users: users, hasher: hasher}
 }
 
-// Register validates the credentials and creates a pending account.
-func (s *RegistrationService) Register(ctx context.Context, email, password string) error {
-	email, err := normalizeEmail(email)
+// Register validates the account and creates it, pending.
+func (s *RegistrationService) Register(ctx context.Context, account NewAccount) error {
+	displayName, err := normalizeDisplayName(account.DisplayName)
 	if err != nil {
 		return err
 	}
-	if err := checkPassword(password); err != nil {
+	email, err := normalizeEmail(account.Email)
+	if err != nil {
+		return err
+	}
+	if err := checkPassword(account.Password); err != nil {
 		return err
 	}
 
-	hash, err := s.hasher.Hash(ctx, password)
+	hash, err := s.hasher.Hash(ctx, account.Password)
 	if err != nil {
 		return fmt.Errorf("register: %w", err)
 	}
-	created, err := s.users.InsertUser(ctx, email, hash)
+	created, err := s.users.InsertUser(
+		ctx,
+		models.CreateUserParams{Email: email, PasswordHash: hash, DisplayName: displayName},
+	)
 	if err != nil {
 		return fmt.Errorf("register: %w", err)
 	}
@@ -59,6 +79,16 @@ func (s *RegistrationService) Register(ctx context.Context, email, password stri
 		return ErrEmailTaken
 	}
 	return nil
+}
+
+// normalizeDisplayName refuses control characters (line breaks, tabs…): the name is shown to other users.
+func normalizeDisplayName(raw string) (string, error) {
+	name := strings.TrimSpace(raw)
+	length := utf8.RuneCountInString(name)
+	if length < displayNameMinLength || length > displayNameMaxLength || strings.ContainsFunc(name, unicode.IsControl) {
+		return "", ErrInvalidDisplayName
+	}
+	return name, nil
 }
 
 // normalizeEmail accepts a bare address only: "Bob <bob@example.com>" is valid for net/mail but not as an account

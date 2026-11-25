@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react'
 import { type ReactNode, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router'
@@ -93,20 +94,24 @@ export function CountryPage() {
         </p>
       )}
       {/*
-        On the header's row: its logo flies away on this page (Layout). The right margin keeps clear of the language
-        switch.
+        On the header's row, which leaves it alone on this page (Layout): the back link, then the name on all the rest.
+        On a phone the back link is a 44 px arrow, so that a long name fits, on two lines at most.
       */}
-      <div className="absolute top-3 right-28 left-4 flex items-center gap-3">
+      <div className="absolute inset-x-4 top-3 flex items-center gap-3">
         <Link
           to="/"
-          className="flex min-h-11 shrink-0 items-center rounded-md bg-card px-3 text-sm font-medium text-card-foreground shadow-lg"
+          aria-label={t('country.backToGlobeLabel')}
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] bg-card text-sm font-medium text-card-foreground shadow-lg sm:rounded-md sm:px-3"
         >
-          {t('country.backToGlobe')}
+          <ChevronLeft aria-hidden className="size-5 sm:hidden" />
+          <span aria-hidden className="hidden sm:inline">
+            {t('country.backToGlobe')}
+          </span>
         </Link>
         {/*
           A title, not a control: plain text, not paper, so it does not look clickable.
         */}
-        <h1 className="tag-title truncate text-2xl drop-shadow-md">{title}</h1>
+        <h1 className="tag-title line-clamp-2 text-xl leading-none text-balance drop-shadow-md sm:text-2xl">{title}</h1>
       </div>
     </Overlay>
   )

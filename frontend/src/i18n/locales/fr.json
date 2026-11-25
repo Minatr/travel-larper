@@ -22,9 +22,6 @@
     "message": "Cette page n'existe pas ou a été déplacée.",
     "backHome": "Retour à l'accueil"
   },
-  "language": {
-    "label": "Langue"
-  },
   "globe": {
     "label": "Globe terrestre",
     "destination": "Destination",
@@ -42,6 +39,7 @@
   "country": {
     "mapLabel": "Carte : {{name}}",
     "backToGlobe": "← Globe",
+    "backToGlobeLabel": "Retour au globe",
     "unavailable": "Impossible de charger la carte.",
     "loading": "Chargement de la carte…",
     "territories_one": "Territoire lointain",
@@ -53,44 +51,66 @@
   },
   "nav": {
     "login": "Se connecter",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "loggedIn": "Tu es connecté.",
+    "loggedOut": "Tu es déconnecté.",
+    "account": "Compte : {{name}}"
+  },
+  "auth": {
+    "close": "Fermer"
   },
   "register": {
+    "printed": "Enregistrement",
     "title": "Créer un compte",
-    "intro": "Vous pourrez utiliser l'appli dès qu'un admin aura validé votre compte.",
+    "displayName": "Nom d'utilisateur",
+    "displayNameHint": "Visible par les membres de tes voyages.",
     "email": "E-mail",
     "password": "Mot de passe",
     "passwordHint": "Au moins {{min}} caractères.",
-    "submit": "S'inscrire",
+    "confirmPassword": "Confirmer le mot de passe",
+    "submit": "Créer mon compte",
     "submitting": "Création du compte…",
+    "hasAccount": "Déjà un compte ?",
+    "loginLink": "Se connecter",
     "success": {
       "title": "Compte créé",
-      "message": "Votre compte attend la validation d'un admin. Vous pourrez utiliser l'appli dès qu'il sera validé.",
-      "login": "Se connecter"
+      "stamp": "En attente",
+      "message": "Un admin doit valider ton compte avant ton premier voyage.",
+      "signedUpWith": "Inscrit avec <b>{{email}}</b>.",
+      "backToGlobe": "Retour au globe",
+      "login": "Se connecter",
+      "wrongAddress": "Erreur dans l'adresse ?",
+      "startOver": "Recommencer"
     },
     "errors": {
+      "invalidDisplayName": "Ton nom d'utilisateur doit faire de {{min}} à {{max}} caractères.",
       "invalidEmail": "Cette adresse e-mail n'est pas valide.",
       "passwordTooShort": "Le mot de passe doit contenir au moins {{min}} caractères.",
       "passwordTooLong": "Le mot de passe doit contenir au plus {{max}} caractères.",
-      "emailTaken": "Un compte existe déjà avec cette adresse e-mail.",
-      "rateLimited": "Trop de tentatives. Réessayez plus tard.",
-      "unreachable": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
-      "generic": "Une erreur est survenue. Réessayez."
+      "passwordMismatch": "Les deux mots de passe sont différents.",
+      "emailTaken": "Tu as déjà un compte avec cette adresse.",
+      "emailTakenLink": "Connecte-toi pour voir où il en est.",
+      "rateLimited": "Trop de tentatives. Réessaie plus tard.",
+      "unreachable": "Le serveur est injoignable. Vérifie ta connexion et réessaie.",
+      "generic": "Une erreur est survenue. Réessaie."
     }
   },
   "login": {
+    "printed": "Embarquement",
     "title": "Se connecter",
     "email": "E-mail",
     "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotPasswordHelp": "Écris à l'admin pour le réinitialiser.",
     "submit": "Se connecter",
     "submitting": "Connexion…",
     "noAccount": "Pas encore de compte ?",
-    "registerLink": "S'inscrire",
+    "registerLink": "Créer un compte",
     "errors": {
       "invalidCredentials": "L'e-mail ou le mot de passe est incorrect.",
-      "rateLimited": "Trop de tentatives. Réessayez plus tard.",
-      "unreachable": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
-      "generic": "Une erreur s'est produite. Réessayez."
+      "rateLimited": "Trop de tentatives. Réessaie plus tard.",
+      "unreachable": "Le serveur est injoignable. Vérifie ta connexion et réessaie.",
+      "generic": "Une erreur est survenue. Réessaie."
     }
   },
   "territories": {

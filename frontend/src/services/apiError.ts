@@ -4,6 +4,7 @@ import type { ApiErrorCode } from '../models/error.ts'
 const API_ERROR_CODES: Record<ApiErrorCode, true> = {
   invalid_parameter: true,
   invalid_body: true,
+  invalid_display_name: true,
   invalid_email: true,
   password_too_short: true,
   password_too_long: true,

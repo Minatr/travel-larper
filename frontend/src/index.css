@@ -26,6 +26,10 @@
   --card: #efe9dc;
   --card-foreground: #17191e;
   --card-muted-foreground: #6a6252;
+  /* A form field on paper: a lighter paper, so the field reads as a box to fill. */
+  --field: #fbf8f1;
+  /* An error on paper: red, apart from the orange ink. 5.6:1 on the paper. */
+  --destructive: #b42318;
   /* Ink: the one variable to change to recolor every printed detail. */
   /* Burnt orange: 5:1 on the paper, readable for the small printed labels. */
   --ink: #a8450f;
@@ -56,6 +60,8 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-card-muted-foreground: var(--card-muted-foreground);
+  --color-field: var(--field);
+  --color-destructive: var(--destructive);
   --color-ink: var(--ink);
   --color-selection: var(--selection);
   --color-selection-foreground: var(--selection-foreground);
@@ -130,6 +136,43 @@
     }
   }
 
+  /*
+   * The login tag printed like a boarding pass at a kiosk (AuthOverlay): a slot opens above the tag's place, the tag
+   * comes out of it in jerks, drops a little and settles, then the slot closes. On a computer only, from the account
+   * button; nothing shows otherwise. The slot sits 3.75rem above the tag, which is hidden above that line.
+   */
+  .tag-slot {
+    display: none;
+  }
+
+  @media (width >= 40rem) {
+    .tag-printing .tag-slot {
+      position: absolute;
+      top: -4rem;
+      left: 50%;
+      z-index: 1;
+      display: block;
+      width: calc(100% + 2rem);
+      height: 0.625rem;
+      translate: -50% 0;
+      opacity: 0;
+      border-radius: 9999px;
+      background: black;
+      box-shadow:
+        0 0 0 2px var(--muted),
+        0 2px 0 2px var(--border);
+      animation: tag-slot 650ms ease-out;
+    }
+
+    .tag-printing .tag-feed {
+      clip-path: inset(-3.75rem -100vw -100vh -100vw);
+    }
+
+    .tag-printing .tag-print {
+      animation: tag-print 650ms linear;
+    }
+  }
+
   /* A pass turning round to show its other side: the territory passes, when the place shown changes. */
   .tag-turn {
     animation: tag-turn 450ms ease-out backwards;
@@ -138,7 +181,9 @@
   @media (prefers-reduced-motion: reduce) {
     .tag-appear,
     .tag-swing,
-    .tag-turn {
+    .tag-turn,
+    .tag-printing .tag-slot,
+    .tag-printing .tag-print {
       animation: none;
     }
   }
@@ -165,6 +210,45 @@
   /* Small label tag: a point on the left, where the string goes. */
   .tag-label-left {
     clip-path: polygon(0.75rem 0, 100% 0, 100% 100%, 0.75rem 100%, 0 50%);
+  }
+}
+
+/* The slot opening wide, staying open while the tag comes out, then closing. */
+@keyframes tag-slot {
+  12%,
+  62% {
+    opacity: 1;
+    width: calc(100% + 2rem);
+  }
+  0%,
+  100% {
+    opacity: 0;
+    width: 0;
+  }
+}
+
+/* Out of the slot in three jerks, hanging from it, then dropping to its place with a small swing. */
+@keyframes tag-print {
+  0% {
+    transform: translateY(calc(-100% - 3.75rem));
+  }
+  14%,
+  19% {
+    transform: translateY(calc(-72% - 3.75rem));
+  }
+  31%,
+  36% {
+    transform: translateY(calc(-42% - 3.75rem));
+  }
+  50%,
+  56% {
+    transform: translateY(-3.75rem);
+  }
+  80% {
+    transform: translateY(0.25rem) rotate(-3deg);
+  }
+  91% {
+    transform: translateY(-0.2rem) rotate(1.5deg);
   }
 }
 

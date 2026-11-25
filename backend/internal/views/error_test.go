@@ -17,6 +17,7 @@ func TestWriteError(t *testing.T) {
 		wantStatus int
 	}{
 		{code: api.ErrorCodeInvalidParameter, wantStatus: http.StatusBadRequest},
+		{code: api.ErrorCodeInvalidDisplayName, wantStatus: http.StatusBadRequest},
 		{code: api.ErrorCodeNotFound, wantStatus: http.StatusNotFound},
 		{code: api.ErrorCodeMethodNotAllowed, wantStatus: http.StatusMethodNotAllowed},
 		{code: api.ErrorCodeRequestTooLarge, wantStatus: http.StatusRequestEntityTooLarge},

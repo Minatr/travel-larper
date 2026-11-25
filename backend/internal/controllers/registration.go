@@ -13,7 +13,7 @@ import (
 
 // Registrar creates user accounts.
 type Registrar interface {
-	Register(ctx context.Context, email, password string) error
+	Register(ctx context.Context, account services.NewAccount) error
 }
 
 // RegistrationController serves the account creation route.
@@ -35,7 +35,8 @@ func (c *RegistrationController) Register(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := c.registrar.Register(r.Context(), body.Email, body.Password); err != nil {
+	account := services.NewAccount{DisplayName: body.DisplayName, Email: body.Email, Password: body.Password}
+	if err := c.registrar.Register(r.Context(), account); err != nil {
 		views.WriteError(w, c.logger, c.registrationErrorCode(err))
 		return
 	}
@@ -44,6 +45,8 @@ func (c *RegistrationController) Register(w http.ResponseWriter, r *http.Request
 
 func (c *RegistrationController) registrationErrorCode(err error) api.ErrorCode {
 	switch {
+	case errors.Is(err, services.ErrInvalidDisplayName):
+		return api.ErrorCodeInvalidDisplayName
 	case errors.Is(err, services.ErrInvalidEmail):
 		return api.ErrorCodeInvalidEmail
 	case errors.Is(err, services.ErrPasswordTooShort):

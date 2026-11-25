@@ -41,6 +41,7 @@ const (
 	ErrorCodeInternalError      ErrorCode = "internal_error"
 	ErrorCodeInvalidBody        ErrorCode = "invalid_body"
 	ErrorCodeInvalidCredentials ErrorCode = "invalid_credentials"
+	ErrorCodeInvalidDisplayName ErrorCode = "invalid_display_name"
 	ErrorCodeInvalidEmail       ErrorCode = "invalid_email"
 	ErrorCodeInvalidParameter   ErrorCode = "invalid_parameter"
 	ErrorCodeMethodNotAllowed   ErrorCode = "method_not_allowed"
@@ -62,6 +63,8 @@ func (e ErrorCode) Valid() bool {
 	case ErrorCodeInvalidBody:
 		return true
 	case ErrorCodeInvalidCredentials:
+		return true
+	case ErrorCodeInvalidDisplayName:
 		return true
 	case ErrorCodeInvalidEmail:
 		return true
@@ -124,9 +127,10 @@ func (e HealthStatus) Valid() bool {
 
 // CurrentUser defines model for CurrentUser.
 type CurrentUser struct {
-	Email  string            `json:"email"`
-	Id     uuid.UUID         `json:"id"`
-	Status CurrentUserStatus `json:"status"`
+	DisplayName string            `json:"displayName"`
+	Email       string            `json:"email"`
+	Id          uuid.UUID         `json:"id"`
+	Status      CurrentUserStatus `json:"status"`
 }
 
 // CurrentUserStatus defines model for CurrentUser.Status.
@@ -161,8 +165,10 @@ type LoginRequest struct {
 
 // RegisterRequest defines model for RegisterRequest.
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	// DisplayName First name or nickname, shown to trip members; spaces around it are trimmed.
+	DisplayName string `json:"displayName"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.

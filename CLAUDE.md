@@ -94,7 +94,8 @@
 
 ### Langue
 - Anglais par défaut, français disponible. **Aucun texte affiché en dur** : tout passe par react-i18next.
-- Les textes sont dans `frontend/src/i18n/locales/en.json` (la référence) et `fr.json`, rangés par écran (`health.title`, `notFound.message`…). Chaque nouveau texte est ajouté **dans les deux langues** : un test vérifie que les deux fichiers ont les mêmes clés, et les clés sont typées (une clé inexistante ne compile pas). Un sélecteur EN | FR dans l'en-tête permet de changer de langue ; le choix est mémorisé dans le navigateur (`localStorage`) et sera synchronisé avec le profil quand les comptes existeront. Sans choix, la langue du navigateur est utilisée, avec repli sur l'anglais.
+- Les textes sont dans `frontend/src/i18n/locales/en.json` (la référence) et `fr.json`, rangés par écran (`health.title`, `notFound.message`…). Chaque nouveau texte est ajouté **dans les deux langues** : un test vérifie que les deux fichiers ont les mêmes clés, et les clés sont typées (une clé inexistante ne compile pas). **Pas de sélecteur de langue à l'écran** : un visiteur a la langue de son navigateur, avec repli sur l'anglais ; un utilisateur connecté la choisira dans les préférences de son profil (TL-25), qui gagnera à la connexion. Un choix mémorisé dans le navigateur (`localStorage`, ancien sélecteur) reste lu d'ici là.
+- **Tutoiement** dans tous les textes français : interface, erreurs et e-mails.
 
 ---
 
@@ -247,7 +248,7 @@ travel-larper/
 | Rôle | Où | Couleur |
 | --- | --- | --- |
 | **Fond** | espace, globe, cartes, pages | graphite et bleu nuit (tableaux ci-dessous) |
-| **Papier** | étiquettes, panneaux, en-tête (logo, langue, recherche), formulaires | crème `#efe9dc`, texte `#17191e`, texte secondaire `#6a6252` |
+| **Papier** | étiquettes, panneaux, en-tête (logo, compte, recherche), formulaires | crème `#efe9dc`, texte `#17191e`, texte secondaire `#6a6252` |
 | **Encre** | détails imprimés **décoratifs** : petites étiquettes en capitales, étoile de priorité, œillet, liseré, code-barres | orange brûlé `#a8450f` (contraste 5:1 sur le papier : lisible pour les petites mentions) |
 | **Action** | boutons | noir `#0d0f13`, texte crème ; la flèche éventuelle prend l'encre |
 | **Sélection** | pays soulevé, contour de focus clavier, élément actif sur une carte | turquoise `#2dd4bf` |
@@ -283,6 +284,8 @@ Les valeurs vivent dans `frontend/src/index.css` (variables shadcn/ui), `fronten
 | Papier (`--card`) | `#efe9dc` |
 | Texte sur papier (`--card-foreground`) | `#17191e` |
 | Texte secondaire sur papier (`--card-muted-foreground`) | `#6a6252` |
+| Champ de saisie sur papier (`--field`) | `#fbf8f1` (papier plus clair) |
+| Erreur sur papier (`--destructive`) | `#b42318` (rouge, distinct de l'encre ; 5,6:1 sur le papier) |
 | Encre (`--ink`) | `#a8450f` |
 | Action (`--primary`) | `#0d0f13`, texte `#efe9dc` (`--primary-foreground`) |
 | Sélection (`--ring`, `--selection`) | `#2dd4bf`, texte `#04201c` |

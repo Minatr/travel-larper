@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -82,7 +82,9 @@ describe('routes', () => {
 
     expect(await screen.findByRole('region', { name: 'Map of France' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'France' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '← Globe' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Back to the globe' })).toHaveAttribute('href', '/')
+    // Its name takes the whole row: the header's account button is put away.
+    expect((await screen.findByRole('link', { name: 'Log in', hidden: true })).closest('nav')).toHaveAttribute('inert')
   })
 
   it('opens on a distant territory with ?territory=, and leads back to the mainland', async () => {
@@ -143,15 +145,22 @@ describe('routes', () => {
     expect(await screen.findByText('The API is unreachable.')).toBeInTheDocument()
   })
 
-  it('switches to French with the language switcher and remembers it', async () => {
+  it('opens the login page over the globe', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
     vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    renderAt('/login')
+
+    expect(screen.getByRole('region', { name: 'World globe' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument()
+  })
+
+  it('shows no language switch: a visitor gets the browser language', () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
     renderAt('/does-not-exist')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Français' }))
-
-    expect(await screen.findByRole('heading', { name: 'Page introuvable' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute('aria-pressed', 'true')
-    expect(window.localStorage.getItem('language')).toBe('fr')
+    expect(screen.queryByRole('button', { name: 'Français' })).not.toBeInTheDocument()
   })
 })

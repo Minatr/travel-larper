@@ -10,8 +10,8 @@ import (
 )
 
 // InsertUser creates a pending user and returns false when the email is already taken, whatever its case.
-func (q *Queries) InsertUser(ctx context.Context, email, passwordHash string) (bool, error) {
-	_, err := q.CreateUser(ctx, CreateUserParams{Email: email, PasswordHash: passwordHash})
+func (q *Queries) InsertUser(ctx context.Context, user CreateUserParams) (bool, error) {
+	_, err := q.CreateUser(ctx, user)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return false, nil
 	}

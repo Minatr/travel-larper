@@ -8,6 +8,7 @@ import { stubFetch } from '../test/fetch.ts'
 
 const user: CurrentUser = {
   id: '6f1c2a9e-0d4b-4c1e-9a55-2b7c3d4e5f60',
+  displayName: 'Léa',
   email: 'bob@example.com',
   status: 'active',
 }
@@ -40,7 +41,8 @@ describe('LoginPage', () => {
 
     await fillAndSubmit('bob@example.com', '12345678')
 
-    expect(await screen.findByRole('button', { name: 'Log out' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Account: Léa' })).toBeInTheDocument()
+    expect(screen.getByText('You are logged in.')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/status')
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/auth/login',
@@ -60,7 +62,7 @@ describe('LoginPage', () => {
 
     await fillAndSubmit('bob@example.com', '12345678')
 
-    await screen.findByRole('button', { name: 'Log out' })
+    await screen.findByRole('button', { name: 'Account: Léa' })
     expect(router.state.location.pathname).toBe('/')
   })
 
@@ -88,6 +90,58 @@ describe('LoginPage', () => {
       'The server cannot be reached. Check your connection and try again.',
     )
   })
+
+  it('sends the email without the spaces around it', async () => {
+    const fetchMock = stubFetch(Response.json(user))
+    renderAt('/login')
+
+    await fillAndSubmit(' bob@example.com ', '12345678')
+
+    await screen.findByRole('button', { name: 'Account: Léa' })
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/auth/login',
+      expect.objectContaining({ body: JSON.stringify({ email: 'bob@example.com', password: '12345678' }) }),
+    )
+  })
+
+  it('tells to write to the admin when the password is forgotten, until it can be reset by email', async () => {
+    stubFetch(new Response(null, { status: 204 }))
+    renderAt('/login')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Forgot your password?' }))
+
+    expect(screen.getByText('Write to the admin to reset it.')).toBeVisible()
+  })
+
+  it('sends a logged-in user on to the page asked for', async () => {
+    stubFetch(new Response(null, { status: 204 }), user)
+    const router = renderAt('/login?redirect=/status')
+
+    await screen.findByRole('button', { name: 'Account: Léa' })
+
+    expect(router.state.location.pathname).toBe('/status')
+  })
+
+  it('closes with Escape, back to the page before', async () => {
+    stubFetch(new Response(null, { status: 204 }))
+    const router = renderAt('/status')
+    fireEvent.click(await screen.findByRole('link', { name: 'Log in' }))
+    await screen.findByRole('heading', { name: 'Log in' })
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    await screen.findByRole('heading', { name: 'Service status' })
+    expect(router.state.location.pathname).toBe('/status')
+  })
+
+  it('closes to the globe when opened from its URL', async () => {
+    stubFetch(new Response(null, { status: 204 }))
+    const router = renderAt('/login')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Close' }))
+
+    expect(router.state.location.pathname).toBe('/')
+  })
 })
 
 describe('header account action', () => {
@@ -103,13 +157,27 @@ describe('header account action', () => {
     expect(await screen.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
   })
 
+  // The account button opens a menu (Radix): with the keyboard, as jsdom has no pointer events.
+  async function logOut() {
+    fireEvent.keyDown(await screen.findByRole('button', { name: 'Account: Léa' }), { key: 'Enter' })
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Log out' }))
+  }
+
+  it('shows the initial of a logged-in user', async () => {
+    stubFetch(new Response(null, { status: 204 }), user)
+    renderAt('/status')
+
+    expect(await screen.findByRole('button', { name: 'Account: Léa' })).toHaveTextContent('L')
+  })
+
   it('logs a user out', async () => {
     const fetchMock = stubFetch(new Response(null, { status: 204 }), user)
     renderAt('/status')
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
+    await logOut()
 
     expect(await screen.findByRole('link', { name: 'Log in' })).toBeInTheDocument()
+    expect(screen.getByText('You are logged out.')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith('/api/auth/logout', {
       method: 'POST',
     })
@@ -120,7 +188,7 @@ describe('header account action', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     renderAt('/status')
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Log out' }))
+    await logOut()
 
     expect(await screen.findByRole('link', { name: 'Log in' })).toBeInTheDocument()
   })

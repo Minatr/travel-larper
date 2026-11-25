@@ -16,19 +16,18 @@ import (
 )
 
 type fakeRegistrar struct {
-	err      error
-	called   bool
-	email    string
-	password string
+	err     error
+	called  bool
+	account services.NewAccount
 }
 
-func (r *fakeRegistrar) Register(_ context.Context, email, password string) error {
-	r.called, r.email, r.password = true, email, password
+func (r *fakeRegistrar) Register(_ context.Context, account services.NewAccount) error {
+	r.called, r.account = true, account
 	return r.err
 }
 
 func TestRegistrationControllerRegister(t *testing.T) {
-	const validBody = `{"email":"bob@example.com","password":"12345678"}`
+	const validBody = `{"displayName":"Bob","email":"bob@example.com","password":"12345678"}`
 
 	tests := []struct {
 		name        string
@@ -48,21 +47,29 @@ func TestRegistrationControllerRegister(t *testing.T) {
 		},
 		{
 			name:       "data after the JSON",
-			body:       `{"email":"bob@example.com","password":"12345678"} trailing`,
+			body:       `{"displayName":"Bob","email":"bob@example.com","password":"12345678"} trailing`,
 			wantStatus: http.StatusBadRequest,
 			wantCode:   api.ErrorCodeInvalidBody,
 		},
 		{
 			name:       "two JSON objects",
-			body:       `{"email":"bob@example.com","password":"12345678"}{}`,
+			body:       `{"displayName":"Bob","email":"bob@example.com","password":"12345678"}{}`,
 			wantStatus: http.StatusBadRequest,
 			wantCode:   api.ErrorCodeInvalidBody,
 		},
 		{
 			name:       "unknown field",
-			body:       `{"email":"bob@example.com","password":"12345678","role":"admin"}`,
+			body:       `{"displayName":"Bob","email":"bob@example.com","password":"12345678","role":"admin"}`,
 			wantStatus: http.StatusBadRequest,
 			wantCode:   api.ErrorCodeInvalidBody,
+		},
+		{
+			name:        "invalid display name",
+			body:        validBody,
+			registerErr: services.ErrInvalidDisplayName,
+			wantStatus:  http.StatusBadRequest,
+			wantCode:    api.ErrorCodeInvalidDisplayName,
+			wantCalled:  true,
 		},
 		{
 			name:        "invalid email",
@@ -123,8 +130,9 @@ func TestRegistrationControllerRegister(t *testing.T) {
 			if registrar.called != tt.wantCalled {
 				t.Fatalf("service called = %v, want %v", registrar.called, tt.wantCalled)
 			}
-			if tt.wantCalled && (registrar.email != "bob@example.com" || registrar.password != "12345678") {
-				t.Fatalf("service received %q / %q, want the request credentials", registrar.email, registrar.password)
+			wantAccount := services.NewAccount{DisplayName: "Bob", Email: "bob@example.com", Password: "12345678"}
+			if tt.wantCalled && registrar.account != wantAccount {
+				t.Fatalf("service received %+v, want the request account", registrar.account)
 			}
 			if tt.wantCode == "" {
 				if recorder.Body.Len() != 0 {

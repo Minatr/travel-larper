@@ -21,7 +21,7 @@ export const resources = {
 
 void i18n.use(initReactI18next).init({
   resources,
-  // The visitor's own choice first, then the browser language.
+  // A choice made earlier on this browser first, then the browser language.
   lng: readStoredLanguage() ?? detectLanguage(navigator.languages),
   // Shown when a key has no translation in the current language.
   fallbackLng: DEFAULT_LANGUAGE,

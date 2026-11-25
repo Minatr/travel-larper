@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { detectLanguage, readStoredLanguage, storeLanguage } from './languages.ts'
+import { detectLanguage, readStoredLanguage } from './languages.ts'
 import en from './locales/en.json'
 import fr from './locales/fr.json'
 
@@ -33,8 +33,8 @@ describe('detectLanguage', () => {
 })
 
 describe('stored language', () => {
-  it('reads back the language stored by the switcher', () => {
-    storeLanguage('fr')
+  it('reads back a language stored earlier', () => {
+    window.localStorage.setItem('language', 'fr')
     expect(readStoredLanguage()).toBe('fr')
   })
 

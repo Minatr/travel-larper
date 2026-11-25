@@ -5,17 +5,18 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/Minatr/travel-larper/backend/internal/models"
 )
 
 type fakeUserInserter struct {
-	taken         bool
-	err           error
-	insertedEmail string
-	insertedHash  string
+	taken    bool
+	err      error
+	inserted models.CreateUserParams
 }
 
-func (f *fakeUserInserter) InsertUser(_ context.Context, email, passwordHash string) (bool, error) {
-	f.insertedEmail, f.insertedHash = email, passwordHash
+func (f *fakeUserInserter) InsertUser(_ context.Context, user models.CreateUserParams) (bool, error) {
+	f.inserted = user
 	return !f.taken, f.err
 }
 
@@ -32,13 +33,15 @@ func TestRegistrationServiceRegister(t *testing.T) {
 	errHash := errors.New("no entropy")
 
 	tests := []struct {
-		name      string
-		email     string
-		password  string
-		users     fakeUserInserter
-		hashErr   error
-		wantErr   error
-		wantEmail string
+		name        string
+		displayName string // Bob when empty
+		wantName    string // displayName when empty
+		email       string
+		password    string
+		users       fakeUserInserter
+		hashErr     error
+		wantErr     error
+		wantEmail   string
 	}{
 		{name: "nominal", email: "bob@example.com", password: "12345678", wantEmail: "bob@example.com"},
 		{
@@ -96,6 +99,42 @@ func TestRegistrationServiceRegister(t *testing.T) {
 			wantEmail: "bob@example.com",
 		},
 		{name: "hash failure", email: "bob@example.com", password: "12345678", hashErr: errHash, wantErr: errHash},
+		{
+			name:        "name trimmed",
+			displayName: "  Léa ",
+			wantName:    "Léa",
+			email:       "bob@example.com",
+			password:    "12345678",
+			wantEmail:   "bob@example.com",
+		},
+		{
+			name:        "longest name, emojis count as one character",
+			displayName: strings.Repeat("🙂", 30),
+			email:       "bob@example.com",
+			password:    "12345678",
+			wantEmail:   "bob@example.com",
+		},
+		{
+			name:        "name too short",
+			displayName: " B ",
+			email:       "bob@example.com",
+			password:    "12345678",
+			wantErr:     ErrInvalidDisplayName,
+		},
+		{
+			name:        "name too long",
+			displayName: strings.Repeat("a", 31),
+			email:       "bob@example.com",
+			password:    "12345678",
+			wantErr:     ErrInvalidDisplayName,
+		},
+		{
+			name:        "name with a line break",
+			displayName: "Bob\nAdmin",
+			email:       "bob@example.com",
+			password:    "12345678",
+			wantErr:     ErrInvalidDisplayName,
+		},
 	}
 
 	for _, tt := range tests {
@@ -103,16 +142,32 @@ func TestRegistrationServiceRegister(t *testing.T) {
 			users := tt.users
 			service := NewRegistrationService(&users, fakeHasher{err: tt.hashErr})
 
-			err := service.Register(context.Background(), tt.email, tt.password)
+			displayName := tt.displayName
+			if displayName == "" {
+				displayName = "Bob"
+			}
+			account := NewAccount{DisplayName: displayName, Email: tt.email, Password: tt.password}
+
+			err := service.Register(context.Background(), account)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Fatalf("Register() error = %v, want %v", err, tt.wantErr)
 			}
-			if users.insertedEmail != tt.wantEmail {
-				t.Fatalf("inserted email = %q, want %q", users.insertedEmail, tt.wantEmail)
+			if users.inserted.Email != tt.wantEmail {
+				t.Fatalf("inserted email = %q, want %q", users.inserted.Email, tt.wantEmail)
 			}
-			if tt.wantEmail != "" && users.insertedHash != "hashed:"+tt.password {
-				t.Fatalf("inserted hash = %q, want the hashed password", users.insertedHash)
+			if tt.wantEmail == "" {
+				return
+			}
+			if users.inserted.PasswordHash != "hashed:"+tt.password {
+				t.Fatalf("inserted hash = %q, want the hashed password", users.inserted.PasswordHash)
+			}
+			wantName := tt.wantName
+			if wantName == "" {
+				wantName = displayName
+			}
+			if users.inserted.DisplayName != wantName {
+				t.Fatalf("inserted name = %q, want %q", users.inserted.DisplayName, wantName)
 			}
 		})
 	}

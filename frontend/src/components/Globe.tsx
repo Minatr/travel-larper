@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { type OpenPlace, useGlobe } from '../hooks/useGlobe.ts'
 import { useKeyPress } from '../hooks/useKeyPress.ts'
+import { usePinnedPage } from '../hooks/usePinnedPage.ts'
 import type { LngLat } from '../lib/countryAnchor.ts'
 import type { Camera } from '../lib/mercatorCamera.ts'
 import { isShortScreen, prefersReducedMotion } from '../lib/screen.ts'
@@ -87,6 +88,9 @@ export function Globe({
   // Phone: the field sits at the bottom, the panel above it; it goes up in place of the header's labels only while
   // typing.
   const searchAtTop = phone && searchFocused
+
+  // The field goes up while the keyboard opens: the page must not follow it.
+  usePinnedPage(searchAtTop)
 
   const hideHeader = use(HeaderContext)
   useEffect(() => {

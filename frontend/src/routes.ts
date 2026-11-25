@@ -21,15 +21,17 @@ export const routes: RouteObject[] = [
   {
     Component: Layout,
     children: [
-      // The globe at `/`, a country page above it at `/countries/:code`.
+      // The globe at `/`; above it, a country page, or the login and sign-up tags over the dimmed globe.
       {
         path: '',
         Component: GlobePage,
-        children: [{ path: 'countries/:code', Component: CountryPage }],
+        children: [
+          { path: 'countries/:code', Component: CountryPage },
+          { path: 'login', Component: LoginPage },
+          { path: 'register', Component: RegisterPage },
+        ],
       },
       { path: 'status', Component: HealthPage },
-      { path: 'register', Component: RegisterPage },
-      { path: 'login', Component: LoginPage },
       // `*`: any URL no other route matches.
       { path: '*', Component: NotFoundPage },
     ],

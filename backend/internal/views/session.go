@@ -4,9 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/Minatr/travel-larper/backend/internal/api"
+	"github.com/Minatr/travel-larper/backend/internal/services"
 )
 
 // SessionCookieName matches the cookieAuth security scheme of openapi.yaml.
@@ -41,6 +40,11 @@ func ClearSessionCookie(w http.ResponseWriter, secure bool) {
 }
 
 // NewCurrentUser builds the public view of the logged-in user.
-func NewCurrentUser(id uuid.UUID, email, status string) api.CurrentUser {
-	return api.CurrentUser{Id: id, Email: email, Status: api.CurrentUserStatus(status)}
+func NewCurrentUser(user services.SessionUser) api.CurrentUser {
+	return api.CurrentUser{
+		Id:          user.ID,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Status:      api.CurrentUserStatus(user.Status),
+	}
 }

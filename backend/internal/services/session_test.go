@@ -90,7 +90,13 @@ func newTestSessionServiceWith(store SessionStore, verifier PasswordVerifier, at
 }
 
 func TestSessionServiceLogin(t *testing.T) {
-	user := models.User{ID: uuid.New(), Email: "bob@example.com", PasswordHash: "hash", Status: "pending"}
+	user := models.User{
+		ID:           uuid.New(),
+		Email:        "bob@example.com",
+		DisplayName:  "Bob",
+		PasswordHash: "hash",
+		Status:       "pending",
+	}
 	errDatabase := errors.New("connection reset")
 
 	tests := []struct {
@@ -186,7 +192,7 @@ func assertOpenedSession(t *testing.T, store *fakeSessionStore, session Session,
 	if !session.ExpiresAt.Equal(wantExpiry) || !store.created.ExpiresAt.Equal(wantExpiry) {
 		t.Fatalf("expiry = %v, want %v", session.ExpiresAt, wantExpiry)
 	}
-	if session.User != (SessionUser{ID: user.ID, Email: user.Email, Status: user.Status}) {
+	if session.User != (SessionUser{ID: user.ID, DisplayName: "Bob", Email: user.Email, Status: user.Status}) {
 		t.Fatalf("user = %+v, want %+v", session.User, user)
 	}
 }
@@ -271,10 +277,11 @@ func TestSessionServiceLoginGivesDifferentTokens(t *testing.T) {
 
 func TestSessionServiceAuthenticate(t *testing.T) {
 	row := models.GetSessionUserRow{
-		SessionID: uuid.New(),
-		UserID:    uuid.New(),
-		Email:     "bob@example.com",
-		Status:    "active",
+		SessionID:   uuid.New(),
+		UserID:      uuid.New(),
+		Email:       "bob@example.com",
+		DisplayName: "Bob",
+		Status:      "active",
 	}
 	errDatabase := errors.New("connection reset")
 
@@ -324,7 +331,7 @@ func TestSessionServiceAuthenticate(t *testing.T) {
 			if tt.wantErr != nil {
 				return
 			}
-			if session.User != (SessionUser{ID: row.UserID, Email: row.Email, Status: row.Status}) {
+			if session.User != (SessionUser{ID: row.UserID, DisplayName: "Bob", Email: row.Email, Status: row.Status}) {
 				t.Fatalf("user = %+v, want the session user", session.User)
 			}
 			if session.Renewed != tt.wantRenewed || (store.extended != nil) != tt.wantRenewed {

@@ -38,7 +38,7 @@ db-reset: ## Supprime et recrée la base (perte des données locales)
 	$(COMPOSE) up -d --build --wait db
 
 # Les tables viennent des migrations, appliquées au démarrage du backend.
-db-seed: ## Ajoute le compte de dev (dev@gmail.com / 12345678) ; lancer après make dev
+db-seed: ## Ajoute les comptes de dev (dev@ actif, pending@ en attente, @gmail.com / 12345678) ; après make dev
 	$(COMPOSE) exec -T db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) -v ON_ERROR_STOP=1 < data/seeds/dev_user.sql
 
 backend: ## Lance la base et le backend Go seuls

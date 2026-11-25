@@ -36,9 +36,10 @@ type PasswordVerifier interface {
 
 // SessionUser is the user a session belongs to.
 type SessionUser struct {
-	ID     uuid.UUID
-	Email  string
-	Status string
+	ID          uuid.UUID
+	DisplayName string
+	Email       string
+	Status      string
 }
 
 // Session is an open session. Renewed tells that its expiry moved, so the
@@ -123,7 +124,7 @@ func (s *SessionService) Login(ctx context.Context, email, password, previousTok
 	return Session{
 		Token:     token,
 		ExpiresAt: expiresAt,
-		User:      SessionUser{ID: user.ID, Email: user.Email, Status: user.Status},
+		User:      SessionUser{ID: user.ID, DisplayName: user.DisplayName, Email: user.Email, Status: user.Status},
 	}, nil
 }
 
@@ -144,7 +145,7 @@ func (s *SessionService) Authenticate(ctx context.Context, token string) (Sessio
 	session := Session{
 		Token:     token,
 		ExpiresAt: row.ExpiresAt,
-		User:      SessionUser{ID: row.UserID, Email: row.Email, Status: row.Status},
+		User:      SessionUser{ID: row.UserID, DisplayName: row.DisplayName, Email: row.Email, Status: row.Status},
 	}
 	now := s.now()
 	if row.ExpiresAt.Sub(now) >= s.idleTimeout/2 {

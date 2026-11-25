@@ -20,7 +20,12 @@ import (
 	"github.com/Minatr/travel-larper/backend/internal/services"
 )
 
-var testSessionUser = services.SessionUser{ID: uuid.New(), Email: "bob@example.com", Status: "pending"}
+var testSessionUser = services.SessionUser{
+	ID:          uuid.New(),
+	DisplayName: "Bob",
+	Email:       "bob@example.com",
+	Status:      "pending",
+}
 
 type fakeSessionManager struct {
 	loginErr       error
@@ -218,9 +223,10 @@ func assertCurrentUser(t *testing.T, recorder *httptest.ResponseRecorder) {
 		t.Fatalf("decode body: %v", err)
 	}
 	want := map[string]any{
-		"id":     testSessionUser.ID.String(),
-		"email":  testSessionUser.Email,
-		"status": testSessionUser.Status,
+		"id":          testSessionUser.ID.String(),
+		"displayName": testSessionUser.DisplayName,
+		"email":       testSessionUser.Email,
+		"status":      testSessionUser.Status,
 	}
 	if len(fields) != len(want) {
 		t.Fatalf("body = %v, want exactly %v", fields, want)

@@ -13,7 +13,7 @@ func createSession(t *testing.T, queries *models.Queries, tokenHash string, expi
 	ctx := context.Background()
 	user, err := queries.CreateUser(
 		ctx,
-		models.CreateUserParams{Email: tokenHash + "@example.com", PasswordHash: "hash"},
+		models.CreateUserParams{Email: tokenHash + "@example.com", PasswordHash: "hash", DisplayName: "Bob"},
 	)
 	if err != nil {
 		t.Fatalf("create user: %v", err)
@@ -50,7 +50,8 @@ func TestFindSessionUser(t *testing.T) {
 			if err != nil || found != tt.wantFound {
 				t.Fatalf("FindSessionUser() = %v, %v, want %v, nil", found, err, tt.wantFound)
 			}
-			if tt.wantFound && (row.UserID != user.ID || row.Email != user.Email || row.Status != "pending") {
+			if tt.wantFound && (row.UserID != user.ID || row.Email != user.Email || row.DisplayName != "Bob" ||
+				row.Status != "pending") {
 				t.Fatalf("row = %+v, want the session user", row)
 			}
 		})

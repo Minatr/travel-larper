@@ -3,7 +3,8 @@ INSERT INTO sessions (user_id, token_hash, expires_at)
 VALUES ($1, $2, $3);
 
 -- name: GetSessionUser :one
-SELECT sessions.id AS session_id, sessions.expires_at, users.id AS user_id, users.email, users.status
+SELECT sessions.id AS session_id, sessions.expires_at,
+  users.id AS user_id, users.email, users.display_name, users.status
 FROM sessions
 JOIN users ON users.id = sessions.user_id
 WHERE sessions.token_hash = $1 AND sessions.expires_at > now();

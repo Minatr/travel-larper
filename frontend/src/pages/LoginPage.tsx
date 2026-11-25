@@ -1,15 +1,14 @@
 import type { TFunction } from 'i18next'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 
-import { PageContainer } from '../components/PageContainer.tsx'
-import { Button } from '../components/ui/button.tsx'
-import { Input } from '../components/ui/input.tsx'
-import { Label } from '../components/ui/label.tsx'
+import { AuthAlt, AuthError, AuthField, AuthLink, AuthSubmit, AuthTextButton } from '../components/AuthForm.tsx'
+import type { AuthLinkState } from '../components/AccountButton.tsx'
+import { AuthOverlay } from '../components/AuthOverlay.tsx'
 import { type LoginFailure, useLogin } from '../hooks/useLogin.ts'
 
-/** Login page; opens the page given by `?redirect=` once logged in. */
+/** Login page, over the globe; opens the page given by `?redirect=` once logged in. */
 export function LoginPage() {
   const { t } = useTranslation()
   const { state, submit } = useLogin()
@@ -17,7 +16,9 @@ export function LoginPage() {
   const { search } = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [forgotShown, setForgotShown] = useState(false)
   const submitting = state.kind === 'submitting'
+  const failed = state.kind === 'failed'
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -25,50 +26,56 @@ export function LoginPage() {
   }
 
   return (
-    <PageContainer>
-      <section className="mx-auto max-w-sm rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
-        <h1 className="mb-6 text-xl font-semibold">{t('login.title')}</h1>
-        {/* noValidate: the browser's messages would ignore the app language. */}
-        <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="login-email">{t('login.email')}</Label>
-            <Input
-              id="login-email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="login-password">{t('login.password')}</Label>
-            <Input
-              id="login-password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </div>
-          {state.kind === 'failed' && (
-            <p role="alert" className="text-sm text-destructive">
-              {errorMessage(t, state.reason)}
-            </p>
-          )}
-          <Button type="submit" disabled={submitting} className="min-h-11">
-            {submitting ? t('login.submitting') : t('login.submit')}
-          </Button>
-        </form>
-        <p className="mt-6 text-sm text-muted-foreground">
-          {t('login.noAccount')}{' '}
-          <Link to={{ pathname: '/register', search }} className="font-medium underline">
-            {t('login.registerLink')}
-          </Link>
-        </p>
-      </section>
-    </PageContainer>
+    <AuthOverlay printed={t('login.printed')} title={t('login.title')}>
+      {/* noValidate: the browser's messages would ignore the app language. */}
+      <form noValidate onSubmit={handleSubmit}>
+        <AuthField
+          id="login-email"
+          next
+          label={t('login.email')}
+          type="email"
+          autoComplete="email"
+          required
+          invalid={failed}
+          value={email}
+          onChange={setEmail}
+        />
+        <AuthField
+          id="login-password"
+          label={t('login.password')}
+          type="password"
+          autoComplete="current-password"
+          required
+          invalid={failed}
+          value={password}
+          onChange={setPassword}
+        />
+        {/* TODO(TL-83): lead to the real reset form. Until passwords can be reset by email, the admin does it. */}
+        <div className="-mt-1 mb-2.5 text-right text-[0.8125rem]">
+          <AuthTextButton
+            aria-expanded={forgotShown}
+            aria-controls="login-forgot"
+            onClick={() => setForgotShown((shown) => !shown)}
+          >
+            {t('login.forgotPassword')}
+          </AuthTextButton>
+          <p id="login-forgot" hidden={!forgotShown} className="mt-1 text-card-muted-foreground">
+            {t('login.forgotPasswordHelp')}
+          </p>
+        </div>
+        {failed && <AuthError>{errorMessage(t, state.reason)}</AuthError>}
+        <AuthSubmit type="submit" disabled={submitting}>
+          {submitting ? t('login.submitting') : t('login.submit')}
+        </AuthSubmit>
+      </form>
+      <AuthAlt>
+        {t('login.noAccount')}{' '}
+        {/* Replacing the page: closing the sign-up page goes back to where the login started. */}
+        <AuthLink to={{ pathname: '/register', search }} state={{ turn: true } satisfies AuthLinkState} replace>
+          {t('login.registerLink')}
+        </AuthLink>
+      </AuthAlt>
+    </AuthOverlay>
   )
 }
 

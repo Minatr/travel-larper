@@ -34,7 +34,7 @@ func TestCreateUser(t *testing.T) {
 
 	user, err := queries.CreateUser(
 		context.Background(),
-		models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash"},
+		models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash", DisplayName: "Bob"},
 	)
 	if err != nil {
 		t.Fatalf("create user: %v", err)
@@ -42,23 +42,47 @@ func TestCreateUser(t *testing.T) {
 	if user.Status != "pending" {
 		t.Errorf("status = %q, want %q", user.Status, "pending")
 	}
+	if user.DisplayName != "Bob" {
+		t.Errorf("display name = %q, want %q", user.DisplayName, "Bob")
+	}
 	if user.CreatedAt.IsZero() {
 		t.Error("created_at is not set")
 	}
 }
 
+// Signing up again with an address already taken must leave its account alone: otherwise anyone could take over an
+// account by signing up with its address and a password of their own.
 func TestInsertUserReportsTakenEmail(t *testing.T) {
 	queries := newQueries(t)
 	ctx := context.Background()
-	created, err := queries.InsertUser(ctx, "bob@example.com", "hash")
+	created, err := queries.InsertUser(
+		ctx,
+		models.CreateUserParams{Email: "bob@example.com", PasswordHash: "hash", DisplayName: "Bob"},
+	)
 	if err != nil || !created {
 		t.Fatalf("first insert = %v, %v, want true, nil", created, err)
 	}
 
-	created, err = queries.InsertUser(ctx, "Bob@Example.com", "hash")
+	created, err = queries.InsertUser(
+		ctx,
+		models.CreateUserParams{Email: "Bob@Example.com", PasswordHash: "other-hash", DisplayName: "Other"},
+	)
 
 	if err != nil || created {
 		t.Fatalf("second insert = %v, %v, want false, nil", created, err)
+	}
+	user, err := queries.GetUserByEmail(ctx, "bob@example.com")
+	if err != nil {
+		t.Fatalf("get user: %v", err)
+	}
+	if user.Email != "bob@example.com" {
+		t.Errorf("email = %q, want %q", user.Email, "bob@example.com")
+	}
+	if user.PasswordHash != "hash" {
+		t.Errorf("password hash = %q, want %q", user.PasswordHash, "hash")
+	}
+	if user.DisplayName != "Bob" {
+		t.Errorf("display name = %q, want %q", user.DisplayName, "Bob")
 	}
 }
 

@@ -20,6 +20,8 @@ func describeError(code api.ErrorCode) (int, string) {
 		return http.StatusBadRequest, "A request parameter is invalid."
 	case api.ErrorCodeInvalidBody:
 		return http.StatusBadRequest, "The request body is not valid JSON for this route."
+	case api.ErrorCodeInvalidDisplayName:
+		return http.StatusBadRequest, "The name must have 2 to 30 characters."
 	case api.ErrorCodeInvalidEmail:
 		return http.StatusBadRequest, "The email address is invalid."
 	case api.ErrorCodePasswordTooShort:

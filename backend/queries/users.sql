@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (email, password_hash)
-VALUES ($1, $2)
+INSERT INTO users (email, password_hash, display_name)
+VALUES ($1, $2, $3)
 ON CONFLICT ((lower(email))) DO NOTHING
 RETURNING *;
 

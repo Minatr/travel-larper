@@ -40,7 +40,7 @@ func (rejectingSessionManager) Logout(context.Context, string) error {
 
 type acceptingRegistrar struct{}
 
-func (acceptingRegistrar) Register(context.Context, string, string) error {
+func (acceptingRegistrar) Register(context.Context, services.NewAccount) error {
 	return nil
 }
 
