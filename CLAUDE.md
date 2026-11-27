@@ -340,6 +340,7 @@ Carte d'un pays (style sombre d'OpenFreeMap recoloré, détail couche par couche
 - **Répondre en français**, de façon concise, en **justifiant les choix** et en expliquant les termes techniques (« à quoi ça sert ? »).
 - **Corriger franchement** les idées et proposer des améliorations, puis laisser l'équipe trancher. Ne pas prendre de décision d'architecture à sa place.
 - **Une courte spec avant chaque fonctionnalité** (routes, tables, cas d'erreur), validée avant d'écrire le code.
+- **Une maquette avant le front** : quand un ticket touche à l'interface et qu'on veut s'en occuper vraiment, maquetter d'abord les écrans (ordinateur et téléphone, états vides, d'erreur et de chargement), la faire valider, puis coder. Demander au début du ticket si on veut s'investir dans le front : on peut aussi ne faire que le back, avec un écran minimal, et revenir sur le front plus tard.
 - Avancer **petit à petit** : ne faire que ce que le ticket demande, sans sur-anticiper (pas de routes, de tables, de dépendances ou de code d'exemple « pour plus tard »).
 - **Ne jamais modifier la configuration Git globale, les clés SSH ni les comptes** : les développeurs s'en occupent eux-mêmes. Proposer plutôt des réglages au niveau du dépôt.
 - Ne jamais committer de secret ; ne jamais pousser directement sur `main`.
