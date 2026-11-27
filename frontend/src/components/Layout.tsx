@@ -32,7 +32,7 @@ export function Layout() {
     <AuthProvider>
       <div className="relative flex min-h-dvh flex-col">
         {/* Clicks between the labels reach the globe below. */}
-        <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
+        <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between pt-[max(0.75rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] pb-3 pl-[max(1rem,env(safe-area-inset-left))]">
           {/*
             Drooping to the right, like a tag hanging from its eyelet; smaller on a phone, where it would hide the globe
             (its padding keeps a 44 px touch target around the smaller label). Out of reach once gone.

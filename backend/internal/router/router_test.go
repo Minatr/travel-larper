@@ -38,6 +38,12 @@ func (rejectingSessionManager) Logout(context.Context, string) error {
 	return nil
 }
 
+type unknownCountries struct{}
+
+func (unknownCountries) Find(context.Context, string, string) (services.CountryInfo, error) {
+	return services.CountryInfo{}, services.ErrCountryNotFound
+}
+
 type acceptingRegistrar struct{}
 
 func (acceptingRegistrar) Register(context.Context, string, string) error {
@@ -65,6 +71,7 @@ func TestRoutes(t *testing.T) {
 	handler := Routes(Controllers{
 		HealthController:  controllers.NewHealthController(healthyChecker{}, discardLogger()),
 		SessionController: controllers.NewSessionController(rejectingSessionManager{}, false, discardLogger()),
+		CountryController: controllers.NewCountryController(unknownCountries{}, discardLogger()),
 	}, rejectingAuthenticator{}, discardLogger(), testOptions)
 
 	tests := []struct {
@@ -107,6 +114,21 @@ func TestRoutes(t *testing.T) {
 			path:          "/api/auth/me",
 			wantStatus:    http.StatusUnauthorized,
 			wantErrorCode: api.ErrorCodeUnauthorized,
+		},
+		{
+			// Reaches the controller, which knows no country: public, no 401.
+			name:          "country fact sheet without a session",
+			method:        http.MethodGet,
+			path:          "/api/countries/ZZ?lang=en",
+			wantStatus:    http.StatusNotFound,
+			wantErrorCode: api.ErrorCodeNotFound,
+		},
+		{
+			name:          "country fact sheet without its language",
+			method:        http.MethodGet,
+			path:          "/api/countries/FR",
+			wantStatus:    http.StatusBadRequest,
+			wantErrorCode: api.ErrorCodeInvalidParameter,
 		},
 		{
 			name:       "logout without a session",

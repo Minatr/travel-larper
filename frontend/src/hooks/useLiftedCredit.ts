@@ -1,11 +1,11 @@
 import { type RefObject, useEffect } from 'react'
 
 /** CSS variable, set on the drawer's parent (which holds the map too), read by index.css to lift the map's credit. */
-const LIFT_VARIABLE = '--territory-drawer-height'
+const LIFT_VARIABLE = '--bottom-drawer-height'
 
 /**
- * Lifts the map's credit button above the territories' drawer `drawerRef` while it is open: on a phone the drawer
- * spans the screen's width, and would cover the credit, which must stay visible. Follows the drawer's height.
+ * Lifts the map's credit button above the drawer `drawerRef` while it is open: on a phone the country's drawer spans
+ * the screen's width, and would cover the credit, which must stay visible. Follows the drawer's height.
  */
 export function useLiftedCredit(drawerRef: RefObject<HTMLElement | null>, open: boolean): void {
   useEffect(() => {

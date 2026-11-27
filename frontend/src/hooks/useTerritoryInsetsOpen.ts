@@ -3,15 +3,12 @@ import { useState } from 'react'
 /** localStorage key holding whether the visitor last left the territory tags out or put away. */
 const STORAGE_KEY = 'territoryInsetsOpen'
 
-/** Screens wide enough to leave the tags out at first, as Tailwind's `sm:`; on a phone, they would hide the map. */
-const WIDE_SCREEN_QUERY = '(min-width: 40rem)'
-
 /**
- * Whether the territory tags at the bottom of a country's map are out, and the way to put them away or out again. At
- * first, out on a wide screen and put away on a phone; then as the visitor last left them, on this browser.
+ * Whether the territory passes' drawer at the bottom of a country's map (on a computer) is out, and the way to put it
+ * away or out again. Out at first, then as the visitor last left it, on this browser.
  */
 export function useTerritoryInsetsOpen(): [boolean, () => void] {
-  const [open, setOpen] = useState(() => storedOpen() ?? window.matchMedia(WIDE_SCREEN_QUERY).matches)
+  const [open, setOpen] = useState(() => storedOpen() ?? true)
   function toggle() {
     setOpen(!open)
     storeOpen(!open)

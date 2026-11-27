@@ -58,15 +58,15 @@ describe('TerritoryInsets', () => {
     expect(screen.queryByRole('link', { name: /French Guiana/ })).not.toBeInTheDocument()
   })
 
-  it('starts put away on a phone, and remembers the tags taken out', () => {
+  it('starts out, and remembers the drawer put away', () => {
     renderInsets(null)
     const tab = screen.getByRole('button', { name: /Distant territory/ })
-    expect(tab).toHaveAttribute('aria-expanded', 'false')
+    expect(tab).toHaveAttribute('aria-expanded', 'true')
 
     fireEvent.click(tab)
 
-    expect(tab).toHaveAttribute('aria-expanded', 'true')
-    expect(window.localStorage.getItem('territoryInsetsOpen')).toBe('true')
+    expect(tab).toHaveAttribute('aria-expanded', 'false')
+    expect(window.localStorage.getItem('territoryInsetsOpen')).toBe('false')
   })
 
   it('names the drawer in the singular for a single territory', () => {

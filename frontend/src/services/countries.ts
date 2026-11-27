@@ -1,6 +1,6 @@
 import type { MultiPolygon, Polygon } from 'geojson'
 
-import type { Countries } from '../models/country.ts'
+import type { Countries, CountryInfo, CountryInfoLanguage } from '../models/country.ts'
 
 /** Served from public/, prepared by scripts/build-countries.mjs. */
 const COUNTRIES_URL = '/geo/countries.json'
@@ -50,4 +50,20 @@ export async function fetchCountryBorders(code: string, signal?: AbortSignal): P
     throw new Error(`${code} borders failed to load (HTTP ${response.status})`)
   }
   return (await response.json()) as Polygon | MultiPolygon | null
+}
+
+/**
+ * Asks the backend for the fact sheet of the country `code` (upper case), its summary in `language`: never the
+ * external services directly. Throws when the API cannot answer.
+ */
+export async function fetchCountryInfo(
+  code: string,
+  language: CountryInfoLanguage,
+  signal?: AbortSignal,
+): Promise<CountryInfo> {
+  const response = await fetch(`/api/countries/${code}?lang=${language}`, { signal })
+  if (!response.ok) {
+    throw new Error(`${code} info failed to load (HTTP ${response.status})`)
+  }
+  return (await response.json()) as CountryInfo
 }

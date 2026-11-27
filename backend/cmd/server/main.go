@@ -21,6 +21,7 @@ import (
 	"github.com/Minatr/travel-larper/backend/internal/config"
 	"github.com/Minatr/travel-larper/backend/internal/controllers"
 	"github.com/Minatr/travel-larper/backend/internal/db"
+	"github.com/Minatr/travel-larper/backend/internal/external"
 	"github.com/Minatr/travel-larper/backend/internal/models"
 	"github.com/Minatr/travel-larper/backend/internal/router"
 	"github.com/Minatr/travel-larper/backend/internal/services"
@@ -57,9 +58,13 @@ func run(logger *slog.Logger) error {
 		return fmt.Errorf("migrate database: %w", err)
 	}
 
+	handler, err := buildHandler(pool, logger, cfg)
+	if err != nil {
+		return err
+	}
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", cfg.APIPort),
-		Handler:           buildHandler(pool, logger, cfg),
+		Handler:           handler,
 		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
 		WriteTimeout:      cfg.WriteTimeout,
 		IdleTimeout:       cfg.IdleTimeout,
@@ -92,7 +97,7 @@ func run(logger *slog.Logger) error {
 
 // buildHandler wires the application layers together: each service receives its dependencies, each controller its
 // service, and the router the controllers. Go has no dependency-injection container
-func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) http.Handler {
+func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) (http.Handler, error) {
 	healthService := services.NewHealthService(pool)
 	healthController := controllers.NewHealthController(healthService, logger)
 
@@ -107,10 +112,16 @@ func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) ht
 	sessionService := services.NewSessionService(queries, passwordHasher, loginAttempts, cfg.SessionIdleTimeout)
 	sessionController := controllers.NewSessionController(sessionService, cfg.Production, logger)
 
+	countryController, err := buildCountryController(logger)
+	if err != nil {
+		return nil, err
+	}
+
 	handlers := router.Controllers{
 		HealthController:       healthController,
 		RegistrationController: registrationController,
 		SessionController:      sessionController,
+		CountryController:      countryController,
 	}
 	return router.Routes(handlers, sessionService, logger, router.Options{
 		RateLimitPerMinute:       cfg.RateLimitPerMinute,
@@ -119,5 +130,27 @@ func buildHandler(pool *pgxpool.Pool, logger *slog.Logger, cfg config.Config) ht
 		SecureCookies:            cfg.Production,
 		RegisterRateLimitPerHour: cfg.RegisterRateLimitPerHour,
 		LoginRateLimitPerMinute:  cfg.LoginRateLimitPerMinute,
-	})
+	}), nil
+}
+
+// buildCountryController wires the country fact sheet: its list of countries and Wikivoyage.
+func buildCountryController(logger *slog.Logger) (*controllers.CountryController, error) {
+	catalog, err := models.LoadCountryCatalog()
+	if err != nil {
+		return nil, err
+	}
+	options := external.Options{
+		Timeout:        config.ExternalRequestTimeout,
+		MinInterval:    config.ExternalMinInterval,
+		DefaultBackoff: config.ExternalDefaultBackoff,
+		UserAgent:      config.ExternalUserAgent,
+	}
+	countryInfoService := services.NewCountryInfoService(
+		catalog,
+		external.NewWikivoyage(external.WikivoyageURL, options),
+		config.CountryInfoCacheTTL,
+		config.CountryInfoStaleTTL,
+		logger,
+	)
+	return controllers.NewCountryController(countryInfoService, logger), nil
 }

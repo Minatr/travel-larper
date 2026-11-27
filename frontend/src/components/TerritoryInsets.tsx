@@ -3,14 +3,14 @@ import { useId, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
-import { useLiftedCredit } from '../hooks/useLiftedCredit.ts'
 import { useScrollEdges } from '../hooks/useScrollEdges.ts'
 import { useTerritoryInsetsOpen } from '../hooks/useTerritoryInsetsOpen.ts'
+import { useTerritoryTags } from '../hooks/useTerritoryTags.ts'
 import type { InsetMap } from '../lib/countryMapData.ts'
 import { INSET_LAND_COLOR, SEA_COLOR } from '../lib/countryMapTheme.ts'
 import type { Bounds } from '../lib/geo.ts'
 import { thumbnailPath } from '../lib/shapePath.ts'
-import { distanceBetweenKm, type InsetId } from '../lib/territories.ts'
+import type { InsetId } from '../lib/territories.ts'
 import { cn } from '../lib/utils.ts'
 
 /** Side of the square map the ticket opens with, in pixels; shown smaller on a phone (CSS). */
@@ -27,7 +27,7 @@ const PLANE_PATH =
 const TURN_STAGGER_MS = 60
 
 /** Props of {@link TerritoryInsets}. */
-type TerritoryInsetsProps = {
+export type TerritoryInsetsProps = {
   /** The country's distant territories. */
   insets: InsetMap[]
   /** Inset shown, or null on the mainland. */
@@ -40,65 +40,28 @@ type TerritoryInsetsProps = {
 }
 
 /**
- * Boarding passes of a country's distant territories, at the bottom of its map: one opens its territory.
- * Once on one, its own pass gives way to the mainland's, which leads back; each tells how far it lies from the place
- * shown. They sit in a drawer whose tab folds it down to the tab alone (out at first on a wide screen, away on a phone,
- * then as last left). In a row, scrolling sideways when there are too many.
+ * The passes in a drawer at the bottom left of the map, on a computer, whose tab folds it down to the tab alone (out
+ * at first, then as last left). In a row, scrolling sideways when there are too many. On a phone, the passes go in the
+ * country's drawer instead (CountryInfoPanel, {@link TerritoryPassList}).
  */
-export function TerritoryInsets({ insets, current, countryName, mainShape, mainBounds }: TerritoryInsetsProps) {
-  const { t, i18n } = useTranslation()
+export function TerritoryInsets(props: TerritoryInsetsProps) {
+  const { t } = useTranslation()
+  const { title, tags } = useTerritoryTags(props)
   const [open, toggle] = useTerritoryInsetsOpen()
   const railId = useId()
   const railRef = useRef<HTMLDivElement>(null)
-  const navRef = useRef<HTMLElement>(null)
-  useLiftedCredit(navRef, open)
   const { moreBefore, moreAfter, scrollStep } = useScrollEdges(railRef)
-  if (insets.length === 0) {
+  if (tags.length === 0) {
     return null
   }
-  const numbers = new Intl.NumberFormat(i18n.language)
-  const here = insets.find(({ inset }) => inset.id === current)?.inset ?? null
-  // How far each place lies from the one shown: the capital on the mainland, the territory's anchor on an inset.
-  function distanceTo(code: string, place: (typeof insets)[number]['inset'] | null): string | null {
-    const distance = distanceBetweenKm(code, here, place)
-    return distance === null ? null : t('country.distanceKm', { distance: numbers.format(distance) })
-  }
-  const code = insets[0].inset.country
-  // In the singular for a country with one (Australia: Christmas Island), even when its tag is the mainland's.
-  const title = t('country.territories', { count: insets.length })
-  const tags = [
-    ...(here === null
-      ? []
-      : [
-          {
-            id: 'mainland',
-            label: countryName,
-            distance: distanceTo(code, null),
-            shape: mainShape,
-            bounds: mainBounds,
-            search: '',
-          },
-        ]),
-    ...insets
-      .filter(({ inset }) => inset !== here)
-      .map(({ inset, shape, bounds }) => ({
-        id: inset.id,
-        label: t(`territories.${inset.id}`),
-        distance: distanceTo(code, inset),
-        shape,
-        bounds,
-        search: `?territory=${inset.id}`,
-      })),
-  ]
+  const current = props.current
 
   return (
-    // A drawer of the map's dark: on a phone, across the bottom, the system bar's room painted below, the map's credit
-    // lifted above it while open; on a wide screen, floating like the other panels, clear of the credit. Clicks go
-    // through the room beside the tab, to the map and its credit.
+    // A drawer of the map's dark, floating like the other panels, clear of the credit. Clicks go through the room
+    // beside the tab, to the map and its credit.
     <nav
       aria-label={title}
-      ref={navRef}
-      className="pointer-events-none absolute bottom-0 left-0 flex w-full flex-col items-start sm:bottom-4 sm:left-4 sm:w-max sm:max-w-[calc(100%-6rem)] sm:drop-shadow-2xl"
+      className="pointer-events-none absolute bottom-4 left-4 hidden w-max max-w-[calc(100%-6rem)] flex-col items-start drop-shadow-2xl sm:flex"
     >
       {/* The tab, as wide as its content; 44 px high, for a finger. */}
       <button
@@ -108,8 +71,7 @@ export function TerritoryInsets({ insets, current, countryName, mainShape, mainB
         onClick={toggle}
         className={cn(
           'pointer-events-auto relative flex min-h-11 shrink-0 items-center gap-2.5 rounded-t-xl bg-primary/90 pr-2 pl-4 text-xs font-semibold tracking-widest text-primary-foreground uppercase backdrop-blur-md transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-[3px] focus-visible:outline-ring motion-reduce:transition-none',
-          !open &&
-            'min-h-[calc(2.75rem+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)] sm:min-h-11 sm:rounded-xl sm:pb-0',
+          !open && 'rounded-xl',
         )}
       >
         <svg aria-hidden viewBox="0 0 24 24" className="size-[1.125rem] shrink-0">
@@ -143,7 +105,7 @@ export function TerritoryInsets({ insets, current, countryName, mainShape, mainB
       {/* Folds down to nothing when put away, the tab staying. */}
       <div
         className={cn(
-          'pointer-events-auto grid w-full rounded-tr-[0.875rem] bg-primary/90 backdrop-blur-md transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none sm:rounded-b-[0.875rem]',
+          'pointer-events-auto grid w-full rounded-tr-[0.875rem] rounded-b-[0.875rem] bg-primary/90 backdrop-blur-md transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none',
           open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
         )}
       >
@@ -153,7 +115,7 @@ export function TerritoryInsets({ insets, current, countryName, mainShape, mainB
             ref={railRef}
             id={railId}
             inert={!open}
-            className="scrollbar-hidden snap-x snap-mandatory scroll-px-6 overflow-x-auto px-6 pt-[1.125rem] pb-[calc(1.625rem+env(safe-area-inset-bottom,0px))] sm:pb-[1.625rem]"
+            className="scrollbar-hidden snap-x snap-mandatory scroll-px-6 overflow-x-auto px-6 pt-[1.125rem] pb-[1.625rem]"
           >
             <div className="flex w-max gap-3">
               {/* Keyed by the place shown too: every pass turns round when it changes, its distance with it. */}
@@ -175,6 +137,20 @@ export function TerritoryInsets({ insets, current, countryName, mainShape, mainB
   )
 }
 
+/** The same passes, one under the other, for the "Territories" tab of the country's drawer on a phone. */
+export function TerritoryPassList(props: TerritoryInsetsProps) {
+  const { title, tags } = useTerritoryTags(props)
+  return (
+    <ul aria-label={title} className="flex flex-col gap-2.5 py-1">
+      {tags.map(({ id, ...tag }) => (
+        <li key={`${props.current ?? 'mainland'}:${id}`} className="flex">
+          <Tag turnDelayMs={0} fullWidth {...tag} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 type TagProps = {
   label: string
   distance: string | null
@@ -182,22 +158,31 @@ type TagProps = {
   bounds: Bounds
   search: string
   turnDelayMs: number
+  /** As wide as its row (the phone's list), rather than the drawer's fixed width. */
+  fullWidth?: boolean
 }
 
 // A boarding pass: the territory's outline on the map's sea, then past a tear line where the paper is notched,
 // "Destination", its name and how far it is. Hovered or focused, it lifts and its plane takes off. The shadow sits on a
 // wrapper: the notches' mask would cut it.
-function Tag({ label, distance, shape, bounds, search, turnDelayMs }: TagProps) {
+function Tag({ label, distance, shape, bounds, search, turnDelayMs, fullWidth = false }: TagProps) {
   const { t } = useTranslation()
   const path = useMemo(() => thumbnailPath(shape, bounds, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX), [shape, bounds])
   return (
     <div
-      className="group tag-turn flex shrink-0 snap-start drop-shadow-[0_2px_5px_rgb(0_0_0/0.45)] transition-[translate] duration-200 ease-out hover:-translate-y-1 has-focus-visible:-translate-y-1 motion-reduce:transition-none"
+      className={cn(
+        'group tag-turn flex shrink-0 snap-start drop-shadow-[0_2px_5px_rgb(0_0_0/0.45)] transition-[translate] duration-200 ease-out hover:-translate-y-1 has-focus-visible:-translate-y-1 motion-reduce:transition-none',
+        fullWidth && 'w-full drop-shadow-none',
+      )}
       style={{ animationDelay: `${turnDelayMs}ms` }}
     >
       <Link
         to={{ search }}
-        className="ticket-notches flex min-h-[5.25rem] w-[13.5rem] overflow-hidden rounded-lg bg-card text-card-foreground [--ticket-cut:5.25rem] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring sm:min-h-[6.25rem] sm:w-64 sm:[--ticket-cut:6.25rem]"
+        className={cn(
+          'ticket-notches flex min-h-[5.25rem] overflow-hidden rounded-lg text-card-foreground [--ticket-cut:5.25rem] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring sm:min-h-[6.25rem] sm:[--ticket-cut:6.25rem]',
+          // On the paper of the country's drawer, a shade darker to stand out.
+          fullWidth ? 'w-full bg-card-foreground/7' : 'w-[13.5rem] bg-card sm:w-64',
+        )}
       >
         <svg
           aria-hidden

@@ -114,12 +114,12 @@
   }
 
   /*
-   * The map's credit button, lifted above the open territories' drawer on a phone, where the drawer spans the width
+   * The map's credit button, lifted above the country's drawer on a phone, where the drawer spans the width
    * (useLiftedCredit sets the variable).
    */
   @media (width < 40rem) {
     .maplibregl-ctrl-bottom-right {
-      bottom: var(--territory-drawer-height, 0px);
+      bottom: var(--bottom-drawer-height, 0px);
       transition: bottom 300ms ease-out;
     }
   }
@@ -160,6 +160,25 @@
   }
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
+  }
+
+  /*
+   * A thin scrollbar of the paper's ink, on a paper panel: the dark theme's (color-scheme) stood out on the cream.
+   * Standard properties first; ::-webkit-scrollbar for Safari, which ignores them.
+   */
+  .scrollbar-paper {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--card-foreground) 25%, transparent) transparent;
+  }
+  .scrollbar-paper::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-paper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-paper::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--card-foreground) 25%, transparent);
   }
 
   /* Small label tag: a point on the left, where the string goes. */

@@ -41,7 +41,7 @@
   },
   "country": {
     "mapLabel": "Carte : {{name}}",
-    "backToGlobe": "← Globe",
+    "backToGlobe": "Retour au globe",
     "unavailable": "Impossible de charger la carte.",
     "loading": "Chargement de la carte…",
     "territories_one": "Territoire lointain",
@@ -50,6 +50,23 @@
     "destination": "Destination",
     "previousTerritories": "Territoires précédents",
     "nextTerritories": "Territoires suivants"
+  },
+  "countryInfo": {
+    "fold": "Replier la fiche du pays",
+    "unfold": "Afficher toute la fiche du pays",
+    "overview": "Aperçu",
+    "loading": "Chargement de la fiche du pays…",
+    "currency_one": "Monnaie",
+    "currency_other": "Monnaies",
+    "language_one": "Langue",
+    "language_other": "Langues",
+    "summary": "En bref",
+    "readMore": "Lire plus",
+    "readLess": "Réduire",
+    "source": "Wikivoyage",
+    "missing": "Pas encore de résumé en français pour ce pays.",
+    "summaryUnavailable": "Le résumé est indisponible pour le moment. Réessaie plus tard.",
+    "unavailable": "Les infos de ce pays sont indisponibles pour le moment. Réessaie plus tard."
   },
   "nav": {
     "login": "Se connecter",

@@ -6,6 +6,7 @@ import { hasMap } from '../lib/countryCode.ts'
 import type { InsetId } from '../lib/territories.ts'
 import { fittedTitleSize } from '../lib/tagTitle.ts'
 import { cn } from '../lib/utils.ts'
+import { Flag } from './Flag.tsx'
 
 /**
  * Room for the country's name on a phone, beside the barcode: the narrowest panel, so the name fits on every screen.
@@ -45,7 +46,7 @@ export function CountryPanel({ code, territory = null, onOpen, onClose }: Countr
     <section
       aria-live="polite"
       // Above the search field, at the bottom of the screen.
-      className="absolute inset-x-3 bottom-24 mx-auto max-w-sm drop-shadow-2xl"
+      className="absolute inset-x-3 bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] mx-auto max-w-sm drop-shadow-2xl"
     >
       <div
         className={cn(
@@ -64,7 +65,10 @@ export function CountryPanel({ code, territory = null, onOpen, onClose }: Countr
             ×
           </button>
         )}
-        <p className="text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase">{t('globe.destination')}</p>
+        <p className="flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-[0.18em] text-ink uppercase">
+          <Flag code={code} />
+          {t('globe.destination')}
+        </p>
         <div className="flex items-end justify-between gap-3">
           <h2
             className="tag-title text-(length:--title-size) leading-[0.9] short:text-(length:--short-title-size)"

@@ -89,6 +89,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/countries/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return a country's currencies, languages and Wikivoyage summary (cached).
+         * @description Public, like the globe. Unknown code: 404. The summary can be missing alone.
+         */
+        get: operations["getCountryInfo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -111,6 +131,32 @@ export interface components {
         LoginRequest: {
             email: string;
             password: string;
+        };
+        CountryInfo: {
+            code: string;
+            /** @description ISO 4217 codes; the frontend shows them in the user's language. */
+            currencies: string[];
+            languages: components["schemas"]["CountryLanguage"][];
+            summary: components["schemas"]["CountrySummary"];
+        };
+        /** @description The browser names it in the user's language, or the frontend uses `name` when it does not know it. */
+        CountryLanguage: {
+            /** @description BCP 47 tag (fr, pt-BR). */
+            code: string;
+            /** @description Name in the language asked for (Wikidata, or REST Countries' English name). */
+            name: string;
+        };
+        /** @description The first paragraph of the country's Wikivoyage article, in the language asked for. */
+        CountrySummary: {
+            /**
+             * @description missing when Wikivoyage has no article in this language; unavailable when it failed.
+             * @enum {string}
+             */
+            status: "available" | "missing" | "unavailable";
+            /** @description Plain text, set when available. */
+            text?: string;
+            /** @description The article, for the source link; set when available. */
+            url?: string;
         };
         CurrentUser: {
             /** Format: uuid */
@@ -256,6 +302,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CurrentUser"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getCountryInfo: {
+        parameters: {
+            query: {
+                /** @description Language of the summary. */
+                lang: "en" | "fr";
+            };
+            header?: never;
+            path: {
+                /** @description ISO 3166-1 alpha-2 code, upper case. */
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description What is known of the country. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountryInfo"];
                 };
             };
             default: components["responses"]["Error"];

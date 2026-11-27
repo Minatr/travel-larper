@@ -32,6 +32,8 @@ var publicRoutes = []string{
 	registerRoute,
 	loginRoute,
 	basePath + "/auth/logout",
+	// Like the globe: the country fact sheet is the app's shop window.
+	basePath + "/countries/{code}",
 }
 
 // Controllers bundles the controllers into a single api.ServerInterface.
@@ -39,6 +41,7 @@ type Controllers struct {
 	*controllers.HealthController
 	*controllers.RegistrationController
 	*controllers.SessionController
+	*controllers.CountryController
 }
 
 // Compile-time check: a route of openapi.yaml without a controller method breaks the build instead of failing at

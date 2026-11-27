@@ -1,10 +1,11 @@
 import { type ReactNode, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router'
+import { useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router'
 
+import { CountryInfoPanel } from '../components/CountryInfoPanel.tsx'
 import { CountryMap } from '../components/CountryMap.tsx'
 import { PageContainer } from '../components/PageContainer.tsx'
-import { TerritoryInsets } from '../components/TerritoryInsets.tsx'
+import { TerritoryInsets, TerritoryPassList } from '../components/TerritoryInsets.tsx'
 import { useCountry } from '../hooks/useCountry.ts'
 import { useKeyPress } from '../hooks/useKeyPress.ts'
 import { usePlaceName } from '../hooks/usePlaceName.ts'
@@ -62,10 +63,20 @@ export function CountryPage() {
 
   const name = countryName(code, i18n.language)
   const title = placeName(code, inset?.id ?? null)
+  const territoryProps =
+    map === null
+      ? null
+      : {
+          insets: map.insets,
+          current: inset?.id ?? null,
+          countryName: name,
+          mainShape: map.mainShape,
+          mainBounds: map.bounds,
+        }
 
   return (
     <Overlay visible={visible}>
-      {map !== null && view !== null && (
+      {map !== null && view !== null && territoryProps !== null && (
         <>
           <CountryMap
             name={title}
@@ -75,13 +86,17 @@ export function CountryPage() {
             onFailed={onMapFailed}
             onMove={onMapMove}
           />
-          <TerritoryInsets
-            insets={map.insets}
-            current={inset?.id ?? null}
-            countryName={name}
-            mainShape={map.mainShape}
-            mainBounds={map.bounds}
+          {/* Before the territories' drawer: opened, it passes over the panel. */}
+          <CountryInfoPanel
+            code={code}
+            title={title}
+            territories={
+              map.insets.length === 0
+                ? null
+                : { count: map.insets.length, list: <TerritoryPassList {...territoryProps} /> }
+            }
           />
+          <TerritoryInsets {...territoryProps} />
         </>
       )}
       {loading && (
@@ -92,22 +107,6 @@ export function CountryPage() {
           {t('country.loading')}
         </p>
       )}
-      {/*
-        On the header's row: its logo flies away on this page (Layout). The right margin keeps clear of the language
-        switch.
-      */}
-      <div className="absolute top-3 right-28 left-4 flex items-center gap-3">
-        <Link
-          to="/"
-          className="flex min-h-11 shrink-0 items-center rounded-md bg-card px-3 text-sm font-medium text-card-foreground shadow-lg"
-        >
-          {t('country.backToGlobe')}
-        </Link>
-        {/*
-          A title, not a control: plain text, not paper, so it does not look clickable.
-        */}
-        <h1 className="tag-title truncate text-2xl drop-shadow-md">{title}</h1>
-      </div>
     </Overlay>
   )
 }
